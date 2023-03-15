@@ -2,7 +2,9 @@ package com.daisy.jetclock.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+val WildSand = Color(0xFFF6F6F6)
+val AntiFlashWhite = Color(0xFFE8E9EB)
+
+val PortGore = Color(0xFF231942)
+val UltraViolet = Color(0xFF5e548e)
+val AfricanViolet = Color(0xFF9f86c0)
