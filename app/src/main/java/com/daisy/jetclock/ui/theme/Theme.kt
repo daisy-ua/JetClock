@@ -15,7 +15,15 @@ import androidx.core.view.WindowCompat
 private val DarkColorPalette = darkColors(
     primary = UltraViolet,
     primaryVariant = PortGore,
-    secondary = PortGore,
+
+    secondary = Platinum,
+    secondaryVariant = AfricanViolet,
+    onSecondary = AfricanViolet,
+
+    background = OxfordViolet,
+    onBackground = Platinum,
+
+    onSurface = TaupeGrey,
 )
 
 private val LightColorPalette = lightColors(
@@ -27,10 +35,9 @@ private val LightColorPalette = lightColors(
     onSecondary = AfricanViolet,
 
     background = WildSand,
-    onBackground = Color.Black,
+    onBackground = OxfordViolet,
 
-    surface = WildSand,
-    onSurface = Color.Black,
+    onSurface = CoolGrey,
 )
 
 @Composable

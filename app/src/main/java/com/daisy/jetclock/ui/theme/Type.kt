@@ -16,6 +16,16 @@ val NunitoFont = FontFamily(
 
 val Typography = Typography(
     defaultFontFamily = NunitoFont,
+    h5 = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    subtitle1 = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        letterSpacing = (-1).sp
+    ),
     body1 = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp

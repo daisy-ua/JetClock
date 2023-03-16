@@ -4,6 +4,7 @@ package com.daisy.jetclock.ui.component.alarm
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
@@ -17,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 
 @Composable
@@ -29,6 +29,7 @@ fun AlarmCard() {
     }
 
     Surface(
+        color = MaterialTheme.colors.background,
         modifier = Modifier
             .clickable {
                 Toast
@@ -53,8 +54,8 @@ fun AlarmCard() {
                 Row {
                     Text(
                         text = "6:30",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 24.sp
+                        style = MaterialTheme.typography.h5,
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = "AM",
@@ -68,16 +69,16 @@ fun AlarmCard() {
                 ) {
                     Text(
                         text = "Alarm",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.DarkGray
+                        style = MaterialTheme.typography.subtitle2,
+                        color = MaterialTheme.colors.onSurface
                     )
                     Text(
                         text = "Mon Tue Wed",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.subtitle2,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colors.onSurface,
                         modifier = Modifier
-                            .padding(horizontal = 8.dp),
-                        color = Color.DarkGray
+                            .padding(horizontal = 8.dp)
                     )
                 }
             }
