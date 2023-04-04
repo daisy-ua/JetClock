@@ -7,8 +7,14 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.DismissDirection.EndToStart
+import androidx.compose.material.DismissDirection.StartToEnd
+import androidx.compose.material.DismissValue.DismissedToEnd
+import androidx.compose.material.DismissValue.DismissedToStart
+import androidx.compose.material.SwipeableDefaults.StandardResistanceFactor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
@@ -23,6 +29,7 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
@@ -51,12 +58,17 @@ val DefaultSwipeActionsConfig = SwipeActionsConfig(
     onDismiss = { },
 )
 
+private const val REVEAL_DURATION_MILLIS = 400
+
+private const val OFFSET_BLIND_SIZE = 50f
+
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SwipeActions(
     modifier: Modifier = Modifier,
     startActionsConfig: SwipeActionsConfig = DefaultSwipeActionsConfig,
     endActionsConfig: SwipeActionsConfig = DefaultSwipeActionsConfig,
+    backgroundColor: Color = MaterialTheme.colors.primary,
     content: @Composable (DismissState) -> Unit,
 ) = BoxWithConstraints(modifier) {
     val width = constraints.maxWidth.toFloat()
@@ -65,21 +77,17 @@ fun SwipeActions(
         mutableStateOf(null)
     }
 
-    var isUndoDirection: Boolean by remember {
-        mutableStateOf(false)
-    }
-
     val state = rememberDismissState(
         confirmStateChange = {
             when {
-                willDismissDirection == DismissDirection.StartToEnd
-                        && it == DismissValue.DismissedToEnd -> {
+                willDismissDirection == StartToEnd
+                        && it == DismissedToEnd -> {
                     startActionsConfig.onDismiss()
                     startActionsConfig.stayDismissed
                 }
 
-                willDismissDirection == DismissDirection.EndToStart
-                        && it == DismissValue.DismissedToStart -> {
+                willDismissDirection == EndToStart
+                        && it == DismissedToStart -> {
                     endActionsConfig.onDismiss()
                     endActionsConfig.stayDismissed
                 }
@@ -89,36 +97,62 @@ fun SwipeActions(
         }
     )
 
-    LaunchedEffect(key1 = Unit, block = {
+    var isStartConfigActive by remember {
+        mutableStateOf(false)
+    }
+
+    val willDismiss = willDismissDirection == EndToStart && !isStartConfigActive ||
+            willDismissDirection == StartToEnd && isStartConfigActive
+
+    val isStartToEndThresholdPassed: (Float) -> Boolean =
+        { it > width * startActionsConfig.threshold }
+
+    val isEndToStartThresholdPassed: (Float) -> Boolean =
+        { it < -width * endActionsConfig.threshold }
+
+    val isStartToEndThresholdUndo: (Float) -> Boolean =
+        {
+            willDismissDirection != null && isStartConfigActive &&
+                    it < width * startActionsConfig.threshold && it > OFFSET_BLIND_SIZE
+        }
+
+    val isEndToStartThresholdUndo: (Float) -> Boolean =
+        {
+            willDismissDirection != null && !isStartConfigActive &&
+                    it > -width * endActionsConfig.threshold && it < -OFFSET_BLIND_SIZE
+        }
+
+    LaunchedEffect(key1 = Unit) {
         snapshotFlow { state.offset.value }
             .collect {
+                isStartConfigActive = it > 0
+
                 willDismissDirection = when {
-                    it > width * startActionsConfig.threshold -> DismissDirection.StartToEnd
-                    it < -width * endActionsConfig.threshold -> DismissDirection.EndToStart
-                    it == 0f -> {
-                        isUndoDirection = false
-                        null
-                    }
-                    else -> {
-                        isUndoDirection = true
-                        null
-                    }
+                    isStartToEndThresholdPassed(it) -> StartToEnd
+
+                    isEndToStartThresholdPassed(it) -> EndToStart
+
+                    isEndToStartThresholdUndo(it) -> StartToEnd
+
+                    isStartToEndThresholdUndo(it) -> EndToStart
+
+                    else -> null
                 }
             }
-    })
+    }
 
     val view = LocalView.current
-    LaunchedEffect(key1 = willDismissDirection, block = {
-        if (willDismissDirection != null || isUndoDirection) {
+    LaunchedEffect(key1 = willDismiss) {
+        if (willDismissDirection != null) {
             view.vibrate()
         }
-    })
+    }
 
     val dismissDirections by remember(startActionsConfig, endActionsConfig) {
         derivedStateOf {
             mutableSetOf<DismissDirection>().apply {
-                if (startActionsConfig != DefaultSwipeActionsConfig) add(DismissDirection.StartToEnd)
-                if (endActionsConfig != DefaultSwipeActionsConfig) add(DismissDirection.EndToStart)
+                if (startActionsConfig != DefaultSwipeActionsConfig) add(StartToEnd)
+                if (endActionsConfig != DefaultSwipeActionsConfig) add(EndToStart)
             }
         }
     }
@@ -127,13 +161,13 @@ fun SwipeActions(
         state = state,
         directions = dismissDirections,
         dismissThresholds = {
-            if (it == DismissDirection.StartToEnd)
+            if (it == StartToEnd)
                 FractionalThreshold(startActionsConfig.threshold)
             else FractionalThreshold(endActionsConfig.threshold)
         },
         background = {
             AnimatedContent(
-                targetState = Pair(state.dismissDirection, willDismissDirection != null),
+                targetState = Pair(willDismissDirection, willDismiss),
                 transitionSpec = {
                     fadeIn(
                         tween(0),
@@ -145,59 +179,66 @@ fun SwipeActions(
                 }
             ) { (direction, willDismiss) ->
                 val revealSize = remember { Animatable(if (willDismiss) 0f else 1f) }
-                val iconSize = remember { Animatable(if (willDismiss) .4f else .8f) }
-                LaunchedEffect(key1 = Unit, block = {
+                val iconSize = remember { Animatable(1f) }
+
+                LaunchedEffect(key1 = Unit) {
+
                     if (willDismiss) {
                         revealSize.snapTo(0f)
                         launch {
-                            revealSize.animateTo(1f, animationSpec = tween(600))
+                            revealSize.animateTo(
+                                1f,
+                                animationSpec = tween(REVEAL_DURATION_MILLIS)
+                            )
                         }
                         iconSize.snapTo(.8f)
                         iconSize.animateTo(
-                            1.2f,
+                            1f,
                             spring(
                                 dampingRatio = Spring.DampingRatioHighBouncy,
                             )
                         )
-                        iconSize.animateTo(
-                            1f,
-                            spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                            )
+                    } else {
+                        revealSize.snapTo(1f)
+                        revealSize.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(REVEAL_DURATION_MILLIS)
                         )
                     }
-                })
-                Box(modifier = Modifier
+                }
+
+                BoxWithConstraints(modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colors.primary)
+                    .background(backgroundColor)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(CirclePath(
                                 revealSize.value,
-                                direction == DismissDirection.StartToEnd
+                                isStartConfigActive,
+                                constraints.maxHeight.toFloat() / 2
                             ))
                             .background(
                                 color = when (direction) {
-                                    DismissDirection.StartToEnd ->
-                                        if (willDismiss) startActionsConfig.background
-                                        else startActionsConfig.iconTint
+                                    StartToEnd ->
+                                        if (isStartConfigActive) startActionsConfig.background
+                                        else endActionsConfig.background
 
-                                    DismissDirection.EndToStart ->
-                                        if (willDismiss) endActionsConfig.background
-                                        else MaterialTheme.colors.primary
+                                    EndToStart ->
+                                        if (!isStartConfigActive) endActionsConfig.background
+                                        else startActionsConfig.background
 
                                     else -> Color.Transparent
                                 },
                             )
-                    ) {
-                        Box(modifier = Modifier
+                    )
+
+                    Box(
+                        modifier = Modifier
                             .align(
-                                when (direction) {
-                                    DismissDirection.StartToEnd -> Alignment.CenterStart
-                                    else -> Alignment.CenterEnd
-                                }
+                                if (isStartConfigActive) Alignment.CenterStart
+                                else Alignment.CenterEnd
                             )
                             .fillMaxHeight()
                             .aspectRatio(1f)
@@ -206,31 +247,20 @@ fun SwipeActions(
                                 IntOffset(x = 0,
                                     y = (10 * (1f - iconSize.value)).roundToInt())
                             },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            when (direction) {
-                                DismissDirection.StartToEnd -> {
-                                    Image(
-                                        painter = rememberVectorPainter(image = startActionsConfig.icon),
-                                        colorFilter = ColorFilter.tint(
-                                            if (willDismiss) startActionsConfig.iconTint
-                                            else startActionsConfig.background
-                                        ),
-                                        contentDescription = null
-                                    )
-                                }
-                                DismissDirection.EndToStart -> {
-                                    Image(
-                                        painter = rememberVectorPainter(image = endActionsConfig.icon),
-                                        colorFilter = ColorFilter.tint(
-                                            if (willDismiss) endActionsConfig.iconTint
-                                            else endActionsConfig.background
-                                        ),
-                                        contentDescription = null
-                                    )
-                                }
-                                else -> {}
-                            }
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (isStartConfigActive) {
+                            Image(
+                                painter = rememberVectorPainter(image = startActionsConfig.icon),
+                                colorFilter = ColorFilter.tint(startActionsConfig.iconTint),
+                                contentDescription = null
+                            )
+                        } else {
+                            Image(
+                                painter = rememberVectorPainter(image = endActionsConfig.icon),
+                                colorFilter = ColorFilter.tint(endActionsConfig.iconTint),
+                                contentDescription = null
+                            )
                         }
                     }
                 }
@@ -241,7 +271,11 @@ fun SwipeActions(
     }
 }
 
-class CirclePath(private val progress: Float, private val start: Boolean) : Shape {
+private class CirclePath(
+    private val progress: Float,
+    private val start: Boolean,
+    private val xOffset: Float,
+) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -249,7 +283,7 @@ class CirclePath(private val progress: Float, private val start: Boolean) : Shap
     ): Outline {
 
         val origin = Offset(
-            x = if (start) 0f else size.width,
+            x = if (start) xOffset else size.width - xOffset,
             y = size.center.y,
         )
 
@@ -267,5 +301,76 @@ class CirclePath(private val progress: Float, private val start: Boolean) : Shap
                 )
             }
         )
+    }
+}
+
+@Composable
+@ExperimentalMaterialApi
+private fun SwipeToDismiss(
+    state: DismissState,
+    modifier: Modifier = Modifier,
+    directions: Set<DismissDirection> = setOf(EndToStart,
+        StartToEnd),
+    dismissThresholds: (DismissDirection) -> ThresholdConfig = { FractionalThreshold(0.5f) },
+    background: @Composable RowScope.() -> Unit,
+    dismissContent: @Composable RowScope.() -> Unit,
+) = BoxWithConstraints(modifier) {
+    val width = constraints.maxWidth.toFloat()
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    val anchors = mutableMapOf(0f to DismissValue.Default)
+    if (StartToEnd in directions) anchors += width to DismissedToEnd
+    if (EndToStart in directions) anchors += -width to DismissedToStart
+
+    val thresholds = { from: DismissValue, to: DismissValue ->
+        dismissThresholds(getDismissDirection(from, to)!!)
+    }
+    val minFactor =
+        if (EndToStart in directions) StandardResistanceFactor else 0f
+    val maxFactor =
+        if (StartToEnd in directions) StandardResistanceFactor else 0f
+    Box(
+        Modifier.swipeable(
+            state = state,
+            anchors = anchors,
+            thresholds = thresholds,
+            orientation = Orientation.Horizontal,
+            enabled = state.currentValue == DismissValue.Default,
+            reverseDirection = isRtl,
+            resistance = ResistanceConfig(
+                basis = width,
+                factorAtMin = minFactor,
+                factorAtMax = maxFactor
+            )
+        )
+    ) {
+        Row(
+            content = background,
+            modifier = Modifier.matchParentSize()
+        )
+        Row(
+            content = dismissContent,
+            modifier = Modifier.offset { IntOffset(state.offset.value.roundToInt(), 0) }
+        )
+    }
+}
+
+private fun getDismissDirection(from: DismissValue, to: DismissValue): DismissDirection? {
+    return when {
+        // settled at the default state
+        from == to && from == DismissValue.Default -> null
+        // has been dismissed to the end
+        from == to && from == DismissedToEnd -> StartToEnd
+        // has been dismissed to the start
+        from == to && from == DismissedToStart -> EndToStart
+        // is currently being dismissed to the end
+        from == DismissValue.Default && to == DismissedToEnd -> StartToEnd
+        // is currently being dismissed to the start
+        from == DismissValue.Default && to == DismissedToStart -> EndToStart
+        // has been dismissed to the end but is now animated back to default
+        from == DismissedToEnd && to == DismissValue.Default -> StartToEnd
+        // has been dismissed to the start but is now animated back to default
+        from == DismissedToStart && to == DismissValue.Default -> EndToStart
+        else -> null
     }
 }
