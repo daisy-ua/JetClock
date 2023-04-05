@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.utils.vibrate
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -60,9 +61,11 @@ val DefaultSwipeActionsConfig = SwipeActionsConfig(
 
 private const val REVEAL_DURATION_MILLIS = 400
 
+private const val VELOCITY_THRESHOLD = 1000
+
 private const val OFFSET_BLIND_SIZE = 50f
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SwipeActions(
     modifier: Modifier = Modifier,
@@ -79,20 +82,16 @@ fun SwipeActions(
 
     val state = rememberDismissState(
         confirmStateChange = {
-            when {
-                willDismissDirection == StartToEnd
-                        && it == DismissedToEnd -> {
+            when (willDismissDirection) {
+                StartToEnd -> {
                     startActionsConfig.onDismiss()
                     startActionsConfig.stayDismissed
                 }
-
-                willDismissDirection == EndToStart
-                        && it == DismissedToStart -> {
+                EndToStart -> {
                     endActionsConfig.onDismiss()
                     endActionsConfig.stayDismissed
                 }
-
-                else -> false
+                else -> true
             }
         }
     )
@@ -166,108 +165,128 @@ fun SwipeActions(
             else FractionalThreshold(endActionsConfig.threshold)
         },
         background = {
-            AnimatedContent(
-                targetState = Pair(willDismissDirection, willDismiss),
-                transitionSpec = {
-                    fadeIn(
-                        tween(0),
-                        initialAlpha = if (targetState.second) 1f else 0f,
-                    ) with fadeOut(
-                        tween(0),
-                        targetAlpha = if (targetState.second) .7f else 0f,
-                    )
-                }
-            ) { (direction, willDismiss) ->
-                val revealSize = remember { Animatable(if (willDismiss) 0f else 1f) }
-                val iconSize = remember { Animatable(1f) }
-
-                LaunchedEffect(key1 = Unit) {
-
-                    if (willDismiss) {
-                        revealSize.snapTo(0f)
-                        launch {
-                            revealSize.animateTo(
-                                1f,
-                                animationSpec = tween(REVEAL_DURATION_MILLIS)
-                            )
-                        }
-                        iconSize.snapTo(.8f)
-                        iconSize.animateTo(
-                            1f,
-                            spring(
-                                dampingRatio = Spring.DampingRatioHighBouncy,
-                            )
-                        )
-                    } else {
-                        revealSize.snapTo(1f)
-                        revealSize.animateTo(
-                            targetValue = 0f,
-                            animationSpec = tween(REVEAL_DURATION_MILLIS)
-                        )
-                    }
-                }
-
-                BoxWithConstraints(modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CirclePath(
-                                revealSize.value,
-                                isStartConfigActive,
-                                constraints.maxHeight.toFloat() / 2
-                            ))
-                            .background(
-                                color = when (direction) {
-                                    StartToEnd ->
-                                        if (isStartConfigActive) startActionsConfig.background
-                                        else endActionsConfig.background
-
-                                    EndToStart ->
-                                        if (!isStartConfigActive) endActionsConfig.background
-                                        else startActionsConfig.background
-
-                                    else -> Color.Transparent
-                                },
-                            )
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .align(
-                                if (isStartConfigActive) Alignment.CenterStart
-                                else Alignment.CenterEnd
-                            )
-                            .fillMaxHeight()
-                            .aspectRatio(1f)
-                            .scale(iconSize.value)
-                            .offset {
-                                IntOffset(x = 0,
-                                    y = (10 * (1f - iconSize.value)).roundToInt())
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (isStartConfigActive) {
-                            Image(
-                                painter = rememberVectorPainter(image = startActionsConfig.icon),
-                                colorFilter = ColorFilter.tint(startActionsConfig.iconTint),
-                                contentDescription = null
-                            )
-                        } else {
-                            Image(
-                                painter = rememberVectorPainter(image = endActionsConfig.icon),
-                                colorFilter = ColorFilter.tint(endActionsConfig.iconTint),
-                                contentDescription = null
-                            )
-                        }
-                    }
-                }
-            }
+            SwipeToActionBackground(
+                willDismissDirection = willDismissDirection,
+                willDismiss = willDismiss,
+                isStartConfigActive = isStartConfigActive,
+                backgroundColor = backgroundColor,
+                startActionsConfig = startActionsConfig,
+                endActionsConfig = endActionsConfig
+            )
         }
     ) {
         content(state)
+    }
+}
+
+@Composable
+@OptIn(ExperimentalAnimationApi::class)
+fun SwipeToActionBackground(
+    willDismissDirection: DismissDirection?,
+    willDismiss: Boolean,
+    isStartConfigActive: Boolean,
+    backgroundColor: Color,
+    startActionsConfig: SwipeActionsConfig,
+    endActionsConfig: SwipeActionsConfig,
+) {
+    AnimatedContent(
+        targetState = Pair(willDismissDirection, willDismiss),
+        transitionSpec = {
+            fadeIn(
+                tween(0),
+                initialAlpha = if (targetState.second) 1f else 0f,
+            ) with fadeOut(
+                tween(0),
+                targetAlpha = if (targetState.second) .7f else 0f,
+            )
+        }
+    ) { (direction, willDismiss) ->
+        val revealSize = remember { Animatable(if (willDismiss) 0f else 1f) }
+        val iconSize = remember { Animatable(1f) }
+
+        LaunchedEffect(key1 = Unit) {
+
+            if (willDismiss) {
+                revealSize.snapTo(0f)
+                launch {
+                    revealSize.animateTo(
+                        1f,
+                        animationSpec = tween(REVEAL_DURATION_MILLIS)
+                    )
+                }
+                iconSize.snapTo(.8f)
+                iconSize.animateTo(
+                    1f,
+                    spring(
+                        dampingRatio = Spring.DampingRatioHighBouncy,
+                    )
+                )
+            } else {
+                revealSize.snapTo(1f)
+                revealSize.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(REVEAL_DURATION_MILLIS)
+                )
+            }
+        }
+
+        BoxWithConstraints(modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CirclePath(
+                        revealSize.value,
+                        isStartConfigActive,
+                        constraints.maxHeight.toFloat() / 2
+                    ))
+                    .background(
+                        color = when (direction) {
+                            StartToEnd ->
+                                if (isStartConfigActive) startActionsConfig.background
+                                else endActionsConfig.background
+
+                            EndToStart ->
+                                if (!isStartConfigActive) endActionsConfig.background
+                                else startActionsConfig.background
+
+                            else -> Color.Transparent
+                        },
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(
+                        if (isStartConfigActive) Alignment.CenterStart
+                        else Alignment.CenterEnd
+                    )
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .scale(iconSize.value)
+                    .offset {
+                        IntOffset(x = 0,
+                            y = (10 * (1f - iconSize.value)).roundToInt())
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (isStartConfigActive) {
+                    Image(
+                        painter = rememberVectorPainter(image = startActionsConfig.icon),
+                        colorFilter = ColorFilter.tint(startActionsConfig.iconTint),
+                        contentDescription = null
+                    )
+                } else {
+                    Image(
+                        painter = rememberVectorPainter(image = endActionsConfig.icon),
+                        colorFilter = ColorFilter.tint(endActionsConfig.iconTint),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -341,7 +360,8 @@ private fun SwipeToDismiss(
                 basis = width,
                 factorAtMin = minFactor,
                 factorAtMax = maxFactor
-            )
+            ),
+            velocityThreshold = VELOCITY_THRESHOLD.dp
         )
     ) {
         Row(
