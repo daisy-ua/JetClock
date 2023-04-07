@@ -82,12 +82,12 @@ fun SwipeActions(
 
     val state = rememberDismissState(
         confirmStateChange = {
-            when (willDismissDirection) {
-                StartToEnd -> {
+            when {
+                willDismissDirection == StartToEnd && it == DismissedToEnd -> {
                     startActionsConfig.onDismiss()
                     startActionsConfig.stayDismissed
                 }
-                EndToStart -> {
+                willDismissDirection == EndToStart && it == DismissedToStart -> {
                     endActionsConfig.onDismiss()
                     endActionsConfig.stayDismissed
                 }
@@ -95,6 +95,11 @@ fun SwipeActions(
             }
         }
     )
+
+    when {
+        state.isDismissed(StartToEnd) -> startActionsConfig.onDismiss()
+        state.isDismissed(EndToStart) -> endActionsConfig.onDismiss()
+    }
 
     var isStartConfigActive by remember {
         mutableStateOf(false)
