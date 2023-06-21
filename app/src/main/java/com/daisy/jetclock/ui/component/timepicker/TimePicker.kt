@@ -67,13 +67,24 @@ fun TimePicker(
 
 }
 
+private const val ITEMS_SIZE = Int.MAX_VALUE
+
 @Composable
 fun WheelPicker(
     items: List<String>,
     firstIndex: Int,
     alignment: Alignment,
+    isInfinite: Boolean = true,
 ) {
-    val listState = rememberLazyListState(firstIndex)
+    val (itemsSize, startIndex) = if (isInfinite) {
+        val itemsMidSize = ITEMS_SIZE / 2 + (firstIndex - 5)
+        Pair(ITEMS_SIZE, itemsMidSize)
+    } else {
+        Pair(items.size, firstIndex)
+    }
+
+    val listState = rememberLazyListState(startIndex)
+
     val selectedItem = remember {
         mutableStateOf("")
     }
@@ -91,7 +102,7 @@ fun WheelPicker(
             horizontalAlignment = Alignment.CenterHorizontally,
             state = listState,
         ) {
-            items(Int.MAX_VALUE) {
+            items(itemsSize) {
                 val opacity by remember {
                     calculateDerivedState(listState, it, halfRowWidth)
                 }
