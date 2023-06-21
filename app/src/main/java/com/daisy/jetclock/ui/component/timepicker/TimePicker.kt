@@ -1,6 +1,10 @@
 package com.daisy.jetclock.ui.component.timepicker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,12 +21,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -32,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daisy.jetclock.constants.TimeFormat
 import com.daisy.jetclock.ui.theme.JetClockTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun TimePicker(
@@ -84,13 +89,18 @@ fun WheelPicker(
     }
 
     val listState = rememberLazyListState(startIndex)
+    val scope = rememberCoroutineScope()
+
+    val scrollableState = rememberScrollableState { delta ->
+        scope.launch {
+            listState.scrollBy(-delta * 0.8f)
+            listState.animateScrollToItem(index = listState.firstVisibleItemIndex)
+        }
+        delta
+    }
 
     val selectedItem = remember {
         mutableStateOf("")
-    }
-
-    LaunchedEffect(key1 = !listState.isScrollInProgress) {
-        listState.animateScrollToItem(index = listState.firstVisibleItemIndex)
     }
 
     BoxWithConstraints(
@@ -99,6 +109,12 @@ fun WheelPicker(
         val halfRowWidth = constraints.maxHeight / 2f
 
         LazyColumn(
+            modifier = Modifier
+                .scrollable(
+                    orientation = Orientation.Vertical,
+                    state = scrollableState
+                ),
+            userScrollEnabled = false,
             horizontalAlignment = Alignment.CenterHorizontally,
             state = listState,
         ) {
