@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -35,26 +37,24 @@ private const val ITEMS_SIZE = Int.MAX_VALUE
 
 @Composable
 fun WheelPicker(
-    modifier: Modifier = Modifier,
     items: List<String>,
-    firstIndex: Int,
+    initialIndex: Int,
     alignment: Alignment,
+    modifier: Modifier = Modifier,
     isInfinite: Boolean = true,
     itemWidth: Dp = 50.dp,
     itemHeight: Dp = 30.dp,
     fontSize: TextUnit? = null,
+    fontColor: Color = MaterialTheme.colors.primaryVariant,
     visibleItemsCount: Int = 5,
 ) {
-    val (itemsSize, startIndex) = if (isInfinite) {
-        val itemsMidSize = ITEMS_SIZE / 2 + (firstIndex - 5)
-        Pair(ITEMS_SIZE, itemsMidSize)
-    } else {
-        Pair(items.size, firstIndex)
-    }
+    val (itemsSize, targetIndex) = calculateTargetValues(
+        isInfinite, items.size, initialIndex, visibleItemsCount
+    )
 
     val pickerLength = (itemHeight.value * visibleItemsCount).dp
 
-    val listState = rememberLazyListState(startIndex)
+    val listState = rememberLazyListState(targetIndex)
     val scope = rememberCoroutineScope()
 
     val scrollableState = rememberScrollableState { delta ->
@@ -99,7 +99,8 @@ fun WheelPicker(
                     alignment = alignment,
                     boxHeight = itemHeight,
                     boxWidth = itemWidth,
-                    fontSize = cFontSize
+                    fontSize = cFontSize,
+                    fontColor = fontColor,
                 )
             }
         }
@@ -115,6 +116,7 @@ private fun ItemContent(
     boxHeight: Dp,
     boxWidth: Dp,
     fontSize: TextUnit,
+    fontColor: Color,
 ) {
     Box(
         contentAlignment = alignment,
@@ -130,16 +132,51 @@ private fun ItemContent(
         Text(
             text = items[index],
             modifier = Modifier.align(alignment),
-            fontSize = fontSize
+            fontSize = fontSize,
+            color = fontColor
         )
     }
 }
 
 @Composable
-private fun wheelFontSize(height: Dp, padding: Dp = 0.dp): TextUnit {
+private fun wheelFontSize(height: Dp): TextUnit {
     return with(LocalDensity.current) {
         ((height * 0.9f).toPx()).toSp()
     }
+}
+
+private fun calculateTargetValues(
+    isInfinite: Boolean,
+    itemsSize: Int,
+    initialIndex: Int,
+    visibleItemsCount: Int,
+): Pair<Int, Int> {
+    return if (isInfinite) {
+        calculateInfiniteTargetValues(
+            itemsSize = itemsSize,
+            initialIndex = initialIndex,
+            visibleItemsCount = visibleItemsCount
+        )
+    } else {
+        Pair(itemsSize, initialIndex)
+    }
+}
+
+private fun calculateInfiniteTargetValues(
+    itemsSize: Int,
+    initialIndex: Int,
+    visibleItemsCount: Int,
+): Pair<Int, Int> {
+    val listMidIndex = ITEMS_SIZE / 2 - 1
+    val itemsMidIndex = listMidIndex % itemsSize
+    val targetIndex = if (initialIndex < itemsMidIndex) {
+        listMidIndex - itemsMidIndex - initialIndex
+    } else {
+        listMidIndex + initialIndex - itemsMidIndex
+    }.let {
+        it - visibleItemsCount / 2
+    }
+    return Pair(ITEMS_SIZE, targetIndex)
 }
 
 private fun calculateDerivedState(
