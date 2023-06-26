@@ -21,6 +21,7 @@ import com.daisy.jetclock.ui.theme.JetClockTheme
 @Composable
 fun TimePicker(
     timeFormat: TimeFormat = TimeFormat.Hour12Format,
+    soundEnabled: Boolean = true,
 ) {
     val timeFormatter = TimeFormatter(timeFormat)
     val meridiemOptions = listOf("", "", "AM", "PM", "", "")
@@ -42,6 +43,7 @@ fun TimePicker(
             items = timeFormatter.hours,
             initialIndex = 0,
             alignment = Alignment.Center,
+            soundEnabled = soundEnabled,
         )
         Text(
             text = ":",
@@ -53,6 +55,7 @@ fun TimePicker(
             items = timeFormatter.minutes,
             initialIndex = 0,
             alignment = Alignment.Center,
+            soundEnabled = soundEnabled,
         )
         if (timeFormat == TimeFormat.Hour12Format) {
             WheelPicker(
@@ -60,6 +63,7 @@ fun TimePicker(
                 initialIndex = 1,
                 alignment = Alignment.Center,
                 isInfinite = false,
+                soundEnabled = soundEnabled,
             )
         }
         RoundedLine(

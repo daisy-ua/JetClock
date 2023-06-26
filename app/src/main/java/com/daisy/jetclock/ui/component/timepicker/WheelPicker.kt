@@ -14,21 +14,26 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.utils.SoundPoolManager
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -47,6 +52,7 @@ fun WheelPicker(
     fontSize: TextUnit? = null,
     fontColor: Color = MaterialTheme.colors.primaryVariant,
     visibleItemsCount: Int = 5,
+    soundEnabled: Boolean = true,
 ) {
     val (itemsSize, targetIndex) = calculateTargetValues(
         isInfinite, items.size, initialIndex, visibleItemsCount
@@ -56,17 +62,41 @@ fun WheelPicker(
 
     val listState = rememberLazyListState(targetIndex)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val soundPoolManager = remember {
+        if (soundEnabled) SoundPoolManager(context) else null
+    }
+
+    val selectedItem = remember {
+        mutableStateOf(initialIndex)
+    }
+
+    var previousIndex by remember { mutableStateOf(0) }
 
     val scrollableState = rememberScrollableState { delta ->
         scope.launch {
             listState.scrollBy(-delta * 0.8f)
-            listState.animateScrollToItem(index = listState.firstVisibleItemIndex)
+
+            soundPoolManager?.let { manager ->
+                val currentIndex = (listState.firstVisibleItemIndex + 1)
+                if (currentIndex != previousIndex) {
+                    previousIndex = currentIndex
+                    manager.playSound()
+                }
+            }
         }
         delta
     }
 
-    val selectedItem = remember {
-        mutableStateOf("")
+    LaunchedEffect(!scrollableState.isScrollInProgress) {
+        listState.animateScrollToItem(index = listState.firstVisibleItemIndex)
+    }
+
+    DisposableEffect(key1 = Unit) {
+        onDispose {
+            soundPoolManager?.release()
+        }
     }
 
     BoxWithConstraints(
