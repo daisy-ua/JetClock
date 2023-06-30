@@ -11,7 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.ui.component.animations.SwipeActions
 import com.daisy.jetclock.ui.component.animations.SwipeActionsConfig
@@ -46,8 +45,8 @@ fun AlarmList() {
             SwipeActions(
                 endActionsConfig = SwipeActionsConfig(
                     threshold = 0.5f,
-                    background = Color.Red,
-                    iconTint = Color.White,
+                    background = MaterialTheme.colors.error,
+                    iconTint = MaterialTheme.colors.onError,
                     icon = Icons.Rounded.Delete,
                     stayDismissed = true,
                     onDismiss = {

@@ -24,6 +24,8 @@ private val DarkColorPalette = darkColors(
     onBackground = Platinum,
 
     onSurface = TaupeGrey,
+
+    error = Color.Red,
 )
 
 private val LightColorPalette = lightColors(
@@ -38,6 +40,8 @@ private val LightColorPalette = lightColors(
     onBackground = OxfordViolet,
 
     onSurface = CoolGrey,
+
+    error = Color.Red,
 )
 
 @Composable

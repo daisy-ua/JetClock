@@ -22,24 +22,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.ui.component.drawable.CirclePath
+import com.daisy.jetclock.ui.component.drawable.CirclePathDirection
 import com.daisy.jetclock.utils.vibrate
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 data class SwipeActionsConfig(
     val threshold: Float,
@@ -87,10 +82,12 @@ fun SwipeActions(
                     startActionsConfig.onDismiss()
                     startActionsConfig.stayDismissed
                 }
+
                 willDismissDirection == EndToStart && it == DismissedToStart -> {
                     endActionsConfig.onDismiss()
                     endActionsConfig.stayDismissed
                 }
+
                 else -> true
             }
         }
@@ -235,18 +232,24 @@ fun SwipeToActionBackground(
             }
         }
 
-        BoxWithConstraints(modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(CirclePath(
-                        revealSize.value,
-                        isStartConfigActive,
-                        constraints.maxHeight.toFloat() / 2
-                    ))
+                    .clip(
+                        CirclePath(
+                            revealSize.value,
+                            if (isStartConfigActive) {
+                                CirclePathDirection.Start(constraints.maxHeight.toFloat() / 2)
+                            } else {
+                                CirclePathDirection.End(constraints.maxHeight.toFloat() / 2)
+                            }
+                        )
+                    )
                     .background(
                         color = when (direction) {
                             StartToEnd ->
@@ -272,8 +275,10 @@ fun SwipeToActionBackground(
                     .aspectRatio(1f)
                     .scale(iconSize.value)
                     .offset {
-                        IntOffset(x = 0,
-                            y = (10 * (1f - iconSize.value)).roundToInt())
+                        IntOffset(
+                            x = 0,
+                            y = (10 * (1f - iconSize.value)).roundToInt()
+                        )
                     },
                 contentAlignment = Alignment.Center,
             ) {
@@ -295,46 +300,15 @@ fun SwipeToActionBackground(
     }
 }
 
-private class CirclePath(
-    private val progress: Float,
-    private val start: Boolean,
-    private val xOffset: Float,
-) : Shape {
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density,
-    ): Outline {
-
-        val origin = Offset(
-            x = if (start) xOffset else size.width - xOffset,
-            y = size.center.y,
-        )
-
-        val radius = (sqrt(
-            size.height * size.height + size.width * size.width
-        ) * 1f) * progress
-
-        return Outline.Generic(
-            Path().apply {
-                addOval(
-                    Rect(
-                        center = origin,
-                        radius = radius,
-                    )
-                )
-            }
-        )
-    }
-}
-
 @Composable
 @ExperimentalMaterialApi
 private fun SwipeToDismiss(
     state: DismissState,
     modifier: Modifier = Modifier,
-    directions: Set<DismissDirection> = setOf(EndToStart,
-        StartToEnd),
+    directions: Set<DismissDirection> = setOf(
+        EndToStart,
+        StartToEnd
+    ),
     dismissThresholds: (DismissDirection) -> ThresholdConfig = { FractionalThreshold(0.5f) },
     background: @Composable RowScope.() -> Unit,
     dismissContent: @Composable RowScope.() -> Unit,
