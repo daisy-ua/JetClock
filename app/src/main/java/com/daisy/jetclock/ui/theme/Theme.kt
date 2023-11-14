@@ -23,9 +23,9 @@ private val DarkColorPalette = darkColors(
     background = OxfordViolet,
     onBackground = Platinum,
 
-    onSurface = TaupeGrey,
+    onSurface = Color.White,
 
-    error = Color.Red,
+    error = BrightRed,
 )
 
 private val LightColorPalette = lightColors(

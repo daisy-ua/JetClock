@@ -2,10 +2,14 @@ package com.daisy.jetclock.ui.component.repeatdays
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,6 +40,7 @@ val days = arrayOf("S", "M", "T", "W", "T", "F", "S")
 @Composable
 fun RepeatDays(
     modifier: Modifier = Modifier,
+    darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
     val selectedDays = remember {
         mutableStateListOf<Int>()
@@ -43,6 +49,29 @@ fun RepeatDays(
     val onSelectDays = { isSelected: Boolean, index: Int ->
         if (isSelected) selectedDays.remove(index) else selectedDays.add(index)
     }
+
+    val (selectedFontColor, backgroundColor, backgroundBrush) =
+        if (darkThemeEnabled) {
+            Triple(
+                MaterialTheme.colors.onSurface,
+                MaterialTheme.colors.primaryVariant,
+                listOf(
+                    MaterialTheme.colors.primary,
+                    MaterialTheme.colors.primary,
+                    MaterialTheme.colors.secondaryVariant,
+                ),
+            )
+        } else {
+            Triple(
+                MaterialTheme.colors.onPrimary,
+                MaterialTheme.colors.surface,
+                listOf(
+                    MaterialTheme.colors.secondaryVariant,
+                    MaterialTheme.colors.secondaryVariant,
+                    MaterialTheme.colors.primary,
+                ),
+            )
+        }
 
     LazyRow(
         modifier = Modifier
@@ -54,12 +83,15 @@ fun RepeatDays(
         items(days.size) { index ->
             val isSelected = selectedDays.contains(index)
 
-            val fontColor =
-                if (isSelected)
-                    MaterialTheme.colors.onPrimary
-                else MaterialTheme.colors.primary
+            val fontColor by animateColorAsState(
+                targetValue = if (isSelected)
+                    selectedFontColor
+                else MaterialTheme.colors.primary,
+                animationSpec = tween(100, easing = LinearEasing),
+                label = "",
+            )
 
-            AnimatedContent(targetState = isSelected) { isSelectedState ->
+            AnimatedContent(targetState = isSelected, label = "") { isSelectedState ->
                 val revealSize = remember { Animatable(if (isSelectedState) 1f else 0f) }
 
                 Box(
@@ -73,7 +105,7 @@ fun RepeatDays(
                             onSelectDays(isSelected, index)
                         }
                         .background(
-                            MaterialTheme.colors.surface,
+                            color = backgroundColor,
                             shape = MaterialTheme.shapes.medium,
                         ),
                 )
@@ -86,15 +118,7 @@ fun RepeatDays(
                                     CirclePathDirection.Center
                                 )
                             )
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        MaterialTheme.colors.secondaryVariant,
-                                        MaterialTheme.colors.secondaryVariant,
-                                        MaterialTheme.colors.primary,
-                                    ),
-                                )
-                            )
+                            .background(Brush.linearGradient(backgroundBrush))
 
                     ) {
                         Text(
@@ -126,7 +150,7 @@ fun RepeatDays(
 @Preview(showBackground = true)
 @Composable
 fun RepeatDaysPreview() {
-    JetClockTheme {
+    JetClockTheme(darkTheme = false) {
         RepeatDays(modifier = Modifier.padding(16.dp))
     }
 }
