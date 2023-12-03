@@ -16,8 +16,7 @@ private val DarkColorPalette = darkColors(
     primary = UltraViolet,
     primaryVariant = PortGore,
 
-    secondary = Platinum,
-    secondaryVariant = AfricanViolet,
+    secondary = AfricanViolet,
     onSecondary = AfricanViolet,
 
     background = OxfordViolet,
@@ -32,9 +31,9 @@ private val LightColorPalette = lightColors(
     primary = UltraViolet,
     primaryVariant = PortGore,
 
-    secondary = Color.White,
+    secondary = AfricanViolet,
     secondaryVariant = AfricanViolet,
-    onSecondary = AfricanViolet,
+    onSecondary = Platinum,
 
     background = WildSand,
     onBackground = OxfordViolet,

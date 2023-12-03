@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.R
 import com.daisy.jetclock.utils.SoundPoolManager
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -65,7 +66,12 @@ fun WheelPicker(
     val context = LocalContext.current
 
     val soundPoolManager = remember {
-        if (soundEnabled) SoundPoolManager(context) else null
+        if (soundEnabled) SoundPoolManager().also {
+            it.setSoundId(
+                context,
+                R.raw.gate_latch_click_1924
+            )
+        } else null
     }
 
     val selectedItem = remember {
@@ -82,7 +88,7 @@ fun WheelPicker(
                 val currentIndex = (listState.firstVisibleItemIndex + 1)
                 if (currentIndex != previousIndex) {
                     previousIndex = currentIndex
-                    manager.playSound()
+                    manager.playSound(rate = 5f)
                 }
             }
         }

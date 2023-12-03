@@ -1,15 +1,10 @@
 package com.daisy.jetclock.ui.screens
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.FabPosition
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -19,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.ui.component.components.ListRowComponent
 import com.daisy.jetclock.ui.component.repeatdays.RepeatDays
 import com.daisy.jetclock.ui.component.scaffold.JetClockFuncTopAppBar
 import com.daisy.jetclock.ui.component.scaffold.TextFloatingActionButton
@@ -66,34 +62,21 @@ fun SetAlarmScreen() {
 
 @Composable
 fun SettingRow(option: String, value: String) {
-    Card(
-        backgroundColor = MaterialTheme.colors.background,
-        shape = RoundedCornerShape(0.dp),
-        elevation = 4.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { }
-
+    ListRowComponent(
+        onItemClick = { },
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = option,
-                style = MaterialTheme.typography.body1,
-                fontWeight = FontWeight.Medium
-            )
+        Text(
+            text = option,
+            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight.Medium
+        )
 
-            Text(
-                text = value,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground.copy(0.5f),
-            )
-        }
-
+        Text(
+            text = value,
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.colors.onBackground.copy(0.5f),
+        )
     }
 }
 
