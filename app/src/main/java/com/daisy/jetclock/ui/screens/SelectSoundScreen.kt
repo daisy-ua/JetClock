@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import com.daisy.jetclock.ui.component.components.ListRowComponent
+import com.daisy.jetclock.ui.component.components.TextRadioButtonRowItem
 import com.daisy.jetclock.ui.component.scaffold.JetClockFuncTopAppBar
 import com.daisy.jetclock.ui.theme.JetClockTheme
 import com.daisy.jetclock.utils.SoundPoolManager
@@ -63,7 +62,7 @@ fun SelectSoundScreen() {
             modifier = Modifier.fillMaxWidth()
         ) {
             item {
-                SoundItem(
+                TextRadioButtonRowItem(
                     name = "None",
                     isSelected = soundSelected.value?.equals("None") ?: true,
                     onItemClick = {
@@ -76,7 +75,7 @@ fun SelectSoundScreen() {
             item { TitleItem() }
 
             items(sounds) { sound ->
-                SoundItem(
+                TextRadioButtonRowItem(
                     name = sound,
                     isSelected = soundSelected.value?.equals(sound) ?: false,
                     onItemClick = {
@@ -108,29 +107,6 @@ fun TitleItem() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
-        )
-    }
-}
-
-@Composable
-fun SoundItem(
-    name: String,
-    isSelected: Boolean,
-    onItemClick: () -> Unit = { },
-) {
-    ListRowComponent(
-        onItemClick = onItemClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.body1,
-            fontWeight = FontWeight.Medium
-        )
-
-        RadioButton(
-            selected = isSelected,
-            onClick = null,
         )
     }
 }
