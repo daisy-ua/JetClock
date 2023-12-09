@@ -1,9 +1,15 @@
 package com.daisy.jetclock.ui.component.alarm
 
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
@@ -13,17 +19,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun AlarmCard() {
-    val context = LocalContext.current
-
+fun AlarmCard(
+    onAlarmClick: (Int) -> Unit,
+) {
     val checkedState = remember {
         mutableStateOf(true)
     }
@@ -32,12 +36,7 @@ fun AlarmCard() {
         color = MaterialTheme.colors.background,
         modifier = Modifier
             .clickable {
-                Toast
-                    .makeText(
-                        context,
-                        "Alarm item clicked!",
-                        Toast.LENGTH_LONG)
-                    .show()
+                onAlarmClick(0)
             }
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .fillMaxWidth()
@@ -70,13 +69,13 @@ fun AlarmCard() {
                     Text(
                         text = "Alarm",
                         style = MaterialTheme.typography.subtitle2,
-                        color = MaterialTheme.colors.onSurface
+                        color = MaterialTheme.colors.onBackground.copy(0.6f)
                     )
                     Text(
                         text = "Mon Tue Wed",
                         style = MaterialTheme.typography.subtitle2,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colors.onSurface,
+                        color = MaterialTheme.colors.onBackground.copy(0.6f),
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                     )
@@ -94,5 +93,5 @@ fun AlarmCard() {
 @Preview(showBackground = true)
 @Composable
 fun AlarmCardPreview() {
-    AlarmCard()
+    AlarmCard({})
 }

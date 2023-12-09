@@ -29,7 +29,9 @@ import com.daisy.jetclock.utils.SoundPoolManager
 import com.daisy.jetclock.utils.rememberLifecycleEvent
 
 @Composable
-fun SelectSoundScreen() {
+fun SelectSoundScreen(
+    onUpClick: () -> Unit,
+) {
     val context = LocalContext.current
 
     val sounds = rememberSaveable {
@@ -56,7 +58,7 @@ fun SelectSoundScreen() {
     }
 
     Scaffold(
-        topBar = { JetClockFuncTopAppBar(title = "Select sound") },
+        topBar = { JetClockFuncTopAppBar(title = "Select sound", onClose = onUpClick) },
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
@@ -115,6 +117,6 @@ fun TitleItem() {
 @Composable
 fun SelectSoundScreenPreview() {
     JetClockTheme(darkTheme = false) {
-        SelectSoundScreen()
+        SelectSoundScreen({})
     }
 }

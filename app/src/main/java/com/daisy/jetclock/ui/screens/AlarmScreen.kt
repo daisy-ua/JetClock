@@ -12,7 +12,9 @@ import com.daisy.jetclock.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.ui.theme.JetClockTheme
 
 @Composable
-fun AlarmScreen() {
+fun AlarmScreen(
+    onAlarmClick: (Int) -> Unit,
+) {
     Scaffold(
         topBar = { JetClockTopAppBar() },
         floatingActionButton = { JetClockFloatingActionButton() },
@@ -20,7 +22,7 @@ fun AlarmScreen() {
     ) {
         Column {
             NextAlarmCard()
-            AlarmList()
+            AlarmList(onAlarmClick)
         }
     }
 }
@@ -29,6 +31,6 @@ fun AlarmScreen() {
 @Composable
 fun AlarmScreenPreview() {
     JetClockTheme {
-        AlarmScreen()
+        AlarmScreen({})
     }
 }

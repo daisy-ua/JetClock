@@ -10,7 +10,11 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.ui.component.animations.SwipeActions
 import com.daisy.jetclock.ui.component.animations.SwipeActionsConfig
@@ -20,7 +24,9 @@ import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AlarmList() {
+fun AlarmList(
+    onAlarmClick: (Int) -> Unit,
+) {
 
     data class Alarm(
         val id: Int,
@@ -55,14 +61,17 @@ fun AlarmList() {
                         }
                     }
                 ),
-            ) { state -> AlarmColumnContent(state = state) }
+            ) { state -> AlarmColumnContent(state = state, onAlarmClick = onAlarmClick) }
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AlarmColumnContent(state: DismissState) {
+fun AlarmColumnContent(
+    state: DismissState,
+    onAlarmClick: (Int) -> Unit,
+) {
     val animateCorners by remember {
         derivedStateOf {
             state.offset.value.absoluteValue > 30
@@ -74,13 +83,13 @@ fun AlarmColumnContent(state: DismissState) {
                     animateCorners -> 8.dp
 
             else -> 0.dp
-        }
+        }, label = ""
     )
     val elevation by animateDpAsState(
         targetValue = when {
             animateCorners -> 6.dp
             else -> 2.dp
-        }
+        }, label = ""
     )
 
     Card(
@@ -91,6 +100,6 @@ fun AlarmColumnContent(state: DismissState) {
         ),
         elevation = elevation,
     ) {
-        AlarmCard()
+        AlarmCard(onAlarmClick = onAlarmClick)
     }
 }

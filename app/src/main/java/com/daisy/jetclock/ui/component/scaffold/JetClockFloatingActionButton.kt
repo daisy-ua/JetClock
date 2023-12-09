@@ -38,7 +38,7 @@ fun JetClockFloatingActionButton() {
                     topPadding = 4f
                 )
                 .background(
-                    color = MaterialTheme.colors.secondary,
+                    color = MaterialTheme.colors.surface,
                     shape = RoundedCornerShape(26.dp)
                 )
         ) {

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.daisy.jetclock'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.daisy.jetclock"
@@ -70,4 +70,5 @@ dependencies {
     // For control over item selection of both touch and mouse driven selection
     implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
 
+    implementation "androidx.navigation:navigation-compose:$nav_version"
 }

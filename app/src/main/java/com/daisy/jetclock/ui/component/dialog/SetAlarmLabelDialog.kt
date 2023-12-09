@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.ui.component.components.CancelOKButtonsRow
 import com.daisy.jetclock.ui.theme.JetClockTheme
+import kotlinx.coroutines.android.awaitFrame
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -43,6 +44,7 @@ fun SetAlarmLabelDialog(
 
     LaunchedEffect(focusRequester) {
         snapshotFlow { windowInfo.isWindowFocused }.collect { isWindowFocused ->
+            awaitFrame()
             if (isWindowFocused) {
                 focusRequester.requestFocus()
                 keyboard?.show()
