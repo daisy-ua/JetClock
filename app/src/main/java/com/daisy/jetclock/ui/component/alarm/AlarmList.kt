@@ -13,33 +13,24 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.ui.component.animations.SwipeActions
 import com.daisy.jetclock.ui.component.animations.SwipeActionsConfig
 import com.daisy.jetclock.ui.component.animations.animatedItemsIndexed
 import com.daisy.jetclock.ui.component.animations.updateAnimatedItemsState
+import com.daisy.jetclock.viewmodels.AlarmViewModel
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlarmList(
-    onAlarmClick: (Int) -> Unit,
+    viewModel: AlarmViewModel,
+    onAlarmClick: (Long) -> Unit,
 ) {
-
-    data class Alarm(
-        val id: Int,
-        val title: String = "Alarm $id",
-    )
-
-    val alarmList = remember {
-        mutableStateListOf<Alarm>().also { list ->
-            for (id in 0..5) {
-                list.add(Alarm(id))
-            }
-        }
-    }
+    val alarmList by viewModel.alarms.collectAsStateWithLifecycle()
 
     val animatedList by updateAnimatedItemsState(newList = alarmList.map { it })
 
@@ -56,12 +47,10 @@ fun AlarmList(
                     icon = Icons.Rounded.Delete,
                     stayDismissed = true,
                     onDismiss = {
-                        alarmList.removeIf {
-                            it.id == item.id
-                        }
+                        viewModel.deleteAlarm(item.id)
                     }
                 ),
-            ) { state -> AlarmColumnContent(state = state, onAlarmClick = onAlarmClick) }
+            ) { state -> AlarmColumnContent(item = item, state = state, onAlarmClick = onAlarmClick) }
         }
     }
 }
@@ -69,8 +58,9 @@ fun AlarmList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlarmColumnContent(
+    item: Alarm,
     state: DismissState,
-    onAlarmClick: (Int) -> Unit,
+    onAlarmClick: (Long) -> Unit,
 ) {
     val animateCorners by remember {
         derivedStateOf {
@@ -100,6 +90,6 @@ fun AlarmColumnContent(
         ),
         elevation = elevation,
     ) {
-        AlarmCard(onAlarmClick = onAlarmClick)
+        AlarmCard(item, onAlarmClick = onAlarmClick)
     }
 }

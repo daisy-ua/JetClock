@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.daisy.jetclock.constants.DayOfWeek
+import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.ui.component.components.ListRowComponent
 import com.daisy.jetclock.ui.component.dialog.SetAlarmLabelDialog
 import com.daisy.jetclock.ui.component.dialog.SetRingDurationDialog
@@ -28,6 +31,7 @@ import com.daisy.jetclock.ui.component.scaffold.JetClockFuncTopAppBar
 import com.daisy.jetclock.ui.component.scaffold.TextFloatingActionButton
 import com.daisy.jetclock.ui.component.timepicker.TimePicker
 import com.daisy.jetclock.ui.theme.JetClockTheme
+import com.daisy.jetclock.viewmodels.NewAlarmViewModel
 
 private enum class DialogType {
     NONE,
@@ -38,11 +42,20 @@ private enum class DialogType {
 
 @Composable
 fun SetAlarmScreen(
-    alarmId: Int,
+    alarmId: Long,
     onUpClick: () -> Unit,
     onSelectSoundClicked: () -> Unit,
+    viewModel: NewAlarmViewModel = hiltViewModel<NewAlarmViewModel>(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
+    var selectedRepeatDays by remember {
+        mutableStateOf<List<DayOfWeek>>(emptyList())
+    }
+
+    var sound by remember {
+        mutableStateOf("Default")
+    }
+
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
     }
@@ -72,8 +85,41 @@ fun SetAlarmScreen(
         DialogType.NONE -> {}
     }
 
+    var isSaving by remember {
+        mutableStateOf(false)
+    }
+
+    val saveAlarm: () -> Unit = {
+        val alarm = Alarm(
+            id = alarmId,
+            hour = 1,
+            minute = 10,
+            meridiem = null,
+            repeatDays = emptyList(),
+            isEnabled = true,
+            label = "label",
+            ringDuration = 10,
+            snoozeDuration = 1,
+            snoozeNumber = 1,
+            sound = "sound"
+        )
+
+        if (!isSaving) {
+            isSaving = true
+            viewModel.insertAlarm(alarm)
+        }
+
+        onUpClick()
+    }
+
     Scaffold(
-        topBar = { JetClockFuncTopAppBar(title = "Set alarm", onClose = onUpClick) },
+        topBar = {
+            JetClockFuncTopAppBar(
+                title = "Set alarm",
+                onClose = onUpClick,
+                onApply = saveAlarm
+            )
+        },
         floatingActionButton = { TextFloatingActionButton(Modifier.padding(bottom = 8.dp)) },
         floatingActionButtonPosition = FabPosition.Center,
     ) {
@@ -156,6 +202,6 @@ fun RepeatSetting(darkThemeEnabled: Boolean) {
 @Composable
 fun SetAlarmScreenPreview() {
     JetClockTheme(darkTheme = true) {
-        SetAlarmScreen(0, {}, {}, true)
+//        SetAlarmScreen(0, {}, {})
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,14 +23,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.constants.DayOfWeek
+import com.daisy.jetclock.domain.Alarm
 
 
 @Composable
 fun AlarmCard(
-    onAlarmClick: (Int) -> Unit,
+    item: Alarm,
+    onAlarmClick: (Long) -> Unit,
 ) {
     val checkedState = remember {
-        mutableStateOf(true)
+        mutableStateOf(item.isEnabled)
+    }
+
+    val repeatDaysString by remember {
+
+//      TODO: move elsewhere
+        val value = item.repeatDays.let { repeat ->
+            when {
+                repeat.isEmpty() -> "Ring only once"
+
+                repeat.size == 7 -> "Everyday"
+
+                repeat.size == 5 && !repeat.containsAll(
+                    listOf(
+                        DayOfWeek.SATURDAY,
+                        DayOfWeek.SUNDAY
+                    )
+                ) -> "Monday to Friday"
+
+                else -> repeat.toString()
+            }
+        }
+
+        mutableStateOf(value)
     }
 
     Surface(
@@ -52,27 +79,30 @@ fun AlarmCard(
             Column {
                 Row {
                     Text(
-                        text = "6:30",
+                        text = "${item.hour}:${item.minute}",
                         style = MaterialTheme.typography.h5,
                         fontWeight = FontWeight.Medium
                     )
-                    Text(
-                        text = "AM",
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
+                    item.meridiem?.let { meridiem ->
+                        Text(
+                            text = meridiem.name,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                 }
 
                 Row(
                     modifier = Modifier.height(IntrinsicSize.Min)
                 ) {
                     Text(
-                        text = "Alarm",
+                        text = item.label,
                         style = MaterialTheme.typography.subtitle2,
                         color = MaterialTheme.colors.onBackground.copy(0.6f)
                     )
+
                     Text(
-                        text = "Mon Tue Wed",
+                        text = repeatDaysString,
                         style = MaterialTheme.typography.subtitle2,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colors.onBackground.copy(0.6f),
@@ -93,5 +123,5 @@ fun AlarmCard(
 @Preview(showBackground = true)
 @Composable
 fun AlarmCardPreview() {
-    AlarmCard({})
+//    AlarmCard({})
 }

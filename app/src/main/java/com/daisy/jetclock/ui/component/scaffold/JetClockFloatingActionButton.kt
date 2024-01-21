@@ -22,10 +22,12 @@ import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.ui.theme.JetClockTheme
 
 @Composable
-fun JetClockFloatingActionButton() {
+fun JetClockFloatingActionButton(
+    onClick: () -> Unit,
+) {
     if (MaterialTheme.colors.isLight) {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { onClick() },
             modifier = Modifier
                 .size(46.dp)
                 .drawColoredShadow(
@@ -52,7 +54,7 @@ fun JetClockFloatingActionButton() {
         }
     } else {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { onClick() },
             modifier = Modifier
                 .size(46.dp)
                 .drawColoredShadow(
@@ -181,6 +183,6 @@ fun AddIcon(
 @Composable
 fun JetClockFloatingActionButtonPreview() {
     JetClockTheme {
-        JetClockFloatingActionButton()
+        JetClockFloatingActionButton({})
     }
 }

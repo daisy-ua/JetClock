@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.constants.AlarmOptionsData
-import com.daisy.jetclock.models.RingDurationOption
+import com.daisy.jetclock.domain.RingDurationOption
 import com.daisy.jetclock.ui.component.components.CancelOKButtonsRow
 import com.daisy.jetclock.ui.component.components.TextRadioButtonRowItem
 import com.daisy.jetclock.ui.theme.JetClockTheme

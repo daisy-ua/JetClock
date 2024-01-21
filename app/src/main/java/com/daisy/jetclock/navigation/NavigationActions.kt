@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 
 
 class NavigationActions(navController: NavHostController) {
-    val navigateToSetAlarmScreen = { alarmId: Int, from: NavBackStackEntry ->
+    val navigateToSetAlarmScreen = { alarmId: Long, from: NavBackStackEntry ->
         if (from.lifecycleIsResumed()) {
             navController.navigate("${MainDestinations.ALARM_ROUTE.name}/$alarmId")
         }

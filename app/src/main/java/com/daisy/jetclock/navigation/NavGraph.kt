@@ -2,6 +2,7 @@ package com.daisy.jetclock.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,6 +17,8 @@ import com.daisy.jetclock.navigation.MainDestinations.SELECT_SOUND_ROUTE
 import com.daisy.jetclock.ui.screens.AlarmScreen
 import com.daisy.jetclock.ui.screens.SelectSoundScreen
 import com.daisy.jetclock.ui.screens.SetAlarmScreen
+import com.daisy.jetclock.viewmodels.AlarmViewModel
+import com.daisy.jetclock.viewmodels.NewAlarmViewModel
 
 
 @Composable
@@ -36,7 +39,7 @@ fun NavGraph(
             AlarmScreen(
                 onAlarmClick = { alarmId ->
                     actions.navigateToSetAlarmScreen(alarmId, backStackEntry)
-                }
+                },
             )
         }
 
@@ -53,7 +56,7 @@ fun NavGraph(
             popExitTransition = exitTransition
         ) { backStackEntry: NavBackStackEntry ->
             val arguments = requireNotNull(backStackEntry.arguments)
-            val currentAlarmId = arguments.getInt(ALARM_ID_KEY.name)
+            val currentAlarmId = arguments.getLong(ALARM_ID_KEY.name)
             SetAlarmScreen(
                 alarmId = currentAlarmId,
                 onSelectSoundClicked = { actions.navigateToSelectSoundScreen(backStackEntry) },
