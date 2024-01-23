@@ -3,7 +3,7 @@ package com.daisy.jetclock.localdata.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.daisy.jetclock.constants.DayOfWeek
+import com.daisy.jetclock.domain.DayOfWeek
 
 @Entity(tableName = "alarms")
 data class AlarmEntity(

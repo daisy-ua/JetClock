@@ -1,5 +1,6 @@
 package com.daisy.jetclock.ui.screens
 
+//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
@@ -7,14 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.constants.NewAlarmDefaults
-//import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.ui.component.alarm.AlarmList
 import com.daisy.jetclock.ui.component.alarm.NextAlarmCard
 import com.daisy.jetclock.ui.component.scaffold.JetClockFloatingActionButton
 import com.daisy.jetclock.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.ui.theme.JetClockTheme
 import com.daisy.jetclock.viewmodels.AlarmViewModel
-import com.daisy.jetclock.viewmodels.NewAlarmViewModel
 
 @Composable
 fun AlarmScreen(

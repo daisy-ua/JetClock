@@ -7,8 +7,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,18 +17,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.constants.AlarmOptionsData
+import com.daisy.jetclock.domain.SnoozeOption
 import com.daisy.jetclock.ui.component.components.CancelOKButtonsRow
 import com.daisy.jetclock.ui.component.components.LabeledSlider
 import com.daisy.jetclock.ui.theme.JetClockTheme
 
 @Composable
 fun SetSnoozeDurationDialog(
+    currentSnoozeOption: SnoozeOption,
     onDismissRequest: () -> Unit,
-    onSubmitRequest: () -> Unit,
+    onSubmitRequest: (SnoozeOption) -> Unit,
 ) {
-    var durationPosition by remember { mutableStateOf(15f) }
+    var durationPosition by rememberSaveable { mutableFloatStateOf(currentSnoozeOption.duration.toFloat()) }
 
-    var snoozeNumberIndex by remember { mutableStateOf(1f) }
+    var snoozeNumberIndex by remember {
+        mutableFloatStateOf(
+            AlarmOptionsData.snoozeNumber.indexOf(
+                currentSnoozeOption.number
+            ).toFloat()
+        )
+    }
 
     BottomFixedDialog(onDismissRequest = onDismissRequest) {
         Column(
@@ -91,7 +100,14 @@ fun SetSnoozeDurationDialog(
                     .fillMaxWidth()
                     .padding(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 4.dp),
                 onDismissRequest = onDismissRequest,
-                onSubmitRequest = onSubmitRequest,
+                onSubmitRequest = {
+                    onSubmitRequest(
+                        SnoozeOption(
+                            durationPosition.toInt(),
+                            AlarmOptionsData.snoozeNumber[snoozeNumberIndex.toInt()]
+                        )
+                    )
+                },
             )
         }
     }
@@ -101,6 +117,6 @@ fun SetSnoozeDurationDialog(
 @Composable
 fun SetSnoozeDurationDialogPreview() {
     JetClockTheme(darkTheme = false) {
-        SetSnoozeDurationDialog(onDismissRequest = {}, onSubmitRequest = {})
+//        SetSnoozeDurationDialog(onDismissRequest = {}, onSubmitRequest = {})
     }
 }

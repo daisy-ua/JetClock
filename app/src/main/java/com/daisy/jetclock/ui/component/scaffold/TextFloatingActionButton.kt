@@ -20,6 +20,7 @@ import com.daisy.jetclock.ui.theme.JetClockTheme
 
 @Composable
 fun TextFloatingActionButton(
+    onItemClick: () -> Unit,
     modifier: Modifier = Modifier,
     actionText: String = "Delete",
     backgroundColor: Color = MaterialTheme.colors.error,
@@ -36,7 +37,7 @@ fun TextFloatingActionButton(
             )
             .clip(MaterialTheme.shapes.medium)
             .background(backgroundColor)
-            .clickable { /*TODO*/ }
+            .clickable { onItemClick() }
             .padding(horizontal = 30.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -54,7 +55,7 @@ fun TextFloatingActionButton(
 fun SetAlarmScreenPreview() {
     JetClockTheme(darkTheme = false) {
         Box(modifier = Modifier.padding(16.dp)) {
-            TextFloatingActionButton()
+            TextFloatingActionButton({})
         }
     }
 }

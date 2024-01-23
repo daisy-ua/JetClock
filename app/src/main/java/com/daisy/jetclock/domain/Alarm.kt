@@ -1,6 +1,5 @@
 package com.daisy.jetclock.domain
 
-import com.daisy.jetclock.constants.DayOfWeek
 import com.daisy.jetclock.constants.MeridiemOption
 
 data class Alarm(
@@ -14,7 +13,7 @@ data class Alarm(
 
     val repeatDays: List<DayOfWeek>,
 
-    val isEnabled: Boolean,
+    var isEnabled: Boolean,
 
     val label: String,
 

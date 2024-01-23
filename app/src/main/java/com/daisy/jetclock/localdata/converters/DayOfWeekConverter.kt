@@ -1,7 +1,7 @@
 package com.daisy.jetclock.localdata.converters
 
 import androidx.room.TypeConverter
-import com.daisy.jetclock.constants.DayOfWeek
+import com.daisy.jetclock.domain.DayOfWeek
 
 
 class DayOfWeekConverter {

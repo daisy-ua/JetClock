@@ -11,6 +11,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.daisy.jetclock.constants.DayOfWeek
-import com.daisy.jetclock.domain.Alarm
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.ui.component.components.ListRowComponent
 import com.daisy.jetclock.ui.component.dialog.SetAlarmLabelDialog
 import com.daisy.jetclock.ui.component.dialog.SetRingDurationDialog
@@ -48,13 +49,13 @@ fun SetAlarmScreen(
     viewModel: NewAlarmViewModel = hiltViewModel<NewAlarmViewModel>(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
-    var selectedRepeatDays by remember {
-        mutableStateOf<List<DayOfWeek>>(emptyList())
+    LaunchedEffect(key1 = alarmId) {
+        viewModel.getAlarmById(alarmId)
     }
 
-    var sound by remember {
-        mutableStateOf("Default")
-    }
+    val label by viewModel.label.collectAsStateWithLifecycle()
+    val ringDuration by viewModel.ringDuration.collectAsStateWithLifecycle()
+    val snoozeDuration by viewModel.snoozeDuration.collectAsStateWithLifecycle()
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -63,53 +64,38 @@ fun SetAlarmScreen(
     when (showDialogType) {
         DialogType.ALARM_LABEL -> {
             SetAlarmLabelDialog(
+                value = label,
                 onDismissRequest = { showDialogType = DialogType.NONE },
-                onSubmitRequest = { showDialogType = DialogType.NONE }
+                onSubmitRequest = { labelValue ->
+                    viewModel.updateLabel(labelValue)
+                    showDialogType = DialogType.NONE
+                }
             )
         }
 
         DialogType.RING_DURATION -> {
             SetRingDurationDialog(
+                currentDurationOption = ringDuration,
                 onDismissRequest = { showDialogType = DialogType.NONE },
-                onSubmitRequest = { showDialogType = DialogType.NONE },
+                onSubmitRequest = { ringDurationOption ->
+                    viewModel.updateRingDuration(ringDurationOption)
+                    showDialogType = DialogType.NONE
+                },
             )
         }
 
         DialogType.SNOOZE_DURATION -> {
             SetSnoozeDurationDialog(
+                currentSnoozeOption = snoozeDuration,
                 onDismissRequest = { showDialogType = DialogType.NONE },
-                onSubmitRequest = { showDialogType = DialogType.NONE }
+                onSubmitRequest = { snoozeOption ->
+                    viewModel.updateSnoozeDuration(snoozeOption)
+                    showDialogType = DialogType.NONE
+                }
             )
         }
 
         DialogType.NONE -> {}
-    }
-
-    var isSaving by remember {
-        mutableStateOf(false)
-    }
-
-    val saveAlarm: () -> Unit = {
-        val alarm = Alarm(
-            id = alarmId,
-            hour = 1,
-            minute = 10,
-            meridiem = null,
-            repeatDays = emptyList(),
-            isEnabled = true,
-            label = "label",
-            ringDuration = 10,
-            snoozeDuration = 1,
-            snoozeNumber = 1,
-            sound = "sound"
-        )
-
-        if (!isSaving) {
-            isSaving = true
-            viewModel.insertAlarm(alarm)
-        }
-
-        onUpClick()
     }
 
     Scaffold(
@@ -117,10 +103,15 @@ fun SetAlarmScreen(
             JetClockFuncTopAppBar(
                 title = "Set alarm",
                 onClose = onUpClick,
-                onApply = saveAlarm
+                onApply = { viewModel.saveAlarm(onUpClick) }
             )
         },
-        floatingActionButton = { TextFloatingActionButton(Modifier.padding(bottom = 8.dp)) },
+        floatingActionButton = {
+            TextFloatingActionButton(
+                onItemClick = {},
+                Modifier.padding(bottom = 8.dp)
+            )
+        },
         floatingActionButtonPosition = FabPosition.Center,
     ) {
         Column(
@@ -132,27 +123,29 @@ fun SetAlarmScreen(
                 soundEnabled = false,
             )
 
-            RepeatSetting(darkThemeEnabled)
+            RepeatSetting(darkThemeEnabled, listOf(), { })
 
             LazyColumn {
                 item {
-                    SettingRow("Sound", "Default") { onSelectSoundClicked() }
+                    SettingRow("Sound", "Sound") {
+                        onSelectSoundClicked()
+                    }
                 }
 
                 item {
-                    SettingRow("Label", "Alarm") {
+                    SettingRow("Label", label) {
                         showDialogType = DialogType.ALARM_LABEL
                     }
                 }
 
                 item {
-                    SettingRow("Ring duration", "5 minutes") {
+                    SettingRow("Ring duration", ringDuration.displayString) {
                         showDialogType = DialogType.RING_DURATION
                     }
                 }
 
                 item {
-                    SettingRow("Snooze duration", "10 minutes, 3x") {
+                    SettingRow("Snooze duration", snoozeDuration.displayString) {
                         showDialogType = DialogType.SNOOZE_DURATION
                     }
                 }
@@ -182,7 +175,7 @@ fun SettingRow(option: String, value: String, onItemClick: () -> Unit) {
 }
 
 @Composable
-fun RepeatSetting(darkThemeEnabled: Boolean) {
+fun RepeatSetting(darkThemeEnabled: Boolean, value: List<DayOfWeek>, onItemClick: () -> Unit) {
     Text(
         text = "Repeat",
         modifier = Modifier.padding(start = 20.dp, top = 8.dp),

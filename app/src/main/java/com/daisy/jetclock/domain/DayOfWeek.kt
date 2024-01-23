@@ -1,4 +1,4 @@
-package com.daisy.jetclock.constants
+package com.daisy.jetclock.domain
 
 enum class DayOfWeek(val abbr: String) {
     SUNDAY("Sun"),

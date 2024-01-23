@@ -27,7 +27,8 @@ fun CancelOKButtonsRow(
                 .padding(end = 16.dp),
             actionText = "Cancel",
             backgroundColor = MaterialTheme.colors.onBackground.copy(.3f),
-            shadowColor = shadowColor
+            shadowColor = shadowColor,
+            onItemClick = onDismissRequest
         )
 
         TextFloatingActionButton(
@@ -36,7 +37,8 @@ fun CancelOKButtonsRow(
                 .padding(start = 16.dp),
             actionText = "OK",
             backgroundColor = MaterialTheme.colors.primary,
-            shadowColor = shadowColor
+            shadowColor = shadowColor,
+            onItemClick = onSubmitRequest
         )
     }
 }

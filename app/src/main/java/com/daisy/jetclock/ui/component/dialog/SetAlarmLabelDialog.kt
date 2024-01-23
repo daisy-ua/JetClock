@@ -34,9 +34,9 @@ import kotlinx.coroutines.android.awaitFrame
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SetAlarmLabelDialog(
+    value: String,
     onDismissRequest: () -> Unit,
-    onSubmitRequest: () -> Unit,
-    value: String = "Label",
+    onSubmitRequest: (String) -> Unit,
 ) {
     val windowInfo = LocalWindowInfo.current
     val focusRequester = remember { FocusRequester() }
@@ -99,7 +99,7 @@ fun SetAlarmLabelDialog(
                     .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 4.dp),
                 onDismissRequest = onDismissRequest,
-                onSubmitRequest = onSubmitRequest,
+                onSubmitRequest = { onSubmitRequest(textFieldValueState.text) },
             )
         }
     }
@@ -109,6 +109,6 @@ fun SetAlarmLabelDialog(
 @Composable
 fun SetAlarmLabelDialogPreview() {
     JetClockTheme(darkTheme = false) {
-        SetAlarmLabelDialog(onDismissRequest = {}, onSubmitRequest = {})
+//        SetAlarmLabelDialog(onDismissRequest = {}, onSubmitRequest = {})
     }
 }

@@ -11,11 +11,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.ui.component.animations.SwipeActions
 import com.daisy.jetclock.ui.component.animations.SwipeActionsConfig
@@ -27,10 +28,10 @@ import kotlin.math.absoluteValue
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlarmList(
-    viewModel: AlarmViewModel,
+    viewModel: AlarmViewModel = hiltViewModel(),
     onAlarmClick: (Long) -> Unit,
 ) {
-    val alarmList by viewModel.alarms.collectAsStateWithLifecycle()
+    val alarmList by viewModel.alarms.collectAsState()
 
     val animatedList by updateAnimatedItemsState(newList = alarmList.map { it })
 
@@ -50,7 +51,13 @@ fun AlarmList(
                         viewModel.deleteAlarm(item.id)
                     }
                 ),
-            ) { state -> AlarmColumnContent(item = item, state = state, onAlarmClick = onAlarmClick) }
+            ) { state ->
+                AlarmColumnContent(
+                    item = item,
+                    state = state,
+                    onAlarmClick = onAlarmClick
+                )
+            }
         }
     }
 }

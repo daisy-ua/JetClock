@@ -23,39 +23,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.daisy.jetclock.constants.DayOfWeek
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.viewmodels.AlarmViewModel
 
 
 @Composable
 fun AlarmCard(
     item: Alarm,
     onAlarmClick: (Long) -> Unit,
+    viewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val checkedState = remember {
         mutableStateOf(item.isEnabled)
     }
 
     val repeatDaysString by remember {
-
-//      TODO: move elsewhere
-        val value = item.repeatDays.let { repeat ->
-            when {
-                repeat.isEmpty() -> "Ring only once"
-
-                repeat.size == 7 -> "Everyday"
-
-                repeat.size == 5 && !repeat.containsAll(
-                    listOf(
-                        DayOfWeek.SATURDAY,
-                        DayOfWeek.SUNDAY
-                    )
-                ) -> "Monday to Friday"
-
-                else -> repeat.toString()
-            }
-        }
-
+        val value = viewModel.getRepeatDaysString(item.repeatDays)
         mutableStateOf(value)
     }
 
@@ -63,7 +47,7 @@ fun AlarmCard(
         color = MaterialTheme.colors.background,
         modifier = Modifier
             .clickable {
-                onAlarmClick(0)
+                onAlarmClick(item.id)
             }
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .fillMaxWidth()
@@ -114,7 +98,10 @@ fun AlarmCard(
 
             Switch(
                 checked = checkedState.value,
-                onCheckedChange = { checkedState.value = it }
+                onCheckedChange = {
+                    checkedState.value = it
+                    viewModel.changeCheckedState(item, it)
+                }
             )
         }
     }
