@@ -15,7 +15,7 @@ class DayOfWeekConverter {
     @TypeConverter
     fun fromList(value: List<DayOfWeek>?): String {
         return value?.takeIf { it.isNotEmpty() }
-            ?.joinToString(",") { it.toString() }
+            ?.joinToString(",") { it.abbr }
             ?: ""
     }
 }

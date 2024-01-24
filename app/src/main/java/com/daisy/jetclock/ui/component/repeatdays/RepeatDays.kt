@@ -1,7 +1,6 @@
 package com.daisy.jetclock.ui.component.repeatdays
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -17,9 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -30,24 +31,33 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.domain.DayOfWeek
+import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.ui.component.drawable.CirclePath
 import com.daisy.jetclock.ui.component.drawable.CirclePathDirection
 import com.daisy.jetclock.ui.theme.JetClockTheme
 
-val days = arrayOf("S", "M", "T", "W", "T", "F", "S")
+val days = DayOfWeek.values().toList()
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RepeatDays(
+    value: RepeatDays,
+    onItemClicked: (RepeatDays) -> Unit,
     modifier: Modifier = Modifier,
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
     val selectedDays = remember {
-        mutableStateListOf<Int>()
+        mutableStateListOf<DayOfWeek>()
     }
 
-    val onSelectDays = { isSelected: Boolean, index: Int ->
-        if (isSelected) selectedDays.remove(index) else selectedDays.add(index)
+    LaunchedEffect(key1 = value) {
+        selectedDays.clear()
+        selectedDays.addAll(value.days)
+    }
+
+    val onSelectDays = { isSelected: Boolean, day: DayOfWeek ->
+        if (isSelected) selectedDays.remove(day) else selectedDays.add(day)
+        onItemClicked(RepeatDays(selectedDays.toList()))
     }
 
     val (selectedFontColor, backgroundColor, backgroundBrush) =
@@ -80,8 +90,8 @@ fun RepeatDays(
             .then(modifier),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        items(days.size) { index ->
-            val isSelected = selectedDays.contains(index)
+        items(days) { day ->
+            val isSelected = selectedDays.contains(day)
 
             val fontColor by animateColorAsState(
                 targetValue = if (isSelected)
@@ -102,7 +112,7 @@ fun RepeatDays(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                         ) {
-                            onSelectDays(isSelected, index)
+                            onSelectDays(isSelected, day)
                         }
                         .background(
                             color = backgroundColor,
@@ -122,7 +132,7 @@ fun RepeatDays(
 
                     ) {
                         Text(
-                            text = days[index],
+                            text = day.abbr.first().toString(),
                             modifier = Modifier
                                 .size(40.dp)
                                 .wrapContentHeight(),
@@ -133,7 +143,7 @@ fun RepeatDays(
                     }
 
                     Text(
-                        text = days[index],
+                        text = day.abbr.first().toString(),
                         modifier = Modifier
                             .size(40.dp)
                             .wrapContentHeight(),
@@ -151,6 +161,6 @@ fun RepeatDays(
 @Composable
 fun RepeatDaysPreview() {
     JetClockTheme(darkTheme = false) {
-        RepeatDays(modifier = Modifier.padding(16.dp))
+//        RepeatDays(modifier = Modifier.padding(16.dp))
     }
 }

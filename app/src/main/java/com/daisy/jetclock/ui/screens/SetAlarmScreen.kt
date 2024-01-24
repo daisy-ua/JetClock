@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.daisy.jetclock.domain.DayOfWeek
+import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.ui.component.components.ListRowComponent
 import com.daisy.jetclock.ui.component.dialog.SetAlarmLabelDialog
 import com.daisy.jetclock.ui.component.dialog.SetRingDurationDialog
@@ -56,6 +56,7 @@ fun SetAlarmScreen(
     val label by viewModel.label.collectAsStateWithLifecycle()
     val ringDuration by viewModel.ringDuration.collectAsStateWithLifecycle()
     val snoozeDuration by viewModel.snoozeDuration.collectAsStateWithLifecycle()
+    val repeatDays by viewModel.repeatDays.collectAsStateWithLifecycle()
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -123,7 +124,9 @@ fun SetAlarmScreen(
                 soundEnabled = false,
             )
 
-            RepeatSetting(darkThemeEnabled, listOf(), { })
+            RepeatSetting(darkThemeEnabled, repeatDays) { updRepeatDays ->
+                viewModel.updateRepeatDays(updRepeatDays)
+            }
 
             LazyColumn {
                 item {
@@ -175,7 +178,7 @@ fun SettingRow(option: String, value: String, onItemClick: () -> Unit) {
 }
 
 @Composable
-fun RepeatSetting(darkThemeEnabled: Boolean, value: List<DayOfWeek>, onItemClick: () -> Unit) {
+fun RepeatSetting(darkThemeEnabled: Boolean, value: RepeatDays, onItemClick: (RepeatDays) -> Unit) {
     Text(
         text = "Repeat",
         modifier = Modifier.padding(start = 20.dp, top = 8.dp),
@@ -185,6 +188,8 @@ fun RepeatSetting(darkThemeEnabled: Boolean, value: List<DayOfWeek>, onItemClick
     )
 
     RepeatDays(
+        value = value,
+        onItemClicked = onItemClick,
         modifier = Modifier
             .padding(top = 8.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
         darkThemeEnabled = darkThemeEnabled

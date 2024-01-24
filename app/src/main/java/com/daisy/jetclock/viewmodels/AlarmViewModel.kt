@@ -2,8 +2,8 @@ package com.daisy.jetclock.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.repositories.AlarmRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,7 +39,7 @@ class AlarmViewModel @Inject constructor(
                 )
             ) -> "Monday to Friday"
 
-            else -> repeatDays.toString()
+            else -> repeatDays.joinToString { day -> day.abbr }
         }
     }
 }

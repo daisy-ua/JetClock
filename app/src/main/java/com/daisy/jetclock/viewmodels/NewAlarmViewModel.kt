@@ -1,10 +1,10 @@
 package com.daisy.jetclock.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.domain.RingDurationOption
 import com.daisy.jetclock.domain.SnoozeOption
 import com.daisy.jetclock.repositories.AlarmRepository
@@ -46,18 +46,25 @@ class NewAlarmViewModel @Inject constructor(
         _snoozeDuration.value = newSnoozeDurationOption
     }
 
+    private val _repeatDays: MutableStateFlow<RepeatDays> = MutableStateFlow(
+        RepeatDays(_alarm.value.repeatDays)
+    )
+    val repeatDays: StateFlow<RepeatDays> get() = _repeatDays
+
+    fun updateRepeatDays(newRepeatDays: RepeatDays) {
+        _repeatDays.value = newRepeatDays
+    }
+
     private var isSaving: Boolean = false
 
     init {
-        Log.d("daisy-ua", "set vm init")
-
         viewModelScope.launch {
-            Log.d("daisy-ua", "alarm changed")
             _alarm.collect { updatedAlarm ->
                 _label.value = updatedAlarm.label
                 _ringDuration.value = RingDurationOption(updatedAlarm.ringDuration)
                 _snoozeDuration.value =
                     SnoozeOption(updatedAlarm.snoozeDuration, updatedAlarm.snoozeNumber)
+                updateRepeatDays(RepeatDays(updatedAlarm.repeatDays))
             }
         }
     }
@@ -75,7 +82,7 @@ class NewAlarmViewModel @Inject constructor(
             hour = 1,
             minute = 10,
             meridiem = null,
-            repeatDays = emptyList(),
+            repeatDays = repeatDays.value.days,
             isEnabled = true,
             label = label.value,
             ringDuration = ringDuration.value.value,
@@ -88,7 +95,7 @@ class NewAlarmViewModel @Inject constructor(
             if (!isSaving) {
                 isSaving = true
                 repository.insertAlarm(updatedAlarm)
-                delay(50L)
+                delay(100L)
             }
             callback.invoke()
         }
