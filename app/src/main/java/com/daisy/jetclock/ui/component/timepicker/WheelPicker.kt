@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,7 @@ private const val ITEMS_SIZE = Int.MAX_VALUE
 fun WheelPicker(
     items: List<String>,
     initialIndex: Int,
+    onValueChange: (Int) -> Unit,
     alignment: Alignment,
     modifier: Modifier = Modifier,
     isInfinite: Boolean = true,
@@ -59,7 +61,9 @@ fun WheelPicker(
         isInfinite, items.size, initialIndex, visibleItemsCount
     )
 
-    val pickerLength = (itemHeight.value * visibleItemsCount).dp
+    val pickerLength by remember {
+        mutableStateOf((itemHeight.value * visibleItemsCount).dp)
+    }
 
     val listState = rememberLazyListState(targetIndex)
     val scope = rememberCoroutineScope()
@@ -74,18 +78,14 @@ fun WheelPicker(
         } else null
     }
 
-    val selectedItem = remember {
-        mutableStateOf(initialIndex)
-    }
-
-    var previousIndex by remember { mutableStateOf(0) }
+    var previousIndex by remember { mutableIntStateOf(0) }
 
     val scrollableState = rememberScrollableState { delta ->
         scope.launch {
-            listState.scrollBy(-delta * 0.8f)
+            listState.scrollBy(-delta * 0.4f)
+            val currentIndex = (listState.firstVisibleItemIndex + 1)
 
             soundPoolManager?.let { manager ->
-                val currentIndex = (listState.firstVisibleItemIndex + 1)
                 if (currentIndex != previousIndex) {
                     previousIndex = currentIndex
                     manager.playSound(rate = 5f)
@@ -95,8 +95,22 @@ fun WheelPicker(
         delta
     }
 
+    LaunchedEffect(scrollableState.isScrollInProgress) {
+        if (!scrollableState.isScrollInProgress) {
+            val currentIndex =
+                (listState.firstVisibleItemIndex + visibleItemsCount / 2) % items.size
+            onValueChange(currentIndex)
+        }
+    }
+
     LaunchedEffect(!scrollableState.isScrollInProgress) {
         listState.animateScrollToItem(index = listState.firstVisibleItemIndex)
+    }
+
+    LaunchedEffect(targetIndex) {
+        if (listState.firstVisibleItemIndex != targetIndex) {
+            listState.scrollToItem(index = targetIndex)
+        }
     }
 
     DisposableEffect(key1 = Unit) {
@@ -206,7 +220,7 @@ private fun calculateInfiniteTargetValues(
     val listMidIndex = ITEMS_SIZE / 2 - 1
     val itemsMidIndex = listMidIndex % itemsSize
     val targetIndex = if (initialIndex < itemsMidIndex) {
-        listMidIndex - itemsMidIndex - initialIndex
+        listMidIndex - itemsMidIndex + initialIndex
     } else {
         listMidIndex + initialIndex - itemsMidIndex
     }.let {

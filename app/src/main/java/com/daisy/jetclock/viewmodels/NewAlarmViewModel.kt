@@ -2,11 +2,13 @@ package com.daisy.jetclock.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.domain.RingDurationOption
 import com.daisy.jetclock.domain.SnoozeOption
+import com.daisy.jetclock.domain.TimeOfDay
 import com.daisy.jetclock.repositories.AlarmRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -55,16 +57,34 @@ class NewAlarmViewModel @Inject constructor(
         _repeatDays.value = newRepeatDays
     }
 
+    private val _time: MutableStateFlow<TimeOfDay> = MutableStateFlow(
+        _alarm.value.let {
+            TimeOfDay(it.hour, it.minute, it.meridiem)
+        }
+    )
+    val time: StateFlow<TimeOfDay> get() = _time
+
+    fun updateTime(hour: Int, minute: Int, meridiem: MeridiemOption?) {
+        viewModelScope.launch {
+            _time.value = TimeOfDay(hour, minute, meridiem)
+        }
+    }
+
     private var isSaving: Boolean = false
 
     init {
         viewModelScope.launch {
             _alarm.collect { updatedAlarm ->
-                _label.value = updatedAlarm.label
-                _ringDuration.value = RingDurationOption(updatedAlarm.ringDuration)
-                _snoozeDuration.value =
-                    SnoozeOption(updatedAlarm.snoozeDuration, updatedAlarm.snoozeNumber)
+                updateLabel(updatedAlarm.label)
+                updateRingDuration(RingDurationOption(updatedAlarm.ringDuration))
+                updateSnoozeDuration(
+                    SnoozeOption(
+                        updatedAlarm.snoozeDuration,
+                        updatedAlarm.snoozeNumber
+                    )
+                )
                 updateRepeatDays(RepeatDays(updatedAlarm.repeatDays))
+                updateTime(updatedAlarm.hour, updatedAlarm.minute, updatedAlarm.meridiem)
             }
         }
     }
@@ -77,24 +97,12 @@ class NewAlarmViewModel @Inject constructor(
     }
 
     fun saveAlarm(callback: () -> Unit) {
-        val updatedAlarm = Alarm(
-            id = _alarm.value.id,
-            hour = 1,
-            minute = 10,
-            meridiem = null,
-            repeatDays = repeatDays.value.days,
-            isEnabled = true,
-            label = label.value,
-            ringDuration = ringDuration.value.value,
-            snoozeDuration = snoozeDuration.value.duration,
-            snoozeNumber = snoozeDuration.value.number,
-            sound = "soundFile.value"
-        )
-
         viewModelScope.launch {
+            val updatedAlarm = getUpdatedAlarm()
             if (!isSaving) {
                 isSaving = true
                 repository.insertAlarm(updatedAlarm)
+                isSaving = false
                 delay(100L)
             }
             callback.invoke()
@@ -104,4 +112,18 @@ class NewAlarmViewModel @Inject constructor(
     fun deleteAlarm(id: Long) = viewModelScope.launch {
         repository.deleteAlarm(id)
     }
+
+    private fun getUpdatedAlarm(): Alarm = Alarm(
+        id = _alarm.value.id,
+        hour = time.value.hour,
+        minute = time.value.minute,
+        meridiem = time.value.meridiem,
+        repeatDays = repeatDays.value.days,
+        isEnabled = true,
+        label = label.value,
+        ringDuration = ringDuration.value.value,
+        snoozeDuration = snoozeDuration.value.duration,
+        snoozeNumber = snoozeDuration.value.number,
+        sound = "soundFile.value"
+    )
 }

@@ -4,21 +4,20 @@ import com.daisy.jetclock.constants.TimeFormat
 
 
 class TimeFormatter(
-    private val timeFormat: TimeFormat = TimeFormat.Hour12Format,
+    timeFormat: TimeFormat = TimeFormat.Hour12Format,
 ) {
+    val hoursRange: List<Int> = when (timeFormat) {
+        TimeFormat.Hour12Format -> (1..12).toList()
 
-    var hours: List<String> = calculateHours()
-        private set
-
-    private fun calculateHours(): List<String> {
-        return when (timeFormat) {
-            TimeFormat.Hour12Format -> convertTwoCharTime(1..12)
-
-            TimeFormat.Hour24Format -> convertTwoCharTime(0..23)
-        }
+        TimeFormat.Hour24Format -> (0..23).toList()
     }
 
-    val minutes: List<String> = convertTwoCharTime(0 until 60)
+    val minutesRange: List<Int> = (0 until 60).toList()
+
+    var hours: List<String> = convertTwoCharTime(hoursRange)
+        private set
+
+    val minutes: List<String> = convertTwoCharTime(minutesRange)
 
     private fun convertTwoCharTime(value: Int): String {
         return value.toString().apply {
@@ -28,7 +27,7 @@ class TimeFormatter(
         }
     }
 
-    private fun convertTwoCharTime(range: IntRange): List<String> {
+    private fun convertTwoCharTime(range: List<Int>): List<String> {
         return range.map {
             convertTwoCharTime(it)
         }

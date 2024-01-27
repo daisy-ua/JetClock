@@ -57,6 +57,7 @@ fun SetAlarmScreen(
     val ringDuration by viewModel.ringDuration.collectAsStateWithLifecycle()
     val snoozeDuration by viewModel.snoozeDuration.collectAsStateWithLifecycle()
     val repeatDays by viewModel.repeatDays.collectAsStateWithLifecycle()
+    val time by viewModel.time.collectAsStateWithLifecycle()
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -120,8 +121,16 @@ fun SetAlarmScreen(
                 .fillMaxSize()
         ) {
             TimePicker(
+                initialTimeValue = time,
+                onValueChange = { hour, minute, meridiem ->
+                    viewModel.updateTime(
+                        hour,
+                        minute,
+                        meridiem
+                    )
+                },
                 modifier = Modifier.padding(top = 4.dp, bottom = 26.dp, start = 16.dp, end = 16.dp),
-                soundEnabled = false,
+                soundEnabled = true,
             )
 
             RepeatSetting(darkThemeEnabled, repeatDays) { updRepeatDays ->
