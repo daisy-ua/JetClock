@@ -1,5 +1,6 @@
 package com.daisy.jetclock.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.ui.component.components.ListRowComponent
 import com.daisy.jetclock.ui.component.dialog.SetAlarmLabelDialog
@@ -109,10 +111,14 @@ fun SetAlarmScreen(
             )
         },
         floatingActionButton = {
-            TextFloatingActionButton(
-                onItemClick = {},
-                Modifier.padding(bottom = 8.dp)
-            )
+            if (alarmId != NewAlarmDefaults.NEW_ALARM_ID) {
+                TextFloatingActionButton(
+                    onItemClick = {
+                        viewModel.deleteAlarm(alarmId, onUpClick)
+                    },
+                    Modifier.padding(bottom = 8.dp)
+                )
+            }
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) {

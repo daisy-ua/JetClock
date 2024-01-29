@@ -92,25 +92,25 @@ class NewAlarmViewModel @Inject constructor(
     fun getAlarmById(id: Long) = viewModelScope.launch {
         if (id == NewAlarmDefaults.NEW_ALARM_ID) return@launch
         repository.getAlarmById(id).collect {
-            _alarm.value = it
+            it?.let { _alarm.value = it }
         }
     }
 
-    fun saveAlarm(callback: () -> Unit) {
-        viewModelScope.launch {
-            val updatedAlarm = getUpdatedAlarm()
-            if (!isSaving) {
-                isSaving = true
-                repository.insertAlarm(updatedAlarm)
-                isSaving = false
-                delay(100L)
-            }
-            callback.invoke()
+    fun saveAlarm(callback: () -> Unit) = viewModelScope.launch {
+        val updatedAlarm = getUpdatedAlarm()
+        if (!isSaving) {
+            isSaving = true
+            repository.insertAlarm(updatedAlarm)
+            isSaving = false
+            delay(100L)
         }
+        callback.invoke()
     }
 
-    fun deleteAlarm(id: Long) = viewModelScope.launch {
+    fun deleteAlarm(id: Long, callback: () -> Unit) = viewModelScope.launch {
         repository.deleteAlarm(id)
+        delay(100L)
+        callback.invoke()
     }
 
     private fun getUpdatedAlarm(): Alarm = Alarm(

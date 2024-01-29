@@ -19,8 +19,8 @@ class AlarmRepositoryImpl @Inject constructor(
         return alarmDao.getAllAlarms().map { alarms -> alarms.map { it.convertToDomain() } }
     }
 
-    override fun getAlarmById(id: Long): Flow<Alarm> {
-        return alarmDao.getAlarm(id).map { it.convertToDomain() }
+    override fun getAlarmById(id: Long): Flow<Alarm?> {
+        return alarmDao.getAlarm(id).map { it?.convertToDomain() }
     }
 
     override suspend fun insertAlarm(alarm: Alarm) {

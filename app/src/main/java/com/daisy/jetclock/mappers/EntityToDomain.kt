@@ -2,8 +2,8 @@ package com.daisy.jetclock.mappers
 
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
-import com.daisy.jetclock.localdata.entities.AlarmEntity
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.localdata.entities.AlarmEntity
 
 fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format): Alarm {
     var amPm: MeridiemOption? = null
