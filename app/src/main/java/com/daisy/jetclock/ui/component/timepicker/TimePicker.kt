@@ -31,6 +31,8 @@ import com.daisy.jetclock.constants.TimeFormat
 import com.daisy.jetclock.domain.TimeOfDay
 import com.daisy.jetclock.ui.theme.JetClockTheme
 
+private val meridiemOptions = listOf("", "", MeridiemOption.AM.name, MeridiemOption.PM.name, "", "")
+
 /**
  * Note: if a value is quickly selected and the save action is triggered immediately,
  * the updated value may not be emitted in time for the save operation
@@ -46,10 +48,6 @@ fun TimePicker(
 ) {
     val timeFormatter by remember {
         mutableStateOf(TimeFormatter(timeFormat))
-    }
-
-    val meridiemOptions = remember {
-        listOf("", "", MeridiemOption.AM.name, MeridiemOption.PM.name, "", "")
     }
 
     var hourValue by remember { mutableIntStateOf(0) }

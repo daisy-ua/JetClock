@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -57,6 +56,18 @@ fun WheelPicker(
     visibleItemsCount: Int = 5,
     soundEnabled: Boolean = true,
 ) {
+    var isInitialized by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableIntStateOf(initialIndex) }
+
+    fun onUserSelect(index: Int) {
+        if (isInitialized) {
+            onValueChange(index)
+        } else {
+            isInitialized = true
+        }
+        selectedIndex = index
+    }
+
     val (itemsSize, targetIndex) = calculateTargetValues(
         isInfinite, items.size, initialIndex, visibleItemsCount
     )
@@ -99,7 +110,7 @@ fun WheelPicker(
         if (!scrollableState.isScrollInProgress) {
             val currentIndex =
                 (listState.firstVisibleItemIndex + visibleItemsCount / 2) % items.size
-            onValueChange(currentIndex)
+            onUserSelect(currentIndex)
         }
     }
 
@@ -110,12 +121,6 @@ fun WheelPicker(
     LaunchedEffect(targetIndex) {
         if (listState.firstVisibleItemIndex != targetIndex) {
             listState.scrollToItem(index = targetIndex)
-        }
-    }
-
-    DisposableEffect(key1 = Unit) {
-        onDispose {
-            soundPoolManager?.release()
         }
     }
 

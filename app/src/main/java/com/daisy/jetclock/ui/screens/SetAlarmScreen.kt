@@ -1,6 +1,5 @@
 package com.daisy.jetclock.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -129,7 +128,7 @@ fun SetAlarmScreen(
             TimePicker(
                 initialTimeValue = time,
                 onValueChange = { hour, minute, meridiem ->
-                    viewModel.updateTime(
+                    viewModel.updateSelectedTime(
                         hour,
                         minute,
                         meridiem

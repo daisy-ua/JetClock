@@ -15,13 +15,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
 class NewAlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
 ) : ViewModel() {
-    private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(NewAlarmDefaults.NEW_ALARM)
+    private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(NewAlarmDefaults.getNewAlarm())
 
     private val _label: MutableStateFlow<String> = MutableStateFlow(_alarm.value.label)
     val label: StateFlow<String> get() = _label
@@ -64,13 +65,21 @@ class NewAlarmViewModel @Inject constructor(
     )
     val time: StateFlow<TimeOfDay> get() = _time
 
-    fun updateTime(hour: Int, minute: Int, meridiem: MeridiemOption?) {
+    private fun updateTime(hour: Int, minute: Int, meridiem: MeridiemOption?) {
         viewModelScope.launch {
             _time.value = TimeOfDay(hour, minute, meridiem)
         }
     }
 
-    private var isSaving: Boolean = false
+    private var selectedTime = _alarm.value.let { alarm ->
+        TimeOfDay(alarm.hour, alarm.minute, alarm.meridiem)
+    }
+
+    fun updateSelectedTime(hour: Int, minute: Int, meridiem: MeridiemOption?) {
+        selectedTime = TimeOfDay(hour, minute, meridiem)
+    }
+
+    private var isSaving: AtomicBoolean = AtomicBoolean(false)
 
     init {
         viewModelScope.launch {
@@ -85,6 +94,7 @@ class NewAlarmViewModel @Inject constructor(
                 )
                 updateRepeatDays(RepeatDays(updatedAlarm.repeatDays))
                 updateTime(updatedAlarm.hour, updatedAlarm.minute, updatedAlarm.meridiem)
+                updateSelectedTime(updatedAlarm.hour, updatedAlarm.minute, updatedAlarm.meridiem)
             }
         }
     }
@@ -98,13 +108,15 @@ class NewAlarmViewModel @Inject constructor(
 
     fun saveAlarm(callback: () -> Unit) = viewModelScope.launch {
         val updatedAlarm = getUpdatedAlarm()
-        if (!isSaving) {
-            isSaving = true
-            repository.insertAlarm(updatedAlarm)
-            isSaving = false
-            delay(100L)
+        if (isSaving.compareAndSet(false, true)) {
+            try {
+                repository.insertAlarm(updatedAlarm)
+                delay(100L)
+            } finally {
+                isSaving.set(false)
+                callback.invoke()
+            }
         }
-        callback.invoke()
     }
 
     fun deleteAlarm(id: Long, callback: () -> Unit) = viewModelScope.launch {
@@ -115,9 +127,9 @@ class NewAlarmViewModel @Inject constructor(
 
     private fun getUpdatedAlarm(): Alarm = Alarm(
         id = _alarm.value.id,
-        hour = time.value.hour,
-        minute = time.value.minute,
-        meridiem = time.value.meridiem,
+        hour = selectedTime.hour,
+        minute = selectedTime.minute,
+        meridiem = selectedTime.meridiem,
         repeatDays = repeatDays.value.days,
         isEnabled = true,
         label = label.value,

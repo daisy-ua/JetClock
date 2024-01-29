@@ -9,7 +9,7 @@ object NewAlarmDefaults {
     const val NEW_ALARM_ID: Long = 0
     const val DEFAULT_SOUND_ID: String = "Oversimplified.mp3"
 
-    val NEW_ALARM: Alarm = getLocalTime().let { time ->
+    fun getNewAlarm() : Alarm = getLocalTime().let { time ->
         Alarm(
             id = NEW_ALARM_ID,
             hour = time.hour,
