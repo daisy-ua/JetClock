@@ -79,6 +79,22 @@ class NewAlarmViewModel @Inject constructor(
         selectedTime = TimeOfDay(hour, minute, meridiem)
     }
 
+    fun syncTime() {
+        _time.value = selectedTime
+    }
+
+    private val _soundFileName: MutableStateFlow<String?> = MutableStateFlow(_alarm.value.sound)
+
+    fun updateSoundFile(newSound: String?) {
+        _soundFileName.value = newSound
+    }
+
+    private var updateSoundViewModelCallback: ((String?) -> Unit)? = null
+
+    fun setUpdateSoundViewModelCallback(callback: (String?) -> Unit) {
+        updateSoundViewModelCallback = callback
+    }
+
     private var isSaving: AtomicBoolean = AtomicBoolean(false)
 
     init {
@@ -95,6 +111,8 @@ class NewAlarmViewModel @Inject constructor(
                 updateRepeatDays(RepeatDays(updatedAlarm.repeatDays))
                 updateTime(updatedAlarm.hour, updatedAlarm.minute, updatedAlarm.meridiem)
                 updateSelectedTime(updatedAlarm.hour, updatedAlarm.minute, updatedAlarm.meridiem)
+                updateSoundFile(updatedAlarm.sound)
+                updateSoundViewModelCallback?.invoke(updatedAlarm.sound)
             }
         }
     }
@@ -136,6 +154,6 @@ class NewAlarmViewModel @Inject constructor(
         ringDuration = ringDuration.value.value,
         snoozeDuration = snoozeDuration.value.duration,
         snoozeNumber = snoozeDuration.value.number,
-        sound = "soundFile.value"
+        sound = _soundFileName.value
     )
 }

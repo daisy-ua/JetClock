@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.RepeatDays
@@ -33,7 +34,9 @@ import com.daisy.jetclock.ui.component.scaffold.JetClockFuncTopAppBar
 import com.daisy.jetclock.ui.component.scaffold.TextFloatingActionButton
 import com.daisy.jetclock.ui.component.timepicker.TimePicker
 import com.daisy.jetclock.ui.theme.JetClockTheme
+import com.daisy.jetclock.utils.rememberLifecycleEvent
 import com.daisy.jetclock.viewmodels.NewAlarmViewModel
+import com.daisy.jetclock.viewmodels.SelectedSoundViewModel
 
 private enum class DialogType {
     NONE,
@@ -48,10 +51,15 @@ fun SetAlarmScreen(
     onUpClick: () -> Unit,
     onSelectSoundClicked: () -> Unit,
     viewModel: NewAlarmViewModel = hiltViewModel<NewAlarmViewModel>(),
+    soundViewModel: SelectedSoundViewModel = hiltViewModel<SelectedSoundViewModel>(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
-    LaunchedEffect(key1 = alarmId) {
+    LaunchedEffect(alarmId) {
         viewModel.getAlarmById(alarmId)
+
+        viewModel.setUpdateSoundViewModelCallback { soundFile ->
+            soundViewModel.updateSelectedSound(soundFile)
+        }
     }
 
     val label by viewModel.label.collectAsStateWithLifecycle()
@@ -59,6 +67,19 @@ fun SetAlarmScreen(
     val snoozeDuration by viewModel.snoozeDuration.collectAsStateWithLifecycle()
     val repeatDays by viewModel.repeatDays.collectAsStateWithLifecycle()
     val time by viewModel.time.collectAsStateWithLifecycle()
+    val sound by soundViewModel.selectedSound.collectAsStateWithLifecycle()
+
+    LaunchedEffect(sound) {
+        viewModel.updateSoundFile(sound.soundFile)
+    }
+
+    val lifecycleEvent = rememberLifecycleEvent()
+
+    LaunchedEffect(lifecycleEvent) {
+        if (lifecycleEvent == Lifecycle.Event.ON_STOP) {
+            viewModel.syncTime()
+        }
+    }
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -104,7 +125,8 @@ fun SetAlarmScreen(
     Scaffold(
         topBar = {
             JetClockFuncTopAppBar(
-                title = "Set alarm",
+                title = if (alarmId == NewAlarmDefaults.NEW_ALARM_ID)
+                    "Set alarm" else "Edit alarm",
                 onClose = onUpClick,
                 onApply = { viewModel.saveAlarm(onUpClick) }
             )
@@ -144,7 +166,7 @@ fun SetAlarmScreen(
 
             LazyColumn {
                 item {
-                    SettingRow("Sound", "Sound") {
+                    SettingRow("Sound", sound.displayName) {
                         onSelectSoundClicked()
                     }
                 }

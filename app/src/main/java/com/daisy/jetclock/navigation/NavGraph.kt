@@ -2,6 +2,9 @@ package com.daisy.jetclock.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,6 +27,7 @@ fun NavGraph(
     startDestination: String = ALARMS_ROUTE.name,
 ) {
     val actions = remember(navController) { NavigationActions(navController) }
+    var viewModelStoreOwner: ViewModelStoreOwner? = null
 
     NavHost(
         navController = navController,
@@ -54,10 +58,14 @@ fun NavGraph(
         ) { backStackEntry: NavBackStackEntry ->
             val arguments = requireNotNull(backStackEntry.arguments)
             val currentAlarmId = arguments.getLong(ALARM_ID_KEY.name)
+            viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+                "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
+            }
             SetAlarmScreen(
                 alarmId = currentAlarmId,
                 onSelectSoundClicked = { actions.navigateToSelectSoundScreen(backStackEntry) },
-                onUpClick = { actions.navigateUp(backStackEntry) }
+                onUpClick = { actions.navigateUp(backStackEntry) },
+                soundViewModel = hiltViewModel(viewModelStoreOwner!!)
             )
         }
 
@@ -67,7 +75,8 @@ fun NavGraph(
             exitTransition = exitTransition
         ) { backStackEntry: NavBackStackEntry ->
             SelectSoundScreen(
-                onUpClick = { actions.navigateUp(backStackEntry) }
+                onUpClick = { actions.navigateUp(backStackEntry) },
+                viewModel = hiltViewModel(viewModelStoreOwner!!),
             )
         }
     }

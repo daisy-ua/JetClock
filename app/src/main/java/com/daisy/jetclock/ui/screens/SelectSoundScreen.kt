@@ -6,88 +6,103 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import com.daisy.jetclock.constants.ConfigConstants
+import com.daisy.jetclock.domain.SoundOption
 import com.daisy.jetclock.ui.component.components.TextRadioButtonRowItem
 import com.daisy.jetclock.ui.component.scaffold.JetClockFuncTopAppBar
 import com.daisy.jetclock.ui.theme.JetClockTheme
-import com.daisy.jetclock.utils.SoundPoolManager
 import com.daisy.jetclock.utils.rememberLifecycleEvent
+import com.daisy.jetclock.viewmodels.SelectedSoundViewModel
+import com.daisy.jetclock.viewmodels.SoundPoolViewModel
 
 @Composable
 fun SelectSoundScreen(
     onUpClick: () -> Unit,
+    viewModel: SelectedSoundViewModel = hiltViewModel<SelectedSoundViewModel>(),
+    soundViewModel: SoundPoolViewModel = hiltViewModel<SoundPoolViewModel>(),
 ) {
     val context = LocalContext.current
 
     val sounds = rememberSaveable {
-        context.assets.list("sounds")
-            ?.map { it.split(".")[0] }?.toList() ?: listOf()
+        context.assets.list(ConfigConstants.SOUND_ASSETS_DIR)?.toList() ?: listOf()
     }
 
-    val soundSelected = rememberSaveable { mutableStateOf<String?>(null) }
+    val soundNames = rememberSaveable {
+        sounds.map { SoundOption.getSoundName(it)!! }
+    }
 
-    val soundPoolManager = remember { SoundPoolManager() }
+    var soundSelectedIndex by rememberSaveable {
+        mutableIntStateOf(sounds.indexOf(viewModel.selectedSound.value.soundFile))
+    }
 
     val lifecycleEvent = rememberLifecycleEvent()
 
     LaunchedEffect(lifecycleEvent) {
         if (lifecycleEvent == Lifecycle.Event.ON_PAUSE) {
-            soundPoolManager.stopSound()
+            soundViewModel.stopSound()
         }
     }
 
-    DisposableEffect(key1 = Unit) {
-        onDispose {
-            soundPoolManager.release()
-        }
+    fun onApplySound() {
+        val soundFile = if (soundSelectedIndex == -1) null
+        else sounds[soundSelectedIndex]
+
+        viewModel.updateSelectedSound(soundFile)
+        onUpClick()
+    }
+
+    fun onPlaySound(index: Int, sound: String) {
+        soundSelectedIndex = index
+        soundViewModel.playSound(context, sound)
     }
 
     Scaffold(
-        topBar = { JetClockFuncTopAppBar(title = "Select sound", onClose = onUpClick) },
+        topBar = {
+            JetClockFuncTopAppBar(
+                title = "Select sound",
+                onClose = onUpClick,
+                onApply = ::onApplySound
+            )
+        },
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
             item {
                 TextRadioButtonRowItem(
-                    name = "None",
-                    isSelected = soundSelected.value?.equals("None") ?: true,
+                    name = SoundOption.NONE,
+                    isSelected = soundSelectedIndex == -1,
                     onItemClick = {
-                        soundSelected.value = null
-                        soundPoolManager.stopSound()
+                        soundSelectedIndex = -1
+                        soundViewModel.stopSound()
                     }
                 )
             }
 
             item { TitleItem() }
 
-            items(sounds) { sound ->
+            itemsIndexed(soundNames) { index, sound ->
                 TextRadioButtonRowItem(
                     name = sound,
-                    isSelected = soundSelected.value?.equals(sound) ?: false,
-                    onItemClick = {
-                        soundSelected.value = sound
-
-                        val soundAsset = context.assets.openFd("sounds/$sound.mp3")
-                        soundPoolManager.let { manager ->
-                            manager.changeSound(soundAsset)
-                        }
-                    }
+                    isSelected = soundSelectedIndex == index,
+                    onItemClick = { onPlaySound(index, sound) }
                 )
             }
         }
@@ -117,6 +132,6 @@ fun TitleItem() {
 @Composable
 fun SelectSoundScreenPreview() {
     JetClockTheme(darkTheme = false) {
-        SelectSoundScreen({})
+//        SelectSoundScreen({})
     }
 }
