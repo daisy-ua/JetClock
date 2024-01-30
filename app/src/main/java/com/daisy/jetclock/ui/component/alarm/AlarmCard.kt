@@ -63,7 +63,7 @@ fun AlarmCard(
             Column {
                 Row {
                     Text(
-                        text = "${item.hour}:${item.minute}",
+                        text = viewModel.getTimeString(item.hour, item.minute),
                         style = MaterialTheme.typography.h5,
                         fontWeight = FontWeight.Medium
                     )

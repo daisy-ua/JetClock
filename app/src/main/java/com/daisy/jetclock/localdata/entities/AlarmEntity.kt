@@ -4,15 +4,14 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.daisy.jetclock.domain.DayOfWeek
+import java.time.LocalTime
 
 @Entity(tableName = "alarms")
 data class AlarmEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
 
-    val hour24: Int,
-
-    val minute: Int,
+    val time: LocalTime,
 
     @ColumnInfo(name = "repeat_days")
     val repeatDays: List<DayOfWeek>,

@@ -6,6 +6,8 @@ import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.localdata.entities.AlarmEntity
 
 fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format): Alarm {
+    val hour24 = time.hour
+
     var amPm: MeridiemOption? = null
     val hour = if (timeFormat == TimeFormat.Hour12Format) {
         amPm = if (hour24 >= 12) MeridiemOption.PM else MeridiemOption.AM
@@ -17,7 +19,7 @@ fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format
     return Alarm(
         id = id,
         hour = hour,
-        minute = minute,
+        minute = time.minute,
         meridiem = amPm,
         repeatDays = repeatDays,
         isEnabled = isEnabled,

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.repositories.AlarmRepository
+import com.daisy.jetclock.ui.component.timepicker.TimeFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -24,6 +25,10 @@ class AlarmViewModel @Inject constructor(
 
     fun deleteAlarm(id: Long) = viewModelScope.launch {
         repository.deleteAlarm(id)
+    }
+
+    fun getTimeString(hour: Int, minute: Int): String {
+        return "$hour:${TimeFormatter.convertTwoCharTime(minute)}"
     }
 
     fun getRepeatDaysString(repeatDays: List<DayOfWeek>): String {

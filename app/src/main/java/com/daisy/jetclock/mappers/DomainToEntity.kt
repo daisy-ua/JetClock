@@ -1,8 +1,9 @@
 package com.daisy.jetclock.mappers
 
 import com.daisy.jetclock.constants.MeridiemOption
-import com.daisy.jetclock.localdata.entities.AlarmEntity
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.localdata.entities.AlarmEntity
+import java.time.LocalTime
 
 fun Alarm.convertToEntity(): AlarmEntity {
     val hour24 = when {
@@ -13,8 +14,7 @@ fun Alarm.convertToEntity(): AlarmEntity {
 
     return AlarmEntity(
         id = id,
-        hour24 = hour24,
-        minute = minute,
+        time = LocalTime.of(hour24, minute),
         repeatDays = repeatDays,
         isEnabled = isEnabled,
         label = label,

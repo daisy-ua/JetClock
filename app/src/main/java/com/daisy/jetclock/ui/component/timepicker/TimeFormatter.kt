@@ -19,17 +19,19 @@ class TimeFormatter(
 
     val minutes: List<String> = convertTwoCharTime(minutesRange)
 
-    private fun convertTwoCharTime(value: Int): String {
-        return value.toString().apply {
-            if (length == 1) {
-                return "0$this"
-            }
-        }
-    }
-
     private fun convertTwoCharTime(range: List<Int>): List<String> {
         return range.map {
             convertTwoCharTime(it)
+        }
+    }
+
+    companion object {
+        fun convertTwoCharTime(value: Int): String {
+            return value.toString().apply {
+                if (length == 1) {
+                    return "0$this"
+                }
+            }
         }
     }
 }
