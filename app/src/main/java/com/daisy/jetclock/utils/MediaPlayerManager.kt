@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 class MediaPlayerManager @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : MediaPlayer.OnPreparedListener {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
 
@@ -35,7 +35,8 @@ class MediaPlayerManager @Inject constructor(
                     with(soundAfd) {
                         setDataSource(fileDescriptor, startOffset, length)
                     }
-                    prepare()
+                    setOnPreparedListener(this@MediaPlayerManager)
+                    prepareAsync()
                 }
             }
         } catch (e: IOException) {
@@ -43,22 +44,27 @@ class MediaPlayerManager @Inject constructor(
         }
 
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibratorManager =
+                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
         } else {
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
     }
 
-    fun start() {
-        val effect = VibrationEffect.createWaveform(
-            longArrayOf(0, 100, 200, 300, 400),
-            intArrayOf(0, 100, 255, 100, 0),
-            0
-        )
-        vibrator?.vibrate(effect)
+    override fun onPrepared(mp: MediaPlayer?) {
+        mp?.start()
+    }
 
-        mediaPlayer?.start()
+    fun start() {
+        vibrator?.let {
+            val effect = VibrationEffect.createWaveform(
+                longArrayOf(0, 100, 200, 300, 400),
+                intArrayOf(0, 100, 255, 100, 0),
+                0
+            )
+            it.vibrate(effect)
+        }
     }
 
     fun release() {

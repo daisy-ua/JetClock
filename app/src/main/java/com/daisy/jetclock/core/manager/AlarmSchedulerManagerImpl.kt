@@ -8,24 +8,30 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.constants.ConfigConstants
+import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.Alarm
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
 import javax.inject.Inject
 
-class AlarmSchedulerImpl @Inject constructor(
+class AlarmSchedulerManagerImpl @Inject constructor(
     private val context: Context,
-) : AlarmScheduler {
+) : AlarmSchedulerManager {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val handler = Handler(Looper.getMainLooper())
 
     @SuppressLint("ScheduleExactAlarm")
     override fun schedule(alarm: Alarm) {
+//        TODO: move as method to Alarm class. Handle 24 hour format
+        val timeStamp = with(alarm) {
+            "$hour:$minute $meridiem"
+        }
         val intent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
-            putExtra("LABEL", "Alarm")
+            putExtra("LABEL", alarm.label)
+            putExtra("TIME", timeStamp)
+            putExtra("ID", alarm.id)
         }
 
         val calendar: Calendar = getTimeInstance(alarm)
@@ -33,7 +39,7 @@ class AlarmSchedulerImpl @Inject constructor(
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
 //        calendar.timeInMillis,
-            LocalDateTime.now().plusSeconds(5).atZone(ZoneId.systemDefault())
+            LocalDateTime.now().plusSeconds(3).atZone(ZoneId.systemDefault())
                 .toEpochSecond() * 1000L,
             PendingIntent.getBroadcast(
                 context,
@@ -47,6 +53,13 @@ class AlarmSchedulerImpl @Inject constructor(
 
         handler.post {
             Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun snooze(alarm: Alarm, minutes: Int) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            add(Calendar.MINUTE, minutes)
         }
     }
 

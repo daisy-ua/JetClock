@@ -1,4 +1,4 @@
-package com.daisy.jetclock.core
+package com.daisy.jetclock.core.receiver
 
 object AlarmReceiverActions {
 
