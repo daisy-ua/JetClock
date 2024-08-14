@@ -11,10 +11,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.Alarm
@@ -33,12 +36,21 @@ fun AlarmList(
 ) {
     val alarmList by viewModel.alarms.collectAsState()
 
-    val animatedList by updateAnimatedItemsState(newList = alarmList.map { it })
+    var showAnimation by remember {
+        mutableStateOf(false)
+    }
+    val animatedList by updateAnimatedItemsState(newList = alarmList.map { it }, showAnimation)
+
+    LaunchedEffect(animatedList) {
+        if (showAnimation) {
+            showAnimation = false
+        }
+    }
 
     LazyColumn {
         animatedItemsIndexed(
             state = animatedList,
-            key = { item -> item.id }
+            key = { item -> "${item.id}$item" }
         ) { _, item ->
             SwipeActions(
                 endActionsConfig = SwipeActionsConfig(
@@ -48,6 +60,7 @@ fun AlarmList(
                     icon = Icons.Rounded.Delete,
                     stayDismissed = true,
                     onDismiss = {
+                        showAnimation = true
                         viewModel.deleteAlarm(item.id)
                     }
                 ),

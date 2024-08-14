@@ -49,6 +49,7 @@ inline fun <T> LazyListScope.animatedItemsIndexed(
 @Composable
 fun <T> updateAnimatedItemsState(
     newList: List<T>,
+    showAnimation: Boolean,
 ): State<List<AnimatedItem<T>>> {
 
     val state = remember { mutableStateOf(emptyList<AnimatedItem<T>>()) }
@@ -84,8 +85,12 @@ fun <T> updateAnimatedItemsState(
             }
 
             override fun onRemoved(position: Int, count: Int) {
-                for (i in 0 until count) {
-                    compositeList[position + i].visibility.targetState = false
+                if (showAnimation) {
+                    for (i in 0 until count) {
+                        compositeList[position + i].visibility.targetState = false
+                    }
+                } else {
+                    compositeList.removeAt(position)
                 }
             }
 
@@ -97,12 +102,17 @@ fun <T> updateAnimatedItemsState(
                 // irrelevant with compose.
             }
         })
+
         if (state.value != compositeList) {
             state.value = compositeList
         }
-        val initialAnimation = androidx.compose.animation.core.Animatable(1.0f)
-        initialAnimation.animateTo(0f)
-        state.value = state.value.filter { it.visibility.targetState }
+
+        if (showAnimation) {
+            val initialAnimation = androidx.compose.animation.core.Animatable(1.0f)
+            initialAnimation.animateTo(0f)
+
+            state.value = state.value.filter { it.visibility.targetState }
+        }
     }
 
     return state
