@@ -5,7 +5,7 @@ import com.daisy.jetclock.domain.Alarm
 interface AlarmSchedulerManager {
     fun schedule(alarm: Alarm)
 
-    fun snooze(alarm: Alarm, minutes: Int)
+    fun snooze(alarm: Alarm): Alarm
 
     fun cancel(id: Long)
 }

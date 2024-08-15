@@ -9,6 +9,8 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import com.daisy.jetclock.constants.ConfigConstants
+import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.Alarm
 import java.time.LocalDateTime
@@ -24,30 +26,9 @@ class AlarmSchedulerManagerImpl @Inject constructor(
 
     @SuppressLint("ScheduleExactAlarm")
     override fun schedule(alarm: Alarm) {
-//        TODO: move as method to Alarm class. Handle 24 hour format
-        val timeStamp = with(alarm) {
-            "$hour:$minute $meridiem"
-        }
-        val intent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
-            putExtra("LABEL", alarm.label)
-            putExtra("TIME", timeStamp)
-            putExtra("ID", alarm.id)
-        }
-
         val calendar: Calendar = getTimeInstance(alarm)
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-//        calendar.timeInMillis,
-            LocalDateTime.now().plusSeconds(3).atZone(ZoneId.systemDefault())
-                .toEpochSecond() * 1000L,
-            PendingIntent.getBroadcast(
-                context,
-                alarm.id.toInt(),
-                intent,
-                ConfigConstants.PENDING_INTENT_FLAGS
-            )
-        )
+        schedule(calendar.timeInMillis, alarm.id, getDefaultIntent(alarm.id))
 
         val toastText = "Alarm rings soon"
 
@@ -56,10 +37,43 @@ class AlarmSchedulerManagerImpl @Inject constructor(
         }
     }
 
-    override fun snooze(alarm: Alarm, minutes: Int) {
+    private fun schedule(timeInMillis: Long, alarmId: Long, intent: Intent) {
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarmId.toInt(),
+            intent,
+            ConfigConstants.PENDING_INTENT_FLAGS
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+//        calendar.timeInMillis,
+            LocalDateTime.now().plusSeconds(3).atZone(ZoneId.systemDefault())
+                .toEpochSecond() * 1000L,
+            pendingIntent
+        )
+    }
+
+    override fun snooze(alarm: Alarm): Alarm {
         val calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            add(Calendar.MINUTE, minutes)
+            add(Calendar.MINUTE, alarm.snoozeDuration)
+        }
+
+        return alarm.copy(
+            hour = calendar.get(Calendar.HOUR),
+            minute = calendar.get(Calendar.MINUTE),
+            meridiem = when (calendar.get(Calendar.AM_PM)) {
+                Calendar.AM -> MeridiemOption.AM
+                Calendar.PM -> MeridiemOption.PM
+                else -> throw IllegalArgumentException("Unknown Meridiem value")
+            },
+        ).also {
+            val intent = getDefaultIntent(it.id).apply {
+                putExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA, it.timestamp)
+            }
+            schedule(calendar.timeInMillis, it.id, intent)
         }
     }
 
@@ -73,6 +87,11 @@ class AlarmSchedulerManagerImpl @Inject constructor(
             )
         )
     }
+
+    private fun getDefaultIntent(alarmId: Long) =
+        Intent(context, AlarmBroadcastReceiver::class.java).apply {
+            putExtra(IntentExtra.ID_EXTRA, alarmId)
+        }
 
     private fun getTimeInstance(alarm: Alarm): Calendar {
         return Calendar.getInstance().apply {

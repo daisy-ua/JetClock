@@ -10,12 +10,9 @@ import androidx.core.app.NotificationManagerCompat
 import com.daisy.jetclock.MainActivity
 import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.ConfigConstants
+import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.NotificationConfig
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
-import com.daisy.jetclock.core.receiver.AlarmReceiverActions.ACTION_DISMISS
-import com.daisy.jetclock.core.receiver.AlarmReceiverActions.ACTION_SNOOZE
-import com.daisy.jetclock.core.receiver.AlarmReceiverActions.DISMISS_REQUEST_CODE
-import com.daisy.jetclock.core.receiver.AlarmReceiverActions.SNOOZE_REQUEST_CODE
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,35 +46,61 @@ class AlarmNotificationManager @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun showAlarmMissedNotification(label: String, time: String) {
-        val alarmMissedNotification = NotificationCompat.Builder(context, NotificationConfig.ALARM_MISSED_CHANNEL_ID)
-            .setSmallIcon(R.drawable.baseline_alarm_24)
-            .setContentTitle("Missed Alarm: $label")
-            .setContentText("Missed at $time")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(getFullScreenIntent())
-            .build()
+        val alarmMissedNotification =
+            NotificationCompat.Builder(context, NotificationConfig.ALARM_MISSED_CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_alarm_24)
+                .setContentTitle("Missed Alarm: $label")
+                .setContentText("Missed at $time")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(getFullScreenIntent())
+                .build()
 
-        notificationManager.notify(NotificationConfig.ALARM_MISSED_NOTIFICATION_ID, alarmMissedNotification)
+        notificationManager.notify(
+            NotificationConfig.ALARM_MISSED_NOTIFICATION_ID,
+            alarmMissedNotification
+        )
+    }
+
+    @SuppressLint("MissingPermission")
+    fun showAlarmSnoozedNotification(label: String, time: String) {
+        val alarmSnoozedNotification =
+            NotificationCompat.Builder(context, NotificationConfig.ALARM_SNOOZE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_alarm_24)
+                .setContentTitle("$label (Snoozed)")
+                .setContentText("Snoozing until $time")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+//            .setAutoCancel(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(getFullScreenIntent())
+                .build()
+
+        notificationManager.notify(
+            NotificationConfig.ALARM_SNOOZE_NOTIFICATION_ID,
+            alarmSnoozedNotification
+        )
     }
 
     fun removeAlarmUpcomingNotification() {
         notificationManager.cancel(NotificationConfig.ALARM_UPCOMING_NOTIFICATION_ID)
     }
 
+    fun removeAlarmSnoozedNotification() {
+        notificationManager.cancel(NotificationConfig.ALARM_SNOOZE_NOTIFICATION_ID)
+    }
+
     private fun getDismissIntentAction(alarmId: Long) = alarmBroadcastReceiver.setIntentAction(
-        actionName = ACTION_DISMISS,
+        actionName = AlarmBroadcastReceiver.ACTION_DISMISS,
         requestCode = DISMISS_REQUEST_CODE,
-        extras = mapOf("ID" to alarmId),
+        extras = mapOf(IntentExtra.ID_EXTRA to alarmId),
         context = context
     )
 
     private fun getSnoozeIntentAction(alarmId: Long) = alarmBroadcastReceiver.setIntentAction(
-        actionName = ACTION_SNOOZE,
+        actionName = AlarmBroadcastReceiver.ACTION_SNOOZE,
         requestCode = SNOOZE_REQUEST_CODE,
-        extras = mapOf("ID" to alarmId),
+        extras = mapOf(IntentExtra.ID_EXTRA to alarmId),
         context = context
     )
 
@@ -100,13 +123,22 @@ class AlarmNotificationManager @Inject constructor(
             .setSound(null, null)
             .build()
 
+        val alarmSnoozedChannel = NotificationChannelCompat.Builder(
+            NotificationConfig.ALARM_SNOOZE_CHANNEL_ID,
+            NotificationManagerCompat.IMPORTANCE_LOW
+        )
+            .setName("Snoozed alarms")
+            .setDescription("Shows notification for snoozed alarms")
+            .setSound(null, null)
+            .build()
+
         notificationManager.createNotificationChannelsCompat(
             listOf(
                 alarmUpcomingChannel,
-                alarmMissedChannel
+                alarmMissedChannel,
+                alarmSnoozedChannel
             )
         )
-
     }
 
     private fun getFullScreenIntent(): PendingIntent {
@@ -116,3 +148,6 @@ class AlarmNotificationManager @Inject constructor(
         return PendingIntent.getActivity(context, 0, intent, ConfigConstants.PENDING_INTENT_FLAGS)
     }
 }
+
+const val DISMISS_REQUEST_CODE = 1001
+const val SNOOZE_REQUEST_CODE = 1002

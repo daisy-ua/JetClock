@@ -23,7 +23,12 @@ data class Alarm(
 
     val snoozeNumber: Int,
 
+    val snoozeCount: Int,
+
     val sound: String?,
-)
+) {
+    val timestamp: String
+        get() = "$hour:$minute ${meridiem ?: ""}"
+}
 
 
