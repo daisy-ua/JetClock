@@ -38,7 +38,6 @@ class AlarmSchedulerManagerImpl @Inject constructor(
     }
 
     private fun schedule(timeInMillis: Long, alarmId: Long, intent: Intent) {
-
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             alarmId.toInt(),
@@ -62,7 +61,7 @@ class AlarmSchedulerManagerImpl @Inject constructor(
         }
 
         return alarm.copy(
-            hour = calendar.get(Calendar.HOUR),
+            hour = calendar.get(Calendar.HOUR).let { if (it == 0) 12 else it },
             minute = calendar.get(Calendar.MINUTE),
             meridiem = when (calendar.get(Calendar.AM_PM)) {
                 Calendar.AM -> MeridiemOption.AM

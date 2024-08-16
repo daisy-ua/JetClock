@@ -1,5 +1,6 @@
 package com.daisy.jetclock.domain
 
+import android.annotation.SuppressLint
 import com.daisy.jetclock.constants.MeridiemOption
 
 data class Alarm(
@@ -28,7 +29,8 @@ data class Alarm(
     val sound: String?,
 ) {
     val timestamp: String
-        get() = "$hour:$minute ${meridiem ?: ""}"
+        @SuppressLint("DefaultLocale")
+        get() = "$hour:${String.format("%02d", minute)} ${meridiem ?: ""}"
 }
 
 

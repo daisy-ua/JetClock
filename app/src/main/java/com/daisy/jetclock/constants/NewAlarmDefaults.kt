@@ -21,6 +21,7 @@ object NewAlarmDefaults {
             ringDuration = AlarmOptionsData.ringDurationOption[1],
             snoozeDuration = AlarmOptionsData.snoozeDuration[1],
             snoozeNumber = AlarmOptionsData.snoozeNumber[1],
+            snoozeCount = 0,
             sound = DEFAULT_SOUND_ID
         )
     }

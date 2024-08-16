@@ -3,18 +3,25 @@ package com.daisy.jetclock.core.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.daisy.jetclock.core.AlarmService
+import com.daisy.jetclock.core.service.AlarmService
 import com.daisy.jetclock.core.IntentExtra
+import com.daisy.jetclock.core.manager.WorkRequestManager
+import com.daisy.jetclock.core.worker.RESCHEDULE_ALARM_TAG
+import com.daisy.jetclock.core.worker.RescheduleAlarmWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AlarmBroadcastReceiver : BroadcastReceiver() {
     private val broadcastReceiverScope = CoroutineScope(SupervisorJob())
+
+    @Inject
+    lateinit var workRequestManager: WorkRequestManager
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val pendingResult: PendingResult = goAsync()
@@ -31,6 +38,12 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                             }
 
                         when (intent.action) {
+                            Intent.ACTION_BOOT_COMPLETED -> {
+                                workRequestManager.enqueueWorker<RescheduleAlarmWorker>(
+                                    RESCHEDULE_ALARM_TAG
+                                )
+                            }
+
                             ACTION_DISMISS -> {
                                 serviceIntent.action = AlarmService.ACTION_DISMISS
                             }
@@ -63,5 +76,6 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_DISMISS = "ACTION_DISMISS"
         const val ACTION_SNOOZE = "ACTION_SNOOZE"
+        const val ACTION_RESCHEDULE = "android.intent.action.BOOT_COMPLETED"
     }
 }

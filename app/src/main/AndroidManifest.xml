@@ -49,7 +49,7 @@
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
-            tools:node="remove"></provider>
+            tools:node="remove"/>
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
@@ -57,7 +57,7 @@
             tools:node="merge" />
 
         <service
-            android:name=".core.AlarmService"
+            android:name=".core.service.AlarmService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:permission="android.permission.FOREGROUND_SERVICE" />

@@ -49,7 +49,7 @@ class AlarmNotificationManager @Inject constructor(
         val alarmMissedNotification =
             NotificationCompat.Builder(context, NotificationConfig.ALARM_MISSED_CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_alarm_24)
-                .setContentTitle("Missed Alarm: $label")
+                .setContentTitle("$label (Missed)")
                 .setContentText("Missed at $time")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
@@ -71,7 +71,7 @@ class AlarmNotificationManager @Inject constructor(
                 .setContentTitle("$label (Snoozed)")
                 .setContentText("Snoozing until $time")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
-//            .setAutoCancel(true)
+                .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(getFullScreenIntent())
                 .build()

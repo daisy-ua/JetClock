@@ -21,6 +21,7 @@ fun Alarm.convertToEntity(): AlarmEntity {
         ringDuration = ringDuration,
         snoozeDuration = snoozeDuration,
         snoozeNumber = snoozeNumber,
+        snoozeCount = snoozeCount,
         sound = sound
     )
 }

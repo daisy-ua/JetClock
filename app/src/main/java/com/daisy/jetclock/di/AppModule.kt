@@ -3,6 +3,8 @@ package com.daisy.jetclock.di
 import android.content.Context
 import com.daisy.jetclock.core.manager.AlarmSchedulerManager
 import com.daisy.jetclock.core.manager.AlarmSchedulerManagerImpl
+import com.daisy.jetclock.core.manager.WorkRequestManager
+import com.daisy.jetclock.utils.SoundPoolManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,4 +22,13 @@ object AppModule {
     fun provideAlarmScheduler(
         @ApplicationContext context: Context,
     ): AlarmSchedulerManager = AlarmSchedulerManagerImpl(context)
+
+    @Provides
+    @Singleton
+    fun provideWorkRequestManager(
+        @ApplicationContext context: Context,
+    ): WorkRequestManager = WorkRequestManager(context)
+
+    @Provides
+    fun provideSoundPoolManager(): SoundPoolManager = SoundPoolManager()
 }
