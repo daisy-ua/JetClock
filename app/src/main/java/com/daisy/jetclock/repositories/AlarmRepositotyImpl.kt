@@ -23,8 +23,8 @@ class AlarmRepositoryImpl @Inject constructor(
         return alarmDao.getAlarm(id).map { it?.convertToDomain() }
     }
 
-    override suspend fun insertAlarm(alarm: Alarm) {
-        withContext(ioDispatcher) {
+    override suspend fun insertAlarm(alarm: Alarm): Long {
+        return withContext(ioDispatcher) {
             alarm.convertToEntity().let { entity ->
                 alarmDao.insertAlarm(entity)
             }

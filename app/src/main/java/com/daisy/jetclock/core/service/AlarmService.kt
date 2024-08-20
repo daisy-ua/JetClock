@@ -62,7 +62,7 @@ class AlarmService : Service() {
 
     private fun startAlarm(alarm: Alarm, timestamp: String) {
         notificationManager.removeAlarmSnoozedNotification()
-        mediaPlayerManager.prepare("")
+        mediaPlayerManager.prepare(alarm.sound, true)
         mediaPlayerManager.start()
 
         val displayTimestamp = timestamp.ifEmpty { alarm.timestamp }
@@ -81,7 +81,7 @@ class AlarmService : Service() {
                 autoSnoozeAlarm(alarm)
                 stopSelf()
             }
-        }, 1 * 15 * 1000)
+        }, alarm.ringDuration * 60 * 1000L)
     }
 
     private suspend fun autoSnoozeAlarm(alarm: Alarm) {
@@ -117,7 +117,7 @@ class AlarmService : Service() {
         if (alarm.repeatDays.isEmpty()) {
             alarm.isEnabled = false
         } else {
-            alarmSchedulerManager.schedule(alarm)
+            alarmSchedulerManager.reschedule(alarm)
         }
 
         return alarm.isEnabled

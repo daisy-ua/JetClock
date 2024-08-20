@@ -16,7 +16,7 @@ interface AlarmDao {
     fun getAlarm(id: Long): Flow<AlarmEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAlarm(alarm: AlarmEntity)
+    suspend fun insertAlarm(alarm: AlarmEntity): Long
 
     @Query("DELETE FROM alarms WHERE id = :id")
     suspend fun deleteAlarm(id: Long)

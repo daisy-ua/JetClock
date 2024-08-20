@@ -12,6 +12,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,16 @@ fun SetAlarmScreen(
 
     LaunchedEffect(sound) {
         viewModel.updateSoundFile(sound.soundFile)
+    }
+
+    val toastMessage by viewModel.toastMessage.collectAsState()
+    val toastManager = viewModel.toastManager
+
+    LaunchedEffect(toastMessage) {
+        toastManager.clearToast()
+        toastMessage?.let {
+            toastManager.showToast(it)
+        }
     }
 
     val lifecycleEvent = rememberLifecycleEvent()

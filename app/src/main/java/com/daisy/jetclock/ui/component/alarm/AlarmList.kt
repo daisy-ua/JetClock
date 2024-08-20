@@ -47,6 +47,16 @@ fun AlarmList(
         }
     }
 
+    val toastMessage by viewModel.toastMessage.collectAsState()
+    val toastManager = viewModel.toastManager
+
+    LaunchedEffect(toastMessage) {
+        toastManager.clearToast()
+        toastMessage?.let {
+            toastManager.showToast(it, viewModel::clearToastMessage)
+        }
+    }
+
     LazyColumn {
         animatedItemsIndexed(
             state = animatedList,

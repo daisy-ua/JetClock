@@ -37,5 +37,9 @@ data class SoundOption(
         fun getAssetFilename(displayName: String): String {
             return "${ConfigConstants.SOUND_ASSETS_DIR}/$displayName.mp3"
         }
+
+        fun getAssetFn(displayName: String): String {
+            return "${ConfigConstants.SOUND_ASSETS_DIR}/$displayName"
+        }
     }
 }

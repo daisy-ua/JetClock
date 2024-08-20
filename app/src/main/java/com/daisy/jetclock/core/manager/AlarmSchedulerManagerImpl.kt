@@ -5,16 +5,13 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
 import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.Alarm
-import java.time.LocalDateTime
-import java.time.ZoneId
+import com.daisy.jetclock.domain.DayOfWeek
+import com.daisy.jetclock.domain.TimeUntilAlarm
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -22,36 +19,25 @@ class AlarmSchedulerManagerImpl @Inject constructor(
     private val context: Context,
 ) : AlarmSchedulerManager {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val handler = Handler(Looper.getMainLooper())
+    private val alarmClockInfo = alarmManager.nextAlarmClock
 
     @SuppressLint("ScheduleExactAlarm")
-    override fun schedule(alarm: Alarm) {
-        val calendar: Calendar = getTimeInstance(alarm)
+    override fun schedule(alarm: Alarm): String {
+        val timeInMillis = reschedule(alarm)
 
-        schedule(calendar.timeInMillis, alarm.id, getDefaultIntent(alarm.id))
+        val timeLeft = getTimeLeftUntilAlarm(timeInMillis) ?: "Error occurred."
 
-        val toastText = "Alarm rings soon"
-
-        handler.post {
-            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
-        }
+        return timeLeft
     }
 
-    private fun schedule(timeInMillis: Long, alarmId: Long, intent: Intent) {
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarmId.toInt(),
-            intent,
-            ConfigConstants.PENDING_INTENT_FLAGS
-        )
+    override fun reschedule(alarm: Alarm): Long {
+        val calendar: Calendar = getTimeInstance(alarm).apply {
+            val nextDayOffset = getNextAvailableDay(this, alarm.repeatDays)
+            add(Calendar.DAY_OF_MONTH, nextDayOffset)
+        }
+        schedule(calendar.timeInMillis, alarm.id, getDefaultIntent(alarm.id))
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-//        calendar.timeInMillis,
-            LocalDateTime.now().plusSeconds(3).atZone(ZoneId.systemDefault())
-                .toEpochSecond() * 1000L,
-            pendingIntent
-        )
+        return calendar.timeInMillis
     }
 
     override fun snooze(alarm: Alarm): Alarm {
@@ -87,6 +73,56 @@ class AlarmSchedulerManagerImpl @Inject constructor(
         )
     }
 
+    override fun getNextAlarmTime(): String? {
+        return alarmClockInfo?.let { info ->
+            TimeUntilAlarm(info.triggerTime).getTimeUntil()
+        }
+    }
+
+    private fun schedule(timeInMillis: Long, alarmId: Long, intent: Intent) {
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarmId.toInt(),
+            intent,
+            ConfigConstants.PENDING_INTENT_FLAGS
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            timeInMillis,
+            pendingIntent
+        )
+    }
+
+    private fun getNextAvailableDay(calendar: Calendar, repeatDays: List<DayOfWeek>): Int {
+        val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+
+        if (repeatDays.isEmpty() && calendar.timeInMillis <= System.currentTimeMillis()) {
+            return 1
+        }
+
+        if (repeatDays.isEmpty()) {
+            return 0
+        }
+
+        val currentDayOfWeek = DayOfWeek.values().first { it.ordinal + 1 == today }
+
+        val sortedDays = repeatDays.sortedBy { it.ordinal }
+
+        for (day in sortedDays) {
+            val daysDifference = day.ordinal - currentDayOfWeek.ordinal
+            if (daysDifference > 0 || (daysDifference == 0 && calendar.timeInMillis > System.currentTimeMillis())) {
+                return daysDifference
+            }
+        }
+
+        return sortedDays.first().ordinal + 7 - currentDayOfWeek.ordinal
+    }
+
+    private fun getTimeLeftUntilAlarm(timeInMillis: Long): String? {
+        return TimeUntilAlarm(timeInMillis).getTimeUntil()
+    }
+
     private fun getDefaultIntent(alarmId: Long) =
         Intent(context, AlarmBroadcastReceiver::class.java).apply {
             putExtra(IntentExtra.ID_EXTRA, alarmId)
@@ -101,6 +137,7 @@ class AlarmSchedulerManagerImpl @Inject constructor(
                 set(Calendar.AM_PM, alarm.meridiem.ordinal)
             }
             set(Calendar.MINUTE, alarm.minute)
+            set(Calendar.SECOND, 0)
         }
     }
 }
