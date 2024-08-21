@@ -71,7 +71,7 @@ fun AlarmList(
                     stayDismissed = true,
                     onDismiss = {
                         showAnimation = true
-                        viewModel.deleteAlarm(item.id)
+                        viewModel.deleteAlarm(item)
                     }
                 ),
             ) { state ->

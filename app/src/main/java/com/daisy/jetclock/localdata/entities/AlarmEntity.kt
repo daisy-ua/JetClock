@@ -19,6 +19,9 @@ data class AlarmEntity(
     @ColumnInfo(name = "is_enabled")
     val isEnabled: Boolean,
 
+    @ColumnInfo(name = "trigger_time")
+    val triggerTime: Long?,
+
     val label: String,
 
     @ColumnInfo(name = "ring_duration")

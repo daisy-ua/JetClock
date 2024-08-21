@@ -146,7 +146,7 @@ fun SetAlarmScreen(
             if (alarmId != NewAlarmDefaults.NEW_ALARM_ID) {
                 TextFloatingActionButton(
                     onItemClick = {
-                        viewModel.deleteAlarm(alarmId, onUpClick)
+                        viewModel.deleteAlarm(onUpClick)
                     },
                     Modifier.padding(bottom = 8.dp)
                 )

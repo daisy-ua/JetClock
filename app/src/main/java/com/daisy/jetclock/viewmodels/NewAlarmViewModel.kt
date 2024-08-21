@@ -139,8 +139,8 @@ class NewAlarmViewModel @Inject constructor(
                 if (updatedAlarm.id == NewAlarmDefaults.NEW_ALARM_ID) {
                     updatedAlarm = updatedAlarm.copy(id = newId)
                 }
-                if (_alarm.value.isEnabled) {
-                    alarmScheduler.cancel(_alarm.value.id)
+                if (_alarm.value.isEnabled && _alarm.value.id != NewAlarmDefaults.NEW_ALARM_ID) {
+                    alarmScheduler.cancel(_alarm.value)
                 }
                 _toastMessage.value = alarmScheduler.schedule(updatedAlarm)
                 delay(100L)
@@ -151,10 +151,10 @@ class NewAlarmViewModel @Inject constructor(
         }
     }
 
-    fun deleteAlarm(id: Long, callback: () -> Unit) = viewModelScope.launch {
-        repository.deleteAlarm(id)
+    fun deleteAlarm(callback: () -> Unit) = viewModelScope.launch {
+        repository.deleteAlarm(_alarm.value.id)
         if (_alarm.value.isEnabled) {
-            alarmScheduler.cancel(id)
+            alarmScheduler.disable(_alarm.value)
         }
         delay(100L)
         callback.invoke()
@@ -167,6 +167,7 @@ class NewAlarmViewModel @Inject constructor(
         meridiem = selectedTime.meridiem,
         repeatDays = repeatDays.value.days,
         isEnabled = true,
+        triggerTime = null,
         label = label.value,
         ringDuration = ringDuration.value.value,
         snoozeDuration = snoozeDuration.value.duration,

@@ -17,6 +17,7 @@ object NewAlarmDefaults {
             meridiem = time.meridiem,
             repeatDays = listOf(),
             isEnabled = true,
+            triggerTime = null,
             label = "Alarm",
             ringDuration = AlarmOptionsData.ringDurationOption[1],
             snoozeDuration = AlarmOptionsData.snoozeDuration[1],

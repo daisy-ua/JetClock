@@ -1,6 +1,7 @@
 package com.daisy.jetclock.core.manager
 
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.utils.AlarmDataCallback
 
 interface AlarmSchedulerManager {
     fun schedule(alarm: Alarm): String
@@ -9,7 +10,11 @@ interface AlarmSchedulerManager {
 
     fun snooze(alarm: Alarm): Alarm
 
-    fun cancel(id: Long)
+    fun cancel(alarm: Alarm)
 
-    fun getNextAlarmTime(): String?
+    fun disable(alarm: Alarm)
+
+    fun getNextAlarmTime(alarms: List<Alarm>): Pair<Alarm, String>?
+
+    fun setAlarmDataCallback(callback: AlarmDataCallback?): Unit
 }

@@ -12,14 +12,16 @@ import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.domain.TimeUntilAlarm
+import com.daisy.jetclock.utils.AlarmDataCallback
 import java.util.Calendar
 import javax.inject.Inject
 
 class AlarmSchedulerManagerImpl @Inject constructor(
     private val context: Context,
 ) : AlarmSchedulerManager {
+    private var dataCallback: AlarmDataCallback? = null
+
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val alarmClockInfo = alarmManager.nextAlarmClock
 
     @SuppressLint("ScheduleExactAlarm")
     override fun schedule(alarm: Alarm): String {
@@ -35,7 +37,7 @@ class AlarmSchedulerManagerImpl @Inject constructor(
             val nextDayOffset = getNextAvailableDay(this, alarm.repeatDays)
             add(Calendar.DAY_OF_MONTH, nextDayOffset)
         }
-        schedule(calendar.timeInMillis, alarm.id, getDefaultIntent(alarm.id))
+        schedule(calendar.timeInMillis, alarm, getDefaultIntent(alarm.id))
 
         return calendar.timeInMillis
     }
@@ -58,31 +60,50 @@ class AlarmSchedulerManagerImpl @Inject constructor(
             val intent = getDefaultIntent(it.id).apply {
                 putExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA, it.timestamp)
             }
-            schedule(calendar.timeInMillis, it.id, intent)
+            schedule(calendar.timeInMillis, it, intent)
         }
     }
 
-    override fun cancel(id: Long) {
+    override fun cancel(alarm: Alarm) {
+        updateAlarm(alarm, null)
+
+        disable(alarm)
+    }
+
+    override fun disable(alarm: Alarm) {
         alarmManager.cancel(
             PendingIntent.getBroadcast(
                 context,
-                id.toInt(),
+                alarm.id.toInt(),
                 Intent(context, AlarmBroadcastReceiver::class.java),
                 ConfigConstants.PENDING_INTENT_FLAGS
             )
         )
     }
 
-    override fun getNextAlarmTime(): String? {
-        return alarmClockInfo?.let { info ->
-            TimeUntilAlarm(info.triggerTime).getTimeUntil()
-        }
+    override fun getNextAlarmTime(alarms: List<Alarm>): Pair<Alarm, String>? {
+        alarms
+            .filter { it.triggerTime != null }
+            .sortedBy { alarm -> alarm.triggerTime }
+            .firstOrNull()
+            ?.let { nextAlarm ->
+                val timeString =
+                    TimeUntilAlarm(nextAlarm.triggerTime!!).getTimeUntil() ?: run { return null }
+
+                return nextAlarm to timeString
+            } ?: return null
     }
 
-    private fun schedule(timeInMillis: Long, alarmId: Long, intent: Intent) {
+    override fun setAlarmDataCallback(callback: AlarmDataCallback?) {
+        this.dataCallback = callback
+    }
+
+    private fun schedule(timeInMillis: Long, alarm: Alarm, intent: Intent) {
+        updateAlarm(alarm, timeInMillis)
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            alarmId.toInt(),
+            alarm.id.toInt(),
             intent,
             ConfigConstants.PENDING_INTENT_FLAGS
         )
@@ -131,14 +152,23 @@ class AlarmSchedulerManagerImpl @Inject constructor(
     private fun getTimeInstance(alarm: Alarm): Calendar {
         return Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            if (alarm.meridiem == null) set(Calendar.HOUR_OF_DAY, alarm.hour)
-            else {
+            if (alarm.meridiem == null) {
+                set(
+                    Calendar.HOUR_OF_DAY,
+                    alarm.hour.let {
+                        if (it == 12) 0 else it
+                    })
+            } else {
                 set(Calendar.HOUR, alarm.hour)
                 set(Calendar.AM_PM, alarm.meridiem.ordinal)
             }
             set(Calendar.MINUTE, alarm.minute)
             set(Calendar.SECOND, 0)
         }
+    }
+
+    private fun updateAlarm(alarm: Alarm, timeInMillis: Long?) {
+        dataCallback?.onAlarmUpdated(alarm.apply { triggerTime = timeInMillis })
     }
 }
 

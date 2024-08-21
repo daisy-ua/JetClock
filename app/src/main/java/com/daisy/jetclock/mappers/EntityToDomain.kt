@@ -23,6 +23,7 @@ fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format
         meridiem = amPm,
         repeatDays = repeatDays,
         isEnabled = isEnabled,
+        triggerTime = triggerTime,
         label = label,
         ringDuration = ringDuration,
         snoozeDuration = snoozeDuration,

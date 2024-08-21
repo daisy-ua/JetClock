@@ -16,6 +16,8 @@ data class Alarm(
 
     var isEnabled: Boolean,
 
+    var triggerTime: Long?,
+
     val label: String,
 
     val ringDuration: Int,

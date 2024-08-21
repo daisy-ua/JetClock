@@ -116,6 +116,7 @@ class AlarmService : Service() {
 
         if (alarm.repeatDays.isEmpty()) {
             alarm.isEnabled = false
+            alarm.triggerTime = null
         } else {
             alarmSchedulerManager.reschedule(alarm)
         }
@@ -126,7 +127,7 @@ class AlarmService : Service() {
     private suspend fun snoozeAlarm(alarm: Alarm) {
         performSnoozeAction(alarm)
         if (alarm.snoozeCount > 0) {
-            alarmRepository.insertAlarm(alarm.copy(snoozeCount = 0))
+            alarmRepository.insertAlarm(alarm.copy(snoozeCount = 0, triggerTime = null))
         }
         stopSelf()
     }

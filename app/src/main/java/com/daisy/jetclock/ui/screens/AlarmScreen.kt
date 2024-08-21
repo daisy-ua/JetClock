@@ -29,7 +29,7 @@ fun AlarmScreen(
         floatingActionButtonPosition = FabPosition.Center,
     ) {
         Column {
-            NextAlarmCard()
+            NextAlarmCard(viewModel, onAlarmClick)
             AlarmList(viewModel, onAlarmClick)
         }
     }

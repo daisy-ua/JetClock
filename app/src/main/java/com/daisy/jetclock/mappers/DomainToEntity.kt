@@ -17,6 +17,7 @@ fun Alarm.convertToEntity(): AlarmEntity {
         time = LocalTime.of(hour24, minute),
         repeatDays = repeatDays,
         isEnabled = isEnabled,
+        triggerTime = triggerTime,
         label = label,
         ringDuration = ringDuration,
         snoozeDuration = snoozeDuration,
