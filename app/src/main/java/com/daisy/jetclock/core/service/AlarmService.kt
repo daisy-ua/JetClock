@@ -7,7 +7,7 @@ import android.os.IBinder
 import android.os.Looper
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.NotificationConfig
-import com.daisy.jetclock.core.manager.AlarmSchedulerManager
+import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.repositories.AlarmRepository
 import com.daisy.jetclock.utils.AlarmNotificationManager
@@ -34,7 +34,7 @@ class AlarmService : Service() {
     lateinit var alarmRepository: AlarmRepository
 
     @Inject
-    lateinit var alarmSchedulerManager: AlarmSchedulerManager
+    lateinit var alarmController: AlarmController
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -84,57 +84,57 @@ class AlarmService : Service() {
         }, alarm.ringDuration * 60 * 1000L)
     }
 
-    private suspend fun autoSnoozeAlarm(alarm: Alarm) {
-        val updatedAlarm = alarm.run {
-            if (snoozeCount < snoozeNumber) {
-                copy(snoozeCount = snoozeCount + 1).also {
-                    performSnoozeAction(it)
-                }
-            } else {
-                val isScheduled = performDismissAction(this)
-                notificationManager.showAlarmMissedNotification(label, timestamp)
-                copy(snoozeCount = 0, isEnabled = isScheduled)
-            }
+    private fun autoSnoozeAlarm(alarm: Alarm) {
+        if (alarm.snoozeCount < alarm.snoozeNumber) {
+            val updatedAlarm = alarm.copy(snoozeCount = alarm.snoozeCount + 1)
+            performSnoozeAction(updatedAlarm)
+        } else {
+            performDismissAction(alarm)
+            notificationManager.showAlarmMissedNotification(alarm.label, alarm.timestamp)
         }
-
-        alarmRepository.insertAlarm(updatedAlarm)
     }
 
     private fun performSnoozeAction(alarm: Alarm) {
         mediaPlayerManager.release()
 
-        alarmSchedulerManager.snooze(alarm).also {
-            notificationManager.showAlarmSnoozedNotification(it.label, it.timestamp)
-        }
+        val updatedAlarm = alarmController.snooze(alarm)
+        notificationManager.showAlarmSnoozedNotification(updatedAlarm.label, updatedAlarm.timestamp)
 
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
-    private fun performDismissAction(alarm: Alarm): Boolean {
+    private fun performDismissAction(alarm: Alarm) {
         mediaPlayerManager.release()
         stopForeground(STOP_FOREGROUND_REMOVE)
 
-        if (alarm.repeatDays.isEmpty()) {
-            alarm.isEnabled = false
-            alarm.triggerTime = null
-        } else {
-            alarmSchedulerManager.reschedule(alarm)
-        }
+        val updatedAlarm = alarm.copy(
+            snoozeCount = 0
+        )
 
-        return alarm.isEnabled
+        if (alarm.repeatDays.isEmpty()) {
+            updatedAlarm.triggerTime = null
+            updatedAlarm.isEnabled = false
+
+            alarmController.updateAlarm(updatedAlarm)
+
+        } else {
+            alarmController.schedule(alarm)
+        }
     }
 
-    private suspend fun snoozeAlarm(alarm: Alarm) {
+    private fun snoozeAlarm(alarm: Alarm) {
         performSnoozeAction(alarm)
         if (alarm.snoozeCount > 0) {
-            alarmRepository.insertAlarm(alarm.copy(snoozeCount = 0, triggerTime = null))
+            val updatedAlarm = alarm.copy(
+                snoozeCount = 0
+            )
+            alarmController.updateAlarm(updatedAlarm)
         }
         stopSelf()
     }
 
-    private suspend fun dismissAlarm(alarm: Alarm) {
+    private fun dismissAlarm(alarm: Alarm) {
         performDismissAction(alarm)
-        alarmRepository.insertAlarm(alarm.copy(snoozeCount = 0))
         stopSelf()
     }
 

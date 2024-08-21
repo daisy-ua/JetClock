@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.NewAlarmDefaults
-import com.daisy.jetclock.core.manager.AlarmSchedulerManager
+import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.domain.RingDurationOption
@@ -12,6 +12,7 @@ import com.daisy.jetclock.domain.SnoozeOption
 import com.daisy.jetclock.domain.TimeOfDay
 import com.daisy.jetclock.repositories.AlarmRepository
 import com.daisy.jetclock.utils.ToastManager
+import com.daisy.jetclock.utils.getTimeLeftUntilAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NewAlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
-    private val alarmScheduler: AlarmSchedulerManager,
+    private val alarmController: AlarmController,
     val toastManager: ToastManager,
 ) : ViewModel() {
     private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(NewAlarmDefaults.getNewAlarm())
@@ -140,9 +141,9 @@ class NewAlarmViewModel @Inject constructor(
                     updatedAlarm = updatedAlarm.copy(id = newId)
                 }
                 if (_alarm.value.isEnabled && _alarm.value.id != NewAlarmDefaults.NEW_ALARM_ID) {
-                    alarmScheduler.cancel(_alarm.value)
+                    alarmController.cancel(_alarm.value)
                 }
-                _toastMessage.value = alarmScheduler.schedule(updatedAlarm)
+                _toastMessage.value = getTimeLeftUntilAlarm(alarmController.schedule(updatedAlarm))
                 delay(100L)
             } finally {
                 isSaving.set(false)
@@ -153,9 +154,7 @@ class NewAlarmViewModel @Inject constructor(
 
     fun deleteAlarm(callback: () -> Unit) = viewModelScope.launch {
         repository.deleteAlarm(_alarm.value.id)
-        if (_alarm.value.isEnabled) {
-            alarmScheduler.disable(_alarm.value)
-        }
+        alarmController.delete(_alarm.value)
         delay(100L)
         callback.invoke()
     }

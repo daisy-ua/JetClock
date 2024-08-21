@@ -2,7 +2,7 @@ package com.daisy.jetclock.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.daisy.jetclock.core.manager.AlarmSchedulerManager
+import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.domain.TimeUntilAlarm
@@ -10,6 +10,8 @@ import com.daisy.jetclock.repositories.AlarmRepository
 import com.daisy.jetclock.ui.component.timepicker.TimeFormatter
 import com.daisy.jetclock.utils.AlarmDataCallback
 import com.daisy.jetclock.utils.ToastManager
+import com.daisy.jetclock.utils.getNextAlarmTime
+import com.daisy.jetclock.utils.getTimeLeftUntilAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
-    private val alarmScheduler: AlarmSchedulerManager,
+    private val alarmController: AlarmController,
     val toastManager: ToastManager,
 ) : ViewModel(), AlarmDataCallback {
     val alarms = repository.getAllAlarms()
@@ -42,7 +44,7 @@ class AlarmViewModel @Inject constructor(
     private var refreshJob: Job? = null
 
     init {
-        alarmScheduler.setAlarmDataCallback(this)
+        alarmController.setAlarmDataCallback(this)
 
         viewModelScope.launch {
             alarms.collectLatest { alarmList ->
@@ -52,7 +54,7 @@ class AlarmViewModel @Inject constructor(
     }
 
     private fun updateNextAlarm(alarmList: List<Alarm>) {
-        val (nextAlarm, nextAlarmTime) = alarmScheduler.getNextAlarmTime(alarmList)
+        val (nextAlarm, nextAlarmTime) = getNextAlarmTime(alarmList)
             ?: Pair(
                 null,
                 null
@@ -71,9 +73,7 @@ class AlarmViewModel @Inject constructor(
     fun deleteAlarm(alarm: Alarm) = viewModelScope.launch {
         repository.deleteAlarm(alarm.id)
 
-        if (alarm.isEnabled) {
-            alarmScheduler.disable(alarm)
-        }
+        alarmController.delete(alarm)
     }
 
     fun getTimeString(hour: Int, minute: Int): String {
@@ -126,10 +126,11 @@ class AlarmViewModel @Inject constructor(
 
     private fun scheduleAlarm(alarm: Alarm) {
         if (alarm.isEnabled) {
-            alarmScheduler.cancel(alarm)
+            alarmController.cancel(alarm)
             clearToastMessage()
         } else {
-            _toastMessage.value = alarmScheduler.schedule(alarm)
+            val timeInMillis = alarmController.schedule(alarm)
+            _toastMessage.value = getTimeLeftUntilAlarm(timeInMillis)
         }
     }
 

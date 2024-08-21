@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.daisy.jetclock.core.manager.AlarmSchedulerManager
+import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.core.manager.WorkRequestManager
 import com.daisy.jetclock.repositories.AlarmRepository
 import dagger.assisted.Assisted
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 @HiltWorker
 class RescheduleAlarmWorker @AssistedInject constructor(
     @Assisted private val alarmRepository: AlarmRepository,
-    @Assisted private val alarmSchedulerManager: AlarmSchedulerManager,
+    @Assisted private val alarmController: AlarmController,
     @Assisted private val workRequestManager: WorkRequestManager,
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
@@ -43,7 +43,7 @@ class RescheduleAlarmWorker @AssistedInject constructor(
             }
             .firstOrNull { it.isNotEmpty() }
 
-        alarms?.forEach { alarmSchedulerManager.schedule(it) }
+        alarms?.forEach { alarmController.schedule(it) }
     }
 }
 
