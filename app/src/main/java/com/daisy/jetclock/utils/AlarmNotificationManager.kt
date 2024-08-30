@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -114,13 +115,15 @@ class AlarmNotificationManager @Inject constructor(
             .setSound(null, null)
             .build()
 
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
         val alarmMissedChannel = NotificationChannelCompat.Builder(
             NotificationConfig.ALARM_MISSED_CHANNEL_ID,
             NotificationManagerCompat.IMPORTANCE_HIGH
         )
             .setName("Missed alarms")
             .setDescription("Shows notification for missed alarms")
-            .setSound(null, null)
+            .setSound(soundUri, null)
             .build()
 
         val alarmSnoozedChannel = NotificationChannelCompat.Builder(
