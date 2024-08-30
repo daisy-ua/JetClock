@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,20 +50,20 @@ class AlarmService : Service() {
     }
 
     private suspend fun handleIntentAction(intent: Intent?, id: Long, snoozedTimestamp: String) {
-        val alarm = alarmRepository.getAlarmById(id).first()
-        alarm?.let {
-            when (intent?.action) {
-                ACTION_START -> startAlarm(it, snoozedTimestamp)
-                ACTION_SNOOZE -> snoozeAlarm(it)
-                ACTION_DISMISS -> dismissAlarm(it)
-            }
-        } ?: stopSelf()
+        val alarm = alarmRepository.getAlarmById(id).firstOrNull() ?: return stopSelf()
+
+        when (intent?.action) {
+            ACTION_START -> startAlarm(alarm, snoozedTimestamp)
+            ACTION_SNOOZE -> snoozeAlarm(alarm)
+            ACTION_DISMISS -> dismissAlarm(alarm)
+            ACTION_DISABLE -> disableAlarm(alarm)
+        }
     }
 
     private fun startAlarm(alarm: Alarm, timestamp: String) {
+        activeAlarmId = alarm.id
         notificationManager.removeAlarmSnoozedNotification()
-        mediaPlayerManager.prepare(alarm.sound, true)
-        mediaPlayerManager.start()
+        startMediaPlayback(alarm.sound)
 
         val displayTimestamp = timestamp.ifEmpty { alarm.timestamp }
 
@@ -75,68 +75,71 @@ class AlarmService : Service() {
         scheduleAutoSnooze(alarm)
     }
 
+    private suspend fun snoozeAlarm(alarm: Alarm) {
+        val updatedAlarm = alarmController.snooze(alarm)
+        stopMediaPlayback()
+        notificationManager.showAlarmSnoozedNotification(updatedAlarm.label, updatedAlarm.timestamp)
+
+        if (alarm.snoozeCount > 0) {
+            alarmController.resetAlarmSnoozeCount(alarm)
+        }
+
+        activeAlarmId = null
+        stopSelf()
+    }
+
+    private suspend fun dismissAlarm(alarm: Alarm) {
+        performDismissAction(alarm)
+        activeAlarmId = null
+        stopSelf()
+    }
+
+    private fun disableAlarm(alarm: Alarm) {
+        if (activeAlarmId == alarm.id) {
+            stopMediaPlayback()
+            activeAlarmId = null
+            stopSelf()
+        }
+    }
+
     private fun scheduleAutoSnooze(alarm: Alarm) {
         Handler(Looper.getMainLooper()).postDelayed({
             serviceScope.launch {
                 autoSnoozeAlarm(alarm)
                 stopSelf()
             }
-        }, alarm.ringDuration * 60 * 1000L)
+        }, alarm.ringDuration * 1 * 1000L)
     }
 
-    private fun autoSnoozeAlarm(alarm: Alarm) {
+    private suspend fun autoSnoozeAlarm(alarm: Alarm) {
         if (alarm.snoozeCount < alarm.snoozeNumber) {
-            val updatedAlarm = alarm.copy(snoozeCount = alarm.snoozeCount + 1)
-            performSnoozeAction(updatedAlarm)
+            alarmController.autoSnooze(alarm)
         } else {
             performDismissAction(alarm)
             notificationManager.showAlarmMissedNotification(alarm.label, alarm.timestamp)
         }
     }
 
-    private fun performSnoozeAction(alarm: Alarm) {
-        mediaPlayerManager.release()
-
-        val updatedAlarm = alarmController.snooze(alarm)
-        notificationManager.showAlarmSnoozedNotification(updatedAlarm.label, updatedAlarm.timestamp)
-
-        stopForeground(STOP_FOREGROUND_REMOVE)
-    }
-
-    private fun performDismissAction(alarm: Alarm) {
-        mediaPlayerManager.release()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-
-        val updatedAlarm = alarm.copy(
-            snoozeCount = 0
-        )
-
-        if (alarm.repeatDays.isEmpty()) {
-            updatedAlarm.triggerTime = null
-            updatedAlarm.isEnabled = false
-
-            alarmController.updateAlarm(updatedAlarm)
-
+    private suspend fun performDismissAction(alarm: Alarm) {
+        stopMediaPlayback()
+        if (shouldRepeatAlarm(alarm)) {
+            alarmController.reschedule(alarm)
         } else {
-            alarmController.schedule(alarm)
+            alarmController.cancel(alarm)
         }
     }
 
-    private fun snoozeAlarm(alarm: Alarm) {
-        performSnoozeAction(alarm)
-        if (alarm.snoozeCount > 0) {
-            val updatedAlarm = alarm.copy(
-                snoozeCount = 0
-            )
-            alarmController.updateAlarm(updatedAlarm)
-        }
-        stopSelf()
+    private fun startMediaPlayback(sound: String?) {
+        mediaPlayerManager.prepare(sound, true)
+        mediaPlayerManager.start()
     }
 
-    private fun dismissAlarm(alarm: Alarm) {
-        performDismissAction(alarm)
-        stopSelf()
+    private fun stopMediaPlayback() {
+        mediaPlayerManager.release()
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
+
+    private fun shouldRepeatAlarm(alarm: Alarm) = alarm.repeatDays.isNotEmpty()
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -145,12 +148,16 @@ class AlarmService : Service() {
     override fun onDestroy() {
         serviceScope.cancel()
         notificationManager.removeAlarmUpcomingNotification()
-        mediaPlayerManager.release()
+        stopMediaPlayback()
+        activeAlarmId = null
     }
 
     companion object {
         const val ACTION_START = "ACTION_START_ALARM"
         const val ACTION_SNOOZE = "ACTION_SNOOZE_ALARM"
         const val ACTION_DISMISS = "ACTION_DISMISS_ALARM"
+        const val ACTION_DISABLE = "ACTION_DISABLE_ALARM"
+
+        private var activeAlarmId: Long? = null
     }
 }

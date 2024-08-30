@@ -2,7 +2,7 @@ package com.daisy.jetclock.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.daisy.jetclock.core.manager.AlarmController
+import com.daisy.jetclock.core.manager.AlarmActionManager
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.DayOfWeek
 import com.daisy.jetclock.domain.TimeUntilAlarm
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
-    private val alarmController: AlarmController,
+    private val alarmActionManager: AlarmActionManager,
     val toastManager: ToastManager,
 ) : ViewModel(), AlarmDataCallback {
     val alarms = repository.getAllAlarms()
@@ -44,8 +44,6 @@ class AlarmViewModel @Inject constructor(
     private var refreshJob: Job? = null
 
     init {
-        alarmController.setAlarmDataCallback(this)
-
         viewModelScope.launch {
             alarms.collectLatest { alarmList ->
                 updateNextAlarm(alarmList)
@@ -66,14 +64,11 @@ class AlarmViewModel @Inject constructor(
 
     fun changeCheckedState(alarm: Alarm, isEnabled: Boolean) = viewModelScope.launch {
         scheduleAlarm(alarm)
-        repository.insertAlarm(alarm.also { it.isEnabled = isEnabled })
         updateNextAlarm(alarms.value)
     }
 
     fun deleteAlarm(alarm: Alarm) = viewModelScope.launch {
-        repository.deleteAlarm(alarm.id)
-
-        alarmController.delete(alarm)
+        alarmActionManager.delete(alarm)
     }
 
     fun getTimeString(hour: Int, minute: Int): String {
@@ -124,12 +119,12 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
-    private fun scheduleAlarm(alarm: Alarm) {
+    private suspend fun scheduleAlarm(alarm: Alarm) {
         if (alarm.isEnabled) {
-            alarmController.cancel(alarm)
+            alarmActionManager.cancel(alarm)
             clearToastMessage()
         } else {
-            val timeInMillis = alarmController.schedule(alarm)
+            val timeInMillis = alarmActionManager.schedule(alarm)
             _toastMessage.value = getTimeLeftUntilAlarm(timeInMillis)
         }
     }

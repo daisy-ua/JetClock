@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.NewAlarmDefaults
-import com.daisy.jetclock.core.manager.AlarmController
+import com.daisy.jetclock.core.manager.AlarmActionManager
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.RepeatDays
 import com.daisy.jetclock.domain.RingDurationOption
@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NewAlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
-    private val alarmController: AlarmController,
+    private val alarmActionManager: AlarmActionManager,
     val toastManager: ToastManager,
 ) : ViewModel() {
     private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(NewAlarmDefaults.getNewAlarm())
@@ -133,17 +133,11 @@ class NewAlarmViewModel @Inject constructor(
     }
 
     fun saveAlarm(callback: () -> Unit) = viewModelScope.launch {
-        var updatedAlarm = getUpdatedAlarm()
+        val updatedAlarm = getUpdatedAlarm()
         if (isSaving.compareAndSet(false, true)) {
             try {
-                val newId = repository.insertAlarm(updatedAlarm)
-                if (updatedAlarm.id == NewAlarmDefaults.NEW_ALARM_ID) {
-                    updatedAlarm = updatedAlarm.copy(id = newId)
-                }
-                if (_alarm.value.isEnabled && _alarm.value.id != NewAlarmDefaults.NEW_ALARM_ID) {
-                    alarmController.cancel(_alarm.value)
-                }
-                _toastMessage.value = getTimeLeftUntilAlarm(alarmController.schedule(updatedAlarm))
+                val timeInMillis = alarmActionManager.reschedule(updatedAlarm, _alarm.value)
+                _toastMessage.value = getTimeLeftUntilAlarm(timeInMillis)
                 delay(100L)
             } finally {
                 isSaving.set(false)
@@ -153,8 +147,7 @@ class NewAlarmViewModel @Inject constructor(
     }
 
     fun deleteAlarm(callback: () -> Unit) = viewModelScope.launch {
-        repository.deleteAlarm(_alarm.value.id)
-        alarmController.delete(_alarm.value)
+        alarmActionManager.delete(_alarm.value)
         delay(100L)
         callback.invoke()
     }

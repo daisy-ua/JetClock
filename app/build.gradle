@@ -94,6 +94,9 @@ dependencies {
 
 //    Background tasks
     implementation "androidx.work:work-runtime-ktx:$work_version"
+
+//    Permission
+    implementation "com.google.accompanist:accompanist-permissions:0.30.1"
 }
 
 kapt {

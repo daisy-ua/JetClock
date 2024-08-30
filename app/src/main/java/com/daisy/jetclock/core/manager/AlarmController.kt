@@ -1,48 +1,62 @@
 package com.daisy.jetclock.core.manager
 
+import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.utils.AlarmDataCallback
+import com.daisy.jetclock.repositories.AlarmRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AlarmController @Inject constructor(
     private val alarmSchedulerManager: AlarmSchedulerManager,
+    private val alarmRepository: AlarmRepository,
 ) {
-    private var dataCallback: AlarmDataCallback? = null
-
-    fun setAlarmDataCallback(callback: AlarmDataCallback?) {
-        this.dataCallback = callback
-    }
-
-    fun schedule(alarm: Alarm): Long {
+    suspend fun schedule(alarm: Alarm): Long {
         val timeInMillis = alarmSchedulerManager.schedule(alarm)
-        updateAlarm(alarm, timeInMillis)
+        val updatedAlarm = alarm.copy(triggerTime = timeInMillis, isEnabled = true)
+        updateAlarm(updatedAlarm)
         return timeInMillis
     }
 
-    fun snooze(alarm: Alarm): Alarm {
+    suspend fun reschedule(alarm: Alarm): Long {
+        return schedule(alarm.copy(snoozeCount = 0))
+    }
+
+    suspend fun resetAlarmSnoozeCount(alarm: Alarm) {
+        updateAlarm(alarm.copy(snoozeCount = 0))
+    }
+
+    suspend fun snooze(alarm: Alarm): Alarm {
         val updatedAlarm = alarmSchedulerManager.snooze(alarm)
         updateAlarm(updatedAlarm)
         return updatedAlarm
     }
 
-    fun cancel(alarm: Alarm) {
-        updateAlarm(alarm, null)
+    suspend fun autoSnooze(alarm: Alarm): Alarm {
+        return snooze(alarm.copy(snoozeCount = alarm.snoozeCount + 1))
+    }
+
+    suspend fun cancel(alarm: Alarm) {
+        updateAlarm(alarm.copy(triggerTime = null, snoozeCount = 0, isEnabled = false))
         alarmSchedulerManager.cancel(alarm)
     }
 
-    fun delete(alarm: Alarm) {
+    suspend fun delete(alarm: Alarm) {
+        alarmRepository.deleteAlarm(alarm.id)
         if (alarm.isEnabled) {
             alarmSchedulerManager.cancel(alarm)
         }
     }
 
-    fun updateAlarm(alarm: Alarm) {
-        dataCallback?.onAlarmUpdated(alarm)
+    suspend fun insert(alarm: Alarm): Alarm {
+        val newId = alarmRepository.insertAlarm(alarm)
+        if (alarm.id == NewAlarmDefaults.NEW_ALARM_ID) {
+            return alarm.copy(id = newId)
+        }
+        return alarm
     }
 
-    private fun updateAlarm(alarm: Alarm, timeInMillis: Long?) {
-        dataCallback?.onAlarmUpdated(alarm.apply { triggerTime = timeInMillis })
+    private suspend fun updateAlarm(alarm: Alarm) {
+        alarmRepository.insertAlarm(alarm)
     }
 }
