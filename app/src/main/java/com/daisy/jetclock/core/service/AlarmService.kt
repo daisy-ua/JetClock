@@ -108,7 +108,7 @@ class AlarmService : Service() {
                 autoSnoozeAlarm(alarm)
                 stopSelf()
             }
-        }, alarm.ringDuration * 1 * 1000L)
+        }, alarm.ringDuration * 60 * 1000L)
     }
 
     private suspend fun autoSnoozeAlarm(alarm: Alarm) {

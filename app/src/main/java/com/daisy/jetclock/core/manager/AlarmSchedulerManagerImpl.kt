@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.daisy.jetclock.constants.ConfigConstants
-import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.Alarm
@@ -34,16 +33,7 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
             add(Calendar.MINUTE, alarm.snoozeDuration)
         }
 
-        return alarm.copy(
-            hour = calendar.get(Calendar.HOUR).let { if (it == 0) 12 else it },
-            minute = calendar.get(Calendar.MINUTE),
-            meridiem = when (calendar.get(Calendar.AM_PM)) {
-                Calendar.AM -> MeridiemOption.AM
-                Calendar.PM -> MeridiemOption.PM
-                else -> throw IllegalArgumentException("Unknown Meridiem value")
-            },
-            triggerTime = calendar.timeInMillis
-        ).also {
+        return alarm.copy(triggerTime = calendar.timeInMillis).also {
             val intent = getDefaultIntent(it.id).apply {
                 putExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA, it.timestamp)
             }
