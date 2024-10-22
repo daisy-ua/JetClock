@@ -34,10 +34,6 @@ fun AlarmCard(
     onAlarmClick: (Long) -> Unit,
     viewModel: AlarmViewModel = hiltViewModel(),
 ) {
-    val checkedState = remember {
-        mutableStateOf(item.isEnabled)
-    }
-
     val repeatDaysString by remember {
         val value = viewModel.getRepeatDaysString(item.repeatDays)
         mutableStateOf(value)
@@ -97,10 +93,9 @@ fun AlarmCard(
             }
 
             Switch(
-                checked = checkedState.value,
+                checked = item.isEnabled,
                 onCheckedChange = {
-                    checkedState.value = it
-                    viewModel.changeCheckedState(item, it)
+                    viewModel.changeCheckedState(item)
                 }
             )
         }

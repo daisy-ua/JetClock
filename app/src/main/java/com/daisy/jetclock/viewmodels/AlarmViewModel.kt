@@ -9,7 +9,7 @@ import com.daisy.jetclock.domain.TimeUntilAlarm
 import com.daisy.jetclock.repositories.AlarmRepository
 import com.daisy.jetclock.ui.component.timepicker.TimeFormatter
 import com.daisy.jetclock.utils.AlarmDataCallback
-import com.daisy.jetclock.utils.ToastManager
+import com.daisy.jetclock.utils.ToastStateHandler
 import com.daisy.jetclock.utils.getNextAlarmTime
 import com.daisy.jetclock.utils.getTimeLeftUntilAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,13 +27,10 @@ import javax.inject.Inject
 class AlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
     private val alarmActionManager: AlarmActionManager,
-    val toastManager: ToastManager,
+    val toastStateHandler: ToastStateHandler,
 ) : ViewModel(), AlarmDataCallback {
     val alarms = repository.getAllAlarms()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
-    val toastMessage: StateFlow<String?> get() = _toastMessage
 
     private val _nextAlarm: MutableStateFlow<Alarm?> = MutableStateFlow(null)
     val nextAlarm: StateFlow<Alarm?> get() = _nextAlarm
@@ -62,7 +59,7 @@ class AlarmViewModel @Inject constructor(
         _nextAlarmTime.value = nextAlarmTime
     }
 
-    fun changeCheckedState(alarm: Alarm, isEnabled: Boolean) = viewModelScope.launch {
+    fun changeCheckedState(alarm: Alarm) = viewModelScope.launch {
         scheduleAlarm(alarm)
         updateNextAlarm(alarms.value)
     }
@@ -92,10 +89,6 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
-    fun clearToastMessage() {
-        _toastMessage.value = null
-    }
-
     fun startRefreshingNextAlarmTime() {
         if (refreshJob?.isActive == true) return
 
@@ -122,10 +115,10 @@ class AlarmViewModel @Inject constructor(
     private suspend fun scheduleAlarm(alarm: Alarm) {
         if (alarm.isEnabled) {
             alarmActionManager.cancel(alarm)
-            clearToastMessage()
+            toastStateHandler.clearToastMessage()
         } else {
             val timeInMillis = alarmActionManager.schedule(alarm)
-            _toastMessage.value = getTimeLeftUntilAlarm(timeInMillis)
+            toastStateHandler.setToastMessage(getTimeLeftUntilAlarm(timeInMillis))
         }
     }
 

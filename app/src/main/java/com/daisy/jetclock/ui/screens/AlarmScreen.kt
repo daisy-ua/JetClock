@@ -11,6 +11,7 @@ import com.daisy.jetclock.ui.component.alarm.AlarmList
 import com.daisy.jetclock.ui.component.alarm.NextAlarmCard
 import com.daisy.jetclock.ui.component.scaffold.JetClockFloatingActionButton
 import com.daisy.jetclock.ui.component.scaffold.JetClockTopAppBar
+import com.daisy.jetclock.ui.component.utils.ToastHandler
 import com.daisy.jetclock.ui.theme.JetClockTheme
 import com.daisy.jetclock.viewmodels.AlarmViewModel
 
@@ -31,6 +32,7 @@ fun AlarmScreen(
         Column {
             NextAlarmCard(viewModel, onAlarmClick)
             AlarmList(viewModel, onAlarmClick)
+            ToastHandler(viewModel = viewModel)
         }
     }
 }

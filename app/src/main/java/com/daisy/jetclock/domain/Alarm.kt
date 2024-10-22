@@ -14,9 +14,9 @@ data class Alarm(
 
     val repeatDays: List<DayOfWeek>,
 
-    var isEnabled: Boolean,
+    val isEnabled: Boolean,
 
-    var triggerTime: Long?,
+    val triggerTime: Long?,
 
     val label: String,
 

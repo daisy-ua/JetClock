@@ -1,7 +1,9 @@
 package com.daisy.jetclock.ui.component.alarm
 
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.DismissDirection
@@ -28,6 +30,7 @@ import com.daisy.jetclock.ui.component.animations.updateAnimatedItemsState
 import com.daisy.jetclock.viewmodels.AlarmViewModel
 import kotlin.math.absoluteValue
 
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlarmList(
@@ -44,16 +47,6 @@ fun AlarmList(
     LaunchedEffect(animatedList) {
         if (showAnimation) {
             showAnimation = false
-        }
-    }
-
-    val toastMessage by viewModel.toastMessage.collectAsState()
-    val toastManager = viewModel.toastManager
-
-    LaunchedEffect(toastMessage) {
-        toastManager.clearToast()
-        toastMessage?.let {
-            toastManager.showToast(it, viewModel::clearToastMessage)
         }
     }
 
