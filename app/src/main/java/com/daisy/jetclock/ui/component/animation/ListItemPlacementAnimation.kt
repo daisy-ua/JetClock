@@ -1,4 +1,4 @@
-package com.daisy.jetclock.ui.component.animations
+package com.daisy.jetclock.ui.component.animation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
