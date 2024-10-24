@@ -1,8 +1,10 @@
 package com.daisy.jetclock.domain
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.Immutable
 import com.daisy.jetclock.constants.MeridiemOption
 
+@Immutable
 data class Alarm(
     val id: Long,
 
