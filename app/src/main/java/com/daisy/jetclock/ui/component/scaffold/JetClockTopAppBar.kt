@@ -13,8 +13,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun JetClockTopAppBar(
     title: String = "Alarm",
+    modifier: Modifier = Modifier,
 ) {
     TopAppBar(
+        modifier = modifier,
         title = {
             Text(
                 text = title,

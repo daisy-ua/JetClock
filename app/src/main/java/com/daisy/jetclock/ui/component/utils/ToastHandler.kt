@@ -2,15 +2,15 @@ package com.daisy.jetclock.ui.component.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.daisy.jetclock.viewmodels.AlarmViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.daisy.jetclock.utils.toast.ToastStateHandler
 
 @Composable
-fun ToastHandler(viewModel: AlarmViewModel) {
-    val toastMessage by viewModel.toastStateHandler.toastMessage.collectAsState()
+fun ToastHandler(toastStateHandler: ToastStateHandler) {
+    val toastMessage by toastStateHandler.toastMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(toastMessage) {
-        viewModel.toastStateHandler.triggerToast()
+        toastStateHandler.triggerToast()
     }
 }

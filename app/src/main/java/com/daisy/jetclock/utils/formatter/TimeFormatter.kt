@@ -1,4 +1,4 @@
-package com.daisy.jetclock.ui.component.timepicker
+package com.daisy.jetclock.utils.formatter
 
 import com.daisy.jetclock.constants.TimeFormat
 

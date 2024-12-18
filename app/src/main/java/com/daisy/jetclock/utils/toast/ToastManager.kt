@@ -1,4 +1,4 @@
-package com.daisy.jetclock.utils
+package com.daisy.jetclock.utils.toast
 
 import android.content.Context
 import android.widget.Toast

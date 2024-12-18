@@ -1,4 +1,4 @@
-package com.daisy.jetclock.utils
+package com.daisy.jetclock.utils.nextalarm
 
 import com.daisy.jetclock.domain.Alarm
 import com.daisy.jetclock.domain.TimeUntilAlarm

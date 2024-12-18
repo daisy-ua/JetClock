@@ -18,11 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.utils.formatter.AlarmFormatter
 import com.daisy.jetclock.viewmodels.AlarmViewModel
 
 
@@ -31,15 +33,22 @@ fun AlarmCard(
     item: Alarm,
     viewModel: AlarmViewModel = hiltViewModel(),
 ) {
-    val repeatDaysString by rememberUpdatedState(viewModel.getRepeatDaysString(item.repeatDays))
+    val context = LocalContext.current
+
+    val repeatDaysString by rememberUpdatedState(
+        AlarmFormatter.getRepeatDaysString(
+            context,
+            item.repeatDays
+        )
+    )
 
     val timeString by remember(item.hour, item.minute) {
-        mutableStateOf(viewModel.getTimeString(item.hour, item.minute))
+        mutableStateOf(AlarmFormatter.getTimeString(context, item.hour, item.minute))
     }
 
     val changeCheckedState: (Alarm) -> Unit = remember {
-        {
-            alarm -> viewModel.changeCheckedState(alarm)
+        { alarm ->
+            viewModel.changeCheckedState(alarm)
         }
     }
 

@@ -15,17 +15,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.daisy.jetclock.constants.NewAlarmDefaults
@@ -34,47 +30,34 @@ import com.daisy.jetclock.ui.theme.AfricanViolet
 import com.daisy.jetclock.ui.theme.Platinum
 import com.daisy.jetclock.ui.theme.PortGore
 import com.daisy.jetclock.ui.theme.UltraViolet
-import com.daisy.jetclock.viewmodels.AlarmViewModel
 
 @Composable
 fun NextAlarmCard(
-    viewModel: AlarmViewModel = hiltViewModel(),
+    alarm: Alarm?,
+    alarmTime: String,
+    ringInTime: String,
     onClick: (Long) -> Unit,
+    onStartRefreshing: () -> Unit,
+    onStopRefreshing: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val nextAlarm by viewModel.nextAlarm.collectAsState()
-    val nextAlarmTime by viewModel.nextAlarmTime.collectAsState()
 
     LaunchedEffect(Unit) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.startRefreshingNextAlarmTime()
+            onStartRefreshing()
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         onDispose {
-            viewModel.stopRefreshingNextAlarmTime()
+            onStopRefreshing()
         }
     }
 
-    NextAlarmCardContent(
-        alarm = nextAlarm,
-        alarmTime = nextAlarm?.let { viewModel.getTimeString(it.hour, it.minute) } ?: "",
-        ringInTime = nextAlarmTime ?: "No alarm scheduled.",
-        onClick = onClick
-    )
-}
-
-@Composable
-fun NextAlarmCardContent(
-    alarm: Alarm?,
-    alarmTime: String,
-    ringInTime: String,
-    onClick: (Long) -> Unit,
-) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 12.dp, vertical = 16.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
@@ -124,10 +107,4 @@ fun NextAlarmCardContent(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NextAlarmCardPreview() {
-    NextAlarmCard(onClick = {})
 }

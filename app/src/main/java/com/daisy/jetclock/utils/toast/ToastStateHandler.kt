@@ -1,4 +1,4 @@
-package com.daisy.jetclock.utils
+package com.daisy.jetclock.utils.toast
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -11,8 +11,8 @@ import com.daisy.jetclock.domain.RingDurationOption
 import com.daisy.jetclock.domain.SnoozeOption
 import com.daisy.jetclock.domain.TimeOfDay
 import com.daisy.jetclock.repositories.AlarmRepository
-import com.daisy.jetclock.utils.ToastManager
-import com.daisy.jetclock.utils.getTimeLeftUntilAlarm
+import com.daisy.jetclock.utils.toast.ToastManager
+import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

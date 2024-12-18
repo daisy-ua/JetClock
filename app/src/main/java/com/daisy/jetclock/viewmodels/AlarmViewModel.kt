@@ -4,18 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.core.manager.AlarmActionManager
 import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.domain.DayOfWeek
-import com.daisy.jetclock.domain.TimeUntilAlarm
 import com.daisy.jetclock.repositories.AlarmRepository
-import com.daisy.jetclock.ui.component.timepicker.TimeFormatter
 import com.daisy.jetclock.utils.AlarmDataCallback
-import com.daisy.jetclock.utils.ToastStateHandler
-import com.daisy.jetclock.utils.getNextAlarmTime
-import com.daisy.jetclock.utils.getTimeLeftUntilAlarm
+import com.daisy.jetclock.utils.nextalarm.NextAlarmHandler
+import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
+import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -27,65 +23,22 @@ import javax.inject.Inject
 class AlarmViewModel @Inject constructor(
     private val repository: AlarmRepository,
     private val alarmActionManager: AlarmActionManager,
+    private val nextAlarmHandler: NextAlarmHandler,
     val toastStateHandler: ToastStateHandler,
 ) : ViewModel(), AlarmDataCallback {
     val alarms = repository.getAllAlarms()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    private val _nextAlarm: MutableStateFlow<Alarm?> = MutableStateFlow(null)
-    val nextAlarm: StateFlow<Alarm?> get() = _nextAlarm
-
-    private val _nextAlarmTime: MutableStateFlow<String?> = MutableStateFlow(null)
-    val nextAlarmTime: StateFlow<String?> get() = _nextAlarmTime
+    val nextAlarm: StateFlow<Alarm?> get() = nextAlarmHandler.nextAlarm
+    val nextAlarmTime: StateFlow<String?> get() = nextAlarmHandler.nextAlarmTime
 
     private var refreshJob: Job? = null
 
     init {
         viewModelScope.launch {
             alarms.collectLatest { alarmList ->
-                updateNextAlarm(alarmList)
+                nextAlarmHandler.updateNextAlarm(alarmList)
             }
-        }
-    }
-
-    private fun updateNextAlarm(alarmList: List<Alarm>) {
-        val (nextAlarm, nextAlarmTime) = getNextAlarmTime(alarmList)
-            ?: Pair(
-                null,
-                null
-            )
-
-        _nextAlarm.value = nextAlarm
-        _nextAlarmTime.value = nextAlarmTime
-    }
-
-    fun changeCheckedState(alarm: Alarm) = viewModelScope.launch {
-        scheduleAlarm(alarm)
-        updateNextAlarm(alarms.value)
-    }
-
-    fun deleteAlarm(alarm: Alarm) = viewModelScope.launch {
-        alarmActionManager.delete(alarm)
-    }
-
-    fun getTimeString(hour: Int, minute: Int): String {
-        return "$hour:${TimeFormatter.convertTwoCharTime(minute)}"
-    }
-
-    fun getRepeatDaysString(repeatDays: List<DayOfWeek>): String {
-        return when {
-            repeatDays.isEmpty() -> "Ring only once"
-
-            repeatDays.size == 7 -> "Everyday"
-
-            repeatDays.size == 5 && !repeatDays.containsAll(
-                listOf(
-                    DayOfWeek.SATURDAY,
-                    DayOfWeek.SUNDAY
-                )
-            ) -> "Monday to Friday"
-
-            else -> repeatDays.joinToString { day -> day.abbr }
         }
     }
 
@@ -94,7 +47,7 @@ class AlarmViewModel @Inject constructor(
 
         refreshJob = viewModelScope.launch {
             while (true) {
-                updateNextAlarmTime()
+                nextAlarmHandler.updateNextAlarmTime()
                 val now = System.currentTimeMillis()
                 val delayUntilNextMinute = 60000 - (now % 60000)
                 delay(delayUntilNextMinute)
@@ -112,6 +65,15 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
+    fun changeCheckedState(alarm: Alarm) = viewModelScope.launch {
+        scheduleAlarm(alarm)
+        nextAlarmHandler.updateNextAlarm(alarms.value)
+    }
+
+    fun deleteAlarm(alarm: Alarm) = viewModelScope.launch {
+        alarmActionManager.delete(alarm)
+    }
+
     private suspend fun scheduleAlarm(alarm: Alarm) {
         if (alarm.isEnabled) {
             alarmActionManager.cancel(alarm)
@@ -119,13 +81,6 @@ class AlarmViewModel @Inject constructor(
         } else {
             val timeInMillis = alarmActionManager.schedule(alarm)
             toastStateHandler.setToastMessage(getTimeLeftUntilAlarm(timeInMillis))
-        }
-    }
-
-    private fun updateNextAlarmTime() {
-        val time = nextAlarm.value?.triggerTime
-        time?.let {
-            _nextAlarmTime.value = TimeUntilAlarm(it).getTimeUntil()
         }
     }
 }

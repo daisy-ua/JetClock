@@ -30,6 +30,7 @@ import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
 import com.daisy.jetclock.domain.TimeOfDay
 import com.daisy.jetclock.ui.theme.JetClockTheme
+import com.daisy.jetclock.utils.formatter.TimeFormatter
 
 private val meridiemOptions = listOf("", "", MeridiemOption.AM.name, MeridiemOption.PM.name, "", "")
 
