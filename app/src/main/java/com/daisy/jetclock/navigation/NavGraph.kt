@@ -18,7 +18,7 @@ import com.daisy.jetclock.navigation.MainDestinations.ALARM_ROUTE
 import com.daisy.jetclock.navigation.MainDestinations.SELECT_SOUND_ROUTE
 import com.daisy.jetclock.ui.screens.AlarmScreen
 import com.daisy.jetclock.ui.screens.SelectSoundScreen
-import com.daisy.jetclock.ui.screens.SetAlarmScreen
+import com.daisy.jetclock.ui.screens.AlarmDetailsScreen
 
 
 @Composable
@@ -61,7 +61,7 @@ fun NavGraph(
             viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
                 "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
             }
-            SetAlarmScreen(
+            AlarmDetailsScreen(
                 alarmId = currentAlarmId,
                 onSelectSoundClicked = { actions.navigateToSelectSoundScreen(backStackEntry) },
                 onUpClick = { actions.navigateUp(backStackEntry) },

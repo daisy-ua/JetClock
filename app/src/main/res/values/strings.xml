@@ -10,4 +10,12 @@
     <string name="no_alarms_message">No alarms created yet.\nTap the + button to add a new alarm.</string>
     <string name="no_alarm_scheduled_message">No alarm scheduled.</string>
 
+    <string name="set_alarm">Set alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
+    <string name="sound">Sound</string>
+    <string name="label">Label</string>
+    <string name="repeat">Repeat</string>
+    <string name="ring_duration">Ring duration</string>
+    <string name="snooze_duration">Snooze duration</string>
+
 </resources>
