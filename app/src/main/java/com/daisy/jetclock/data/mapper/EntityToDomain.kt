@@ -2,8 +2,13 @@ package com.daisy.jetclock.data.mapper
 
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
-import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.data.local.entity.AlarmEntity
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.RepeatDays
+import com.daisy.jetclock.domain.model.RingDurationOption
+import com.daisy.jetclock.domain.model.SnoozeOption
+import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.model.TimeOfDay
 
 fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format): Alarm {
     val hour24 = time.hour
@@ -18,17 +23,14 @@ fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format
 
     return Alarm(
         id = id,
-        hour = hour,
-        minute = time.minute,
-        meridiem = amPm,
-        repeatDays = repeatDays,
+        time = TimeOfDay(hour, time.minute, amPm),
+        repeatDays = RepeatDays(repeatDays),
         isEnabled = isEnabled,
         triggerTime = triggerTime,
         label = label,
-        ringDuration = ringDuration,
-        snoozeDuration = snoozeDuration,
-        snoozeNumber = snoozeNumber,
+        ringDurationOption = RingDurationOption(ringDuration),
+        snoozeOption = SnoozeOption(snoozeDuration, snoozeNumber),
         snoozeCount = snoozeCount,
-        sound = sound
+        soundOption = SoundOption(sound)
     )
 }

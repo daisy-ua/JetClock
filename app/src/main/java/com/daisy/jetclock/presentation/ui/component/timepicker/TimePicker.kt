@@ -41,7 +41,7 @@ private val meridiemOptions = listOf("", "", MeridiemOption.AM.name, MeridiemOpt
 @Composable
 fun TimePicker(
     initialTimeValue: TimeOfDay,
-    onValueChange: (Int, Int, MeridiemOption?) -> Unit,
+    onValueChange: (TimeOfDay) -> Unit,
     modifier: Modifier = Modifier,
     timeFormat: TimeFormat = TimeFormat.Hour12Format,
     soundEnabled: Boolean = false,
@@ -61,18 +61,18 @@ fun TimePicker(
 
     fun handleHourChange(hourIndex: Int) {
         hourValue = timeFormatter.hoursRange[hourIndex]
-        onValueChange(hourValue, minuteValue, meridiemValue)
+        onValueChange(TimeOfDay(hourValue, minuteValue, meridiemValue))
     }
 
     fun handleMinuteChange(minuteIndex: Int) {
         minuteValue = minuteIndex
-        onValueChange(hourValue, minuteValue, meridiemValue)
+        onValueChange(TimeOfDay(hourValue, minuteValue, meridiemValue))
     }
 
     fun handleMeridiemChange(meridiem: Int) {
         val newValue = MeridiemOption.valueOf(meridiemOptions[meridiem])
         meridiemValue = newValue
-        onValueChange(hourValue, minuteValue, meridiemValue)
+        onValueChange(TimeOfDay(hourValue, minuteValue, meridiemValue))
     }
 
     LaunchedEffect(initialTimeValue) {

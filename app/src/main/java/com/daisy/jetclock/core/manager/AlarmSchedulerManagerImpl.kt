@@ -19,7 +19,7 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
 
     override fun schedule(alarm: Alarm): Long {
         val calendar: Calendar = AlarmDateCalculator.calculateAlarmTriggerTime(alarm).apply {
-            val nextDayOffset = AlarmDateCalculator.getNextAvailableDay(this, alarm.repeatDays)
+            val nextDayOffset = AlarmDateCalculator.getNextAvailableDay(this, alarm.repeatDays.days)
             add(Calendar.DAY_OF_MONTH, nextDayOffset)
         }
         schedule(calendar.timeInMillis, alarm, getDefaultIntent(alarm.id))
@@ -30,7 +30,7 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
     override fun snooze(alarm: Alarm): Alarm {
         val calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            add(Calendar.MINUTE, alarm.snoozeDuration)
+            add(Calendar.MINUTE, alarm.snoozeOption.duration)
         }
 
         return alarm.copy(triggerTime = calendar.timeInMillis).also {

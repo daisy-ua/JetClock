@@ -97,8 +97,8 @@ fun AlarmScreenContent(
                     alarmTime = nextAlarm?.let {
                         AlarmFormatter.getTimeString(
                             context,
-                            it.hour,
-                            it.minute
+                            it.time.hour,
+                            it.time.minute
                         )
                     }
                         ?: "",

@@ -23,13 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
-import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
-import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.components.ListRowComponent
 import com.daisy.jetclock.presentation.ui.component.dialog.SetAlarmLabelDialog
@@ -62,8 +60,8 @@ fun AlarmDetailsScreen(
     LaunchedEffect(alarmId) {
         viewModel.updateScreenData(alarmId)
 
-        viewModel.setUpdateSoundViewModelCallback { soundFile ->
-            soundViewModel.updateSelectedSound(soundFile)
+        viewModel.setUpdateSoundViewModelCallback { soundOption ->
+            soundViewModel.updateSelectedSound(soundOption)
         }
     }
 
@@ -71,8 +69,8 @@ fun AlarmDetailsScreen(
     val sound by soundViewModel.selectedSound.collectAsStateWithLifecycle()
 
     LaunchedEffect(sound) {
-        if (sound.soundFile != alarm.sound) {
-            viewModel.updateSoundFile(sound.soundFile)
+        if (sound != alarm.soundOption) {
+            viewModel.updateSoundFile(sound)
         }
     }
 
@@ -82,8 +80,8 @@ fun AlarmDetailsScreen(
 
     HandleDialogs(
         label = alarm.label,
-        ringDuration = RingDurationOption(alarm.ringDuration),
-        snoozeDuration = with(alarm) { SnoozeOption(snoozeDuration, snoozeNumber) },
+        ringDuration = alarm.ringDurationOption,
+        snoozeDuration = alarm.snoozeOption,
         showDialogType = showDialogType,
         onDialogDismiss = { showDialogType = DialogType.NONE },
         onSubmit = { updatedValue, dialogType ->
@@ -91,13 +89,9 @@ fun AlarmDetailsScreen(
             showDialogType = DialogType.NONE
         })
 
-    val onUpdateSelectedTime: (Int, Int, MeridiemOption?) -> Unit = remember {
-        { hour, minute, meridiem ->
-            viewModel.updateTime(
-                hour,
-                minute,
-                meridiem
-            )
+    val onUpdateSelectedTime: (TimeOfDay) -> Unit = remember {
+        { time ->
+            viewModel.updateTime(time)
         }
     }
 
@@ -184,7 +178,11 @@ fun HandleDialogs(
     }
 }
 
-fun handleDialogSubmit(dialogType: DialogType, updatedValue: Any, viewModel: AlarmDetailsViewModel) {
+fun handleDialogSubmit(
+    dialogType: DialogType,
+    updatedValue: Any,
+    viewModel: AlarmDetailsViewModel,
+) {
     when (dialogType) {
         DialogType.ALARM_LABEL -> viewModel.updateLabel(updatedValue as String)
         DialogType.RING_DURATION -> viewModel.updateRingDuration(updatedValue as RingDurationOption)
@@ -198,7 +196,7 @@ fun SetAlarmScreenContent(
     alarm: Alarm,
     onSaveAlarm: () -> Unit,
     onDeleteAlarm: () -> Unit,
-    onUpdateSelectedTime: (Int, Int, MeridiemOption?) -> Unit,
+    onUpdateSelectedTime: (TimeOfDay) -> Unit,
     onUpdateRepeatDays: (RepeatDays) -> Unit,
     onSelectSoundClicked: () -> Unit,
     onUpClick: () -> Unit,
@@ -209,7 +207,7 @@ fun SetAlarmScreenContent(
         topBar = {
             JetClockFuncTopAppBar(
                 title = stringResource(
-                    id = if (alarm.id == NewAlarmDefaults.NEW_ALARM_ID)
+                    id = if (isNewAlarm(alarm.id))
                         R.string.set_alarm
                     else R.string.edit_alarm
                 ),
@@ -218,7 +216,7 @@ fun SetAlarmScreenContent(
             )
         },
         floatingActionButton = {
-            if (alarm.id != NewAlarmDefaults.NEW_ALARM_ID) {
+            if (!isNewAlarm(alarm.id)) {
                 TextFloatingActionButton(
                     onItemClick = onDeleteAlarm,
                     Modifier.padding(bottom = 8.dp)
@@ -232,19 +230,19 @@ fun SetAlarmScreenContent(
                 .fillMaxSize()
         ) {
             TimePicker(
-                initialTimeValue = with(alarm) { TimeOfDay(hour, minute, meridiem) },
+                initialTimeValue = alarm.time,
                 onValueChange = onUpdateSelectedTime,
                 modifier = Modifier.padding(top = 4.dp, bottom = 26.dp, start = 16.dp, end = 16.dp),
                 soundEnabled = true,
             )
 
-            RepeatSetting(darkThemeEnabled, RepeatDays(alarm.repeatDays), onUpdateRepeatDays)
+            RepeatSetting(darkThemeEnabled, alarm.repeatDays, onUpdateRepeatDays)
 
             LazyColumn {
                 item {
                     SettingRow(
                         stringResource(id = R.string.sound),
-                        SoundOption(alarm.sound).displayName,
+                        alarm.soundOption.displayName,
                         onSelectSoundClicked
                     )
                 }
@@ -258,7 +256,7 @@ fun SetAlarmScreenContent(
                 item {
                     SettingRow(
                         stringResource(id = R.string.ring_duration),
-                        RingDurationOption(alarm.ringDuration).displayString
+                        alarm.ringDurationOption.displayString
                     ) {
                         onShowDialogTypeChanged(DialogType.RING_DURATION)
                     }
@@ -267,7 +265,7 @@ fun SetAlarmScreenContent(
                 item {
                     SettingRow(
                         stringResource(id = R.string.snooze_duration),
-                        SnoozeOption(alarm.snoozeDuration, alarm.snoozeNumber).displayString
+                        alarm.snoozeOption.displayString
                     ) {
                         onShowDialogTypeChanged(DialogType.SNOOZE_DURATION)
                     }
@@ -275,6 +273,10 @@ fun SetAlarmScreenContent(
             }
         }
     }
+}
+
+private fun isNewAlarm(id: Long): Boolean {
+    return id == NewAlarmDefaults.NEW_ALARM_ID
 }
 
 @Composable

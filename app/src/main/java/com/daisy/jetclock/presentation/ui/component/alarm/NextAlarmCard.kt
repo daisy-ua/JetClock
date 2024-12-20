@@ -90,7 +90,7 @@ fun NextAlarmCard(
                         color = Platinum
                     )
                     Text(
-                        text = alarm?.meridiem?.name ?: "",
+                        text = alarm?.time?.meridiem?.name ?: "",
                         style = MaterialTheme.typography.h5,
                         fontWeight = FontWeight.Bold,
                         color = Platinum,

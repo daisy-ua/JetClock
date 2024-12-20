@@ -64,7 +64,7 @@ fun SelectSoundScreen(
         val soundFile = if (soundSelectedIndex == -1) null
         else sounds[soundSelectedIndex]
 
-        viewModel.updateSelectedSound(soundFile)
+        viewModel.updateSelectedSound(SoundOption(soundFile))
         onUpClick()
     }
 

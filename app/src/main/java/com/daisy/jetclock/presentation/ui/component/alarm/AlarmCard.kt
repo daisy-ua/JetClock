@@ -38,12 +38,12 @@ fun AlarmCard(
     val repeatDaysString by rememberUpdatedState(
         AlarmFormatter.getRepeatDaysString(
             context,
-            item.repeatDays
+            item.repeatDays.days
         )
     )
 
-    val timeString by remember(item.hour, item.minute) {
-        mutableStateOf(AlarmFormatter.getTimeString(context, item.hour, item.minute))
+    val timeString by remember(item.time.hour, item.time.minute) {
+        mutableStateOf(AlarmFormatter.getTimeString(context, item.time.hour, item.time.minute))
     }
 
     val changeCheckedState: (Alarm) -> Unit = remember {
@@ -66,7 +66,7 @@ fun AlarmCard(
                     style = MaterialTheme.typography.h5,
                     fontWeight = FontWeight.Medium
                 )
-                item.meridiem?.let { meridiem ->
+                item.time.meridiem?.let { meridiem ->
                     Text(
                         text = meridiem.name,
                         fontWeight = FontWeight.Medium,

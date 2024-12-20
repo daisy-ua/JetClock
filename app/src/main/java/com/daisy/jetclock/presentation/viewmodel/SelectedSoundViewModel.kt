@@ -12,7 +12,7 @@ class SelectedSoundViewModel @Inject constructor() : ViewModel() {
     private val _selectedSound: MutableStateFlow<SoundOption> = MutableStateFlow(SoundOption())
     val selectedSound: StateFlow<SoundOption> get() = _selectedSound
 
-    fun updateSelectedSound(soundFile: String?) {
-        _selectedSound.value = SoundOption(soundFile)
+    fun updateSelectedSound(sound: SoundOption) {
+        _selectedSound.value = sound
     }
 }

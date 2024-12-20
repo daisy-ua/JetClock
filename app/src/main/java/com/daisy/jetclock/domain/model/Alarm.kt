@@ -1,20 +1,14 @@
 package com.daisy.jetclock.domain.model
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.Immutable
-import com.daisy.jetclock.constants.MeridiemOption
 
 @Immutable
 data class Alarm(
     val id: Long,
 
-    val hour: Int,
+    val time: TimeOfDay,
 
-    val minute: Int,
-
-    val meridiem: MeridiemOption?,
-
-    val repeatDays: List<DayOfWeek>,
+    val repeatDays: RepeatDays,
 
     val isEnabled: Boolean,
 
@@ -22,19 +16,17 @@ data class Alarm(
 
     val label: String,
 
-    val ringDuration: Int,
+    val ringDurationOption: RingDurationOption,
 
-    val snoozeDuration: Int,
+    val snoozeOption: SnoozeOption,
 
-    val snoozeNumber: Int,
-
+// Tracks the number of times alarm has been snoozed
     val snoozeCount: Int,
 
-    val sound: String?,
+    val soundOption: SoundOption,
 ) {
     val timestamp: String
-        @SuppressLint("DefaultLocale")
-        get() = "$hour:${String.format("%02d", minute)} ${meridiem ?: ""}"
+        get() = time.timestamp
 }
 
 

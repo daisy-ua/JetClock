@@ -63,7 +63,7 @@ class AlarmService : Service() {
     private fun startAlarm(alarm: Alarm, timestamp: String) {
         activeAlarmId = alarm.id
         notificationManager.removeAlarmSnoozedNotification()
-        startMediaPlayback(alarm.sound)
+        startMediaPlayback(alarm.soundOption.soundFile)
 
         val displayTimestamp = timestamp.ifEmpty { alarm.timestamp }
 
@@ -108,11 +108,11 @@ class AlarmService : Service() {
                 autoSnoozeAlarm(alarm)
                 stopSelf()
             }
-        }, alarm.ringDuration * 60 * 1000L)
+        }, alarm.ringDurationOption.value * 60 * 1000L)
     }
 
     private suspend fun autoSnoozeAlarm(alarm: Alarm) {
-        if (alarm.snoozeCount < alarm.snoozeNumber) {
+        if (alarm.snoozeCount < alarm.snoozeOption.number) {
             alarmController.autoSnooze(alarm)
         } else {
             performDismissAction(alarm)
@@ -139,7 +139,7 @@ class AlarmService : Service() {
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
-    private fun shouldRepeatAlarm(alarm: Alarm) = alarm.repeatDays.isNotEmpty()
+    private fun shouldRepeatAlarm(alarm: Alarm) = alarm.repeatDays.days.isNotEmpty()
 
     override fun onBind(p0: Intent?): IBinder? {
         return null

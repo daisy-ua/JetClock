@@ -37,18 +37,20 @@ object AlarmDateCalculator {
     fun calculateAlarmTriggerTime(alarm: Alarm): Calendar {
         return Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            if (alarm.meridiem == null) {
-                set(
-                    Calendar.HOUR_OF_DAY,
-                    alarm.hour.let {
-                        if (it == 12) 0 else it
-                    })
-            } else {
-                set(Calendar.HOUR, alarm.hour)
-                set(Calendar.AM_PM, alarm.meridiem.ordinal)
+            with(alarm.time) {
+                if (meridiem == null) {
+                    set(
+                        Calendar.HOUR_OF_DAY,
+                        hour.let {
+                            if (it == 12) 0 else it
+                        })
+                } else {
+                    set(Calendar.HOUR, hour)
+                    set(Calendar.AM_PM, meridiem.ordinal)
+                }
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
             }
-            set(Calendar.MINUTE, alarm.minute)
-            set(Calendar.SECOND, 0)
         }
     }
 }
