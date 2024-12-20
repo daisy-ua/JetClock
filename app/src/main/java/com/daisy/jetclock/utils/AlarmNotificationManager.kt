@@ -8,7 +8,7 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.daisy.jetclock.MainActivity
+import com.daisy.jetclock.app.MainActivity
 import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.core.IntentExtra

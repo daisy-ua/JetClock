@@ -7,7 +7,7 @@ import android.content.Intent
 import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
-import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.utils.AlarmDateCalculator
 import java.util.Calendar
 import javax.inject.Inject

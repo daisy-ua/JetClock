@@ -1,6 +1,6 @@
 package com.daisy.jetclock.core.manager
 
-import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.domain.model.Alarm
 
 interface AlarmSchedulerManager {
     fun schedule(alarm: Alarm): Long

@@ -1,7 +1,7 @@
 package com.daisy.jetclock.constants
 
-import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.domain.TimeOfDay
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeOfDay
 import java.util.Calendar
 import java.util.TimeZone
 

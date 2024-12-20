@@ -1,7 +1,7 @@
 package com.daisy.jetclock.utils.nextalarm
 
-import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.domain.TimeUntilAlarm
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeUntilAlarm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton

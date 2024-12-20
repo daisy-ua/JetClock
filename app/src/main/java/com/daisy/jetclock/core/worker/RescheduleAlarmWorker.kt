@@ -7,7 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.core.manager.WorkRequestManager
-import com.daisy.jetclock.repositories.AlarmRepository
+import com.daisy.jetclock.domain.repository.AlarmRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException

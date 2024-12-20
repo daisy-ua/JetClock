@@ -6,7 +6,7 @@ import androidx.work.WorkerParameters
 import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.core.manager.WorkRequestManager
 import com.daisy.jetclock.core.worker.RescheduleAlarmWorker
-import com.daisy.jetclock.repositories.AlarmRepository
+import com.daisy.jetclock.domain.repository.AlarmRepository
 import javax.inject.Inject
 
 class RescheduleAlarmWorkerFactory @Inject constructor(

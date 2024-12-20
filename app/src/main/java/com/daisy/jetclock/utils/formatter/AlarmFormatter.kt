@@ -2,7 +2,7 @@ package com.daisy.jetclock.utils.formatter
 
 import android.content.Context
 import com.daisy.jetclock.R
-import com.daisy.jetclock.domain.DayOfWeek
+import com.daisy.jetclock.domain.model.DayOfWeek
 
 object AlarmFormatter {
     fun getTimeString(context: Context, hour: Int, minute: Int): String {

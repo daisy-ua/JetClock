@@ -1,7 +1,7 @@
 package com.daisy.jetclock.utils
 
-import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.domain.DayOfWeek
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.DayOfWeek
 import java.util.Calendar
 import javax.inject.Singleton
 

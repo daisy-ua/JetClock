@@ -5,7 +5,7 @@ import android.content.Intent
 import com.daisy.jetclock.constants.NewAlarmDefaults
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
-import com.daisy.jetclock.domain.Alarm
+import com.daisy.jetclock.domain.model.Alarm
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

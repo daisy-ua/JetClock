@@ -1,7 +1,7 @@
 package com.daisy.jetclock.di
 
-import com.daisy.jetclock.repositories.AlarmRepository
-import com.daisy.jetclock.repositories.AlarmRepositoryImpl
+import com.daisy.jetclock.domain.repository.AlarmRepository
+import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

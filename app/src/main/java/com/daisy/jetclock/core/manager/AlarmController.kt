@@ -1,8 +1,8 @@
 package com.daisy.jetclock.core.manager
 
 import com.daisy.jetclock.constants.NewAlarmDefaults
-import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.repositories.AlarmRepository
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.repository.AlarmRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

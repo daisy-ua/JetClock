@@ -2,8 +2,8 @@ package com.daisy.jetclock.di
 
 import android.content.Context
 import androidx.room.Room
-import com.daisy.jetclock.localdata.dao.AlarmDao
-import com.daisy.jetclock.localdata.database.LocalDatabase
+import com.daisy.jetclock.data.local.dao.AlarmDao
+import com.daisy.jetclock.data.local.database.LocalDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

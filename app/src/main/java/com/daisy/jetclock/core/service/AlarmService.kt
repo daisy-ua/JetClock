@@ -8,8 +8,8 @@ import android.os.Looper
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.NotificationConfig
 import com.daisy.jetclock.core.manager.AlarmController
-import com.daisy.jetclock.domain.Alarm
-import com.daisy.jetclock.repositories.AlarmRepository
+import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.utils.AlarmNotificationManager
 import com.daisy.jetclock.utils.MediaPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
