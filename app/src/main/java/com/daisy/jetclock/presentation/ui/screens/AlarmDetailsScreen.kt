@@ -28,6 +28,7 @@ import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
+import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.components.ListRowComponent
 import com.daisy.jetclock.presentation.ui.component.dialog.SetAlarmLabelDialog
@@ -52,7 +53,7 @@ enum class DialogType {
 fun AlarmDetailsScreen(
     alarmId: Long,
     onUpClick: () -> Unit,
-    onSelectSoundClicked: () -> Unit,
+    onSelectSoundClicked: (String?) -> Unit,
     viewModel: AlarmDetailsViewModel = hiltViewModel<AlarmDetailsViewModel>(),
     soundViewModel: SelectedSoundViewModel = hiltViewModel<SelectedSoundViewModel>(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
@@ -115,7 +116,8 @@ fun AlarmDetailsScreen(
         }
     }
 
-    SetAlarmScreenContent(
+
+    AlarmDetailsScreenContent(
         alarm = alarm,
         onSaveAlarm = onSaveAlarm,
         onDeleteAlarm = onDeleteAlarm,
@@ -192,13 +194,13 @@ fun handleDialogSubmit(
 }
 
 @Composable
-fun SetAlarmScreenContent(
+fun AlarmDetailsScreenContent(
     alarm: Alarm,
     onSaveAlarm: () -> Unit,
     onDeleteAlarm: () -> Unit,
     onUpdateSelectedTime: (TimeOfDay) -> Unit,
     onUpdateRepeatDays: (RepeatDays) -> Unit,
-    onSelectSoundClicked: () -> Unit,
+    onSelectSoundClicked: (String?) -> Unit,
     onUpClick: () -> Unit,
     onShowDialogTypeChanged: (DialogType) -> Unit,
     darkThemeEnabled: Boolean,
@@ -243,8 +245,9 @@ fun SetAlarmScreenContent(
                     SettingRow(
                         stringResource(id = R.string.sound),
                         alarm.soundOption.displayName,
-                        onSelectSoundClicked
-                    )
+                    ) {
+                        onSelectSoundClicked(alarm.soundOption.soundFile)
+                    }
                 }
 
                 item {

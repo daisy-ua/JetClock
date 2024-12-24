@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SelectedSoundViewModel @Inject constructor() : ViewModel() {
-    private val _selectedSound: MutableStateFlow<SoundOption> = MutableStateFlow(SoundOption())
+    private val _selectedSound: MutableStateFlow<SoundOption> = MutableStateFlow(SoundOption.default)
     val selectedSound: StateFlow<SoundOption> get() = _selectedSound
 
     fun updateSelectedSound(sound: SoundOption) {

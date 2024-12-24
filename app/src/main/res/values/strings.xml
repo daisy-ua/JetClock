@@ -19,4 +19,7 @@
     <string name="snooze_duration">Snooze duration</string>
 
     <string name="default_label">Alarm</string>
+
+    <string name="select_sound">Select sound</string>
+    <string name="ringtones_category_classic">CLASSIC RINGTONES</string>
 </resources>

@@ -7,10 +7,6 @@ data class SoundOption(
     val soundFile: String?,
     val displayName: String,
 ) {
-    constructor() : this(
-        soundFile = NewAlarmDefaults.DEFAULT_SOUND_ID,
-        displayName = DEFAULT
-    )
 
     constructor(soundFile: String?) : this(
         soundFile = soundFile,
@@ -22,6 +18,18 @@ data class SoundOption(
 
         const val DEFAULT = "Default"
 
+        val default: SoundOption
+            get() = SoundOption(
+                soundFile = NewAlarmDefaults.DEFAULT_SOUND_ID,
+                displayName = DEFAULT
+            )
+
+        val none: SoundOption
+            get() = SoundOption(
+                soundFile = null,
+                displayName = NONE
+            )
+
         fun getDisplayName(fileName: String?): String {
             return fileName?.let { file ->
                 if (file == NewAlarmDefaults.DEFAULT_SOUND_ID)
@@ -30,12 +38,8 @@ data class SoundOption(
             } ?: NONE
         }
 
-        fun getSoundName(file: String?): String? {
+        private fun getSoundName(file: String?): String? {
             return file?.split(".")?.get(0)
-        }
-
-        fun getAssetFilename(displayName: String): String {
-            return "${ConfigConstants.SOUND_ASSETS_DIR}/$displayName.mp3"
         }
 
         fun getAssetFn(displayName: String): String {
