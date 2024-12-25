@@ -20,7 +20,7 @@ import com.daisy.jetclock.presentation.navigation.MainDestinations.SOUND_ID_KEY
 import com.daisy.jetclock.presentation.ui.screens.AlarmDetailsScreen
 import com.daisy.jetclock.presentation.ui.screens.AlarmScreen
 import com.daisy.jetclock.presentation.ui.screens.SoundSelectionScreen
-import com.daisy.jetclock.presentation.viewmodel.SelectedSoundViewModel
+import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
 
 
 @Composable
@@ -61,22 +61,27 @@ fun NavGraph(
                 popEnterTransition = { null },
                 popExitTransition = exitTransition
             ) { backStackEntry: NavBackStackEntry ->
-                val arguments = requireNotNull(backStackEntry.arguments)
-                val currentAlarmId = arguments.getLong(ALARM_ID_KEY.name)
-
                 val parentBackStackEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(ALARM_DETAILS_GRAPH.name)
                 }
 
+                val viewModel = hiltViewModel<AlarmDetailsViewModel>(parentBackStackEntry)
+                val selectedSound = navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<String?>(SOUND_ID_KEY.name)
+
+                selectedSound?.let { file ->
+                    viewModel.emitSoundFile(file)
+                }
+
                 AlarmDetailsScreen(
-                    alarmId = currentAlarmId,
                     onSelectSoundClicked = { sound ->
                         actions.navigateToSelectSoundScreen(
                             sound,
                             backStackEntry
                         )
                     },
-                    soundViewModel = hiltViewModel(parentBackStackEntry),
+                    viewModel = viewModel,
                     onUpClick = { actions.navigateUp(backStackEntry) },
                 )
             }
@@ -86,26 +91,18 @@ fun NavGraph(
                 arguments = listOf(
                     navArgument(SOUND_ID_KEY.name) {
                         type = NavType.StringType
-                        nullable = true
                     }
                 ),
                 enterTransition = enterTransition,
                 exitTransition = exitTransition
             ) { backStackEntry: NavBackStackEntry ->
-                val arguments = requireNotNull(backStackEntry.arguments)
-                val currentSound = arguments.getString(SOUND_ID_KEY.name)
-
-                val parentBackStackEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry(ALARM_DETAILS_GRAPH.name)
-                }
-
-                val selectedSoundViewModel =
-                    hiltViewModel<SelectedSoundViewModel>(parentBackStackEntry)
-
                 SoundSelectionScreen(
                     onUpClick = { actions.navigateUp(backStackEntry) },
-                    soundFile = currentSound,
-                    onSoundSelected = selectedSoundViewModel::updateSelectedSound
+                    onSoundSelected = { selectedSound ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(SOUND_ID_KEY.name, selectedSound.soundFile)
+                    }
                 )
             }
         }

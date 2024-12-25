@@ -36,7 +36,7 @@ data class AlarmEntity(
     @ColumnInfo(name = "snooze_count")
     val snoozeCount: Int,
 
-    val sound: String?,
+    val sound: String,
 )
 
 

@@ -30,16 +30,11 @@ import com.daisy.jetclock.presentation.viewmodel.SoundSelectionViewModel
 @Composable
 fun SoundSelectionScreen(
     onUpClick: () -> Unit,
-    soundFile: String?,
     onSoundSelected: (SoundOption) -> Unit,
     viewModel: SoundSelectionViewModel = hiltViewModel<SoundSelectionViewModel>(),
 ) {
     val sounds by viewModel.sounds.collectAsStateWithLifecycle()
     val selectedSoundOption by viewModel.selectedSoundOption.collectAsStateWithLifecycle()
-
-    LaunchedEffect(soundFile) {
-        viewModel.updateSelectedSoundOption(SoundOption(soundFile))
-    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 

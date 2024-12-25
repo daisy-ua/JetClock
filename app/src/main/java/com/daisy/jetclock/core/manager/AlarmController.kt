@@ -1,6 +1,6 @@
 package com.daisy.jetclock.core.manager
 
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import javax.inject.Inject
@@ -50,7 +50,7 @@ class AlarmController @Inject constructor(
 
     suspend fun insert(alarm: Alarm): Alarm {
         val newId = alarmRepository.insertAlarm(alarm)
-        if (alarm.id == NewAlarmDefaults.NEW_ALARM_ID) {
+        if (alarm.id == DefaultAlarmConfig.NEW_ALARM_ID) {
             return alarm.copy(id = newId)
         }
         return alarm

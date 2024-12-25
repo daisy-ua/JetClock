@@ -1,10 +1,10 @@
 package com.daisy.jetclock.presentation.viewmodel
 
-import android.content.Context
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.core.manager.AlarmActionManager
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
@@ -13,38 +13,58 @@ import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.domain.repository.AlarmRepository
+import com.daisy.jetclock.presentation.navigation.MainDestinations
 import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
 class AlarmDetailsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle,
+    alarmConfig: DefaultAlarmConfig,
     private val repository: AlarmRepository,
     private val alarmActionManager: AlarmActionManager,
     val toastStateHandler: ToastStateHandler,
 ) : ViewModel() {
-    private val _alarm: MutableStateFlow<Alarm> =
-        MutableStateFlow(NewAlarmDefaults.getNewAlarm(context))
+    private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(alarmConfig.defaultAlarm)
     val alarm: StateFlow<Alarm> get() = _alarm
 
-    fun updateScreenData(id: Long) {
-        if (id == NewAlarmDefaults.NEW_ALARM_ID || _alarm.value.id == id) return
-        viewModelScope.launch {
-            repository.getAlarmById(id).collect {
-                it?.let {
-                    _alarm.value = it
-                    updateSoundViewModelCallback?.invoke(it.soundOption)
+    private val soundFileFlow: MutableSharedFlow<String> = MutableSharedFlow(replay = 1)
+
+    init {
+        initAlarm(savedStateHandle)
+
+        observeSoundFile()
+    }
+
+    private fun initAlarm(savedStateHandle: SavedStateHandle) {
+        val alarmId = savedStateHandle.get<Long>(MainDestinations.ALARM_ID_KEY.name)
+
+        alarmId?.let { id ->
+            viewModelScope.launch {
+                repository.getAlarmById(id).collect {
+                    it?.let {
+                        _alarm.value = it
+                    }
                 }
             }
         }
+    }
+
+    private fun observeSoundFile() = viewModelScope.launch {
+        soundFileFlow
+            .distinctUntilChanged()
+            .collect { soundFile ->
+                updateSoundFile(SoundOption(soundFile))
+            }
     }
 
     fun updateLabel(newLabel: String) {
@@ -67,14 +87,12 @@ class AlarmDetailsViewModel @Inject constructor(
         updateAlarm { copy(time = newTimeOfDay) }
     }
 
-    fun updateSoundFile(newSound: SoundOption) {
-        updateAlarm { copy(soundOption = newSound) }
+    fun emitSoundFile(newSoundFile: String) {
+        soundFileFlow.tryEmit(newSoundFile)
     }
 
-    private var updateSoundViewModelCallback: ((SoundOption) -> Unit)? = null
-
-    fun setUpdateSoundViewModelCallback(callback: (SoundOption) -> Unit) {
-        updateSoundViewModelCallback = callback
+    private fun updateSoundFile(newSound: SoundOption) {
+        updateAlarm { copy(soundOption = newSound) }
     }
 
     private var isSaving: AtomicBoolean = AtomicBoolean(false)

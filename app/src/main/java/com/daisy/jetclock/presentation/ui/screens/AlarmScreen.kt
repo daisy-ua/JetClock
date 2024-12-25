@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.ui.component.alarm.AlarmList
 import com.daisy.jetclock.presentation.ui.component.alarm.NextAlarmCard
@@ -56,7 +56,7 @@ fun AlarmScreen(
         nextAlarm = nextAlarm,
         nextAlarmRingInTime = nextAlarmRingInTime,
         alarmList = alarmList,
-        onNewAlarmClick = { onAlarmClick(NewAlarmDefaults.NEW_ALARM_ID) },
+        onNewAlarmClick = { onAlarmClick(DefaultAlarmConfig.NEW_ALARM_ID) },
         onExistingAlarmClick = onAlarmClick,
         onStartRefreshingNextAlarm = viewModel::startRefreshingNextAlarmTime,
         onStopRefreshingNextAlarm = viewModel::stopRefreshingNextAlarmTime,

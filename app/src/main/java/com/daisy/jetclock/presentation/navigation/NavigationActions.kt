@@ -12,7 +12,7 @@ class NavigationActions(navController: NavHostController) {
         }
     }
 
-    val navigateToSelectSoundScreen = { sound: String?, from: NavBackStackEntry ->
+    val navigateToSelectSoundScreen = { sound: String, from: NavBackStackEntry ->
         if (from.lifecycleIsResumed()) {
             navController.navigate("${MainDestinations.SELECT_SOUND_ROUTE.name}/$sound")
         }

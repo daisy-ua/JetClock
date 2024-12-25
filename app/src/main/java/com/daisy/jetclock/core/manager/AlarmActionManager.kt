@@ -2,7 +2,7 @@ package com.daisy.jetclock.core.manager
 
 import android.content.Context
 import android.content.Intent
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.model.Alarm
@@ -15,7 +15,7 @@ class AlarmActionManager @Inject constructor(
 ) {
     suspend fun reschedule(currentAlarm: Alarm, alarm: Alarm): Long {
         val updatedAlarm = alarmController.insert(currentAlarm)
-        if (alarm.isEnabled && alarm.id != NewAlarmDefaults.NEW_ALARM_ID) {
+        if (alarm.isEnabled && alarm.id != DefaultAlarmConfig.NEW_ALARM_ID) {
             cancel(alarm)
         }
 

@@ -11,7 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,12 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
-import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.components.ListRowComponent
 import com.daisy.jetclock.presentation.ui.component.dialog.SetAlarmLabelDialog
@@ -40,7 +38,6 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.TextFloatingActionB
 import com.daisy.jetclock.presentation.ui.component.timepicker.TimePicker
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
-import com.daisy.jetclock.presentation.viewmodel.SelectedSoundViewModel
 
 enum class DialogType {
     NONE,
@@ -51,29 +48,12 @@ enum class DialogType {
 
 @Composable
 fun AlarmDetailsScreen(
-    alarmId: Long,
     onUpClick: () -> Unit,
-    onSelectSoundClicked: (String?) -> Unit,
+    onSelectSoundClicked: (String) -> Unit,
     viewModel: AlarmDetailsViewModel = hiltViewModel<AlarmDetailsViewModel>(),
-    soundViewModel: SelectedSoundViewModel = hiltViewModel<SelectedSoundViewModel>(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
-    LaunchedEffect(alarmId) {
-        viewModel.updateScreenData(alarmId)
-
-        viewModel.setUpdateSoundViewModelCallback { soundOption ->
-            soundViewModel.updateSelectedSound(soundOption)
-        }
-    }
-
     val alarm by viewModel.alarm.collectAsStateWithLifecycle()
-    val sound by soundViewModel.selectedSound.collectAsStateWithLifecycle()
-
-    LaunchedEffect(sound) {
-        if (sound != alarm.soundOption) {
-            viewModel.updateSoundFile(sound)
-        }
-    }
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -200,7 +180,7 @@ fun AlarmDetailsScreenContent(
     onDeleteAlarm: () -> Unit,
     onUpdateSelectedTime: (TimeOfDay) -> Unit,
     onUpdateRepeatDays: (RepeatDays) -> Unit,
-    onSelectSoundClicked: (String?) -> Unit,
+    onSelectSoundClicked: (String) -> Unit,
     onUpClick: () -> Unit,
     onShowDialogTypeChanged: (DialogType) -> Unit,
     darkThemeEnabled: Boolean,
@@ -279,7 +259,7 @@ fun AlarmDetailsScreenContent(
 }
 
 private fun isNewAlarm(id: Long): Boolean {
-    return id == NewAlarmDefaults.NEW_ALARM_ID
+    return id == DefaultAlarmConfig.NEW_ALARM_ID
 }
 
 @Composable

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.daisy.jetclock.constants.NewAlarmDefaults
+import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.ui.theme.AfricanViolet
 import com.daisy.jetclock.presentation.ui.theme.Platinum
@@ -76,7 +76,7 @@ fun NextAlarmCard(
                     )
                 )
                 .clickable {
-                    onClick(alarm?.id ?: NewAlarmDefaults.NEW_ALARM_ID)
+                    onClick(alarm?.id ?: DefaultAlarmConfig.NEW_ALARM_ID)
                 }
                 .padding(horizontal = 20.dp, vertical = 28.dp)
                 .fillMaxWidth()
