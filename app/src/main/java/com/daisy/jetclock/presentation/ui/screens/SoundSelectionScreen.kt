@@ -26,6 +26,7 @@ import com.daisy.jetclock.R
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.presentation.ui.component.components.TextRadioButtonRowItem
 import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockFuncTopAppBar
+import com.daisy.jetclock.presentation.utils.formatter.SoundOptionFormatter
 import com.daisy.jetclock.presentation.viewmodel.SoundSelectionViewModel
 
 @Composable
@@ -92,7 +93,7 @@ fun SoundSelectionScreenContent(
 
             items(sounds) { sound ->
                 TextRadioButtonRowItem(
-                    name = sound.getDisplayName(context),
+                    name = SoundOptionFormatter.getDisplayName(context, sound),
                     isSelected = isSoundSelected(sound),
                     onItemClick = { onSoundClicked(sound) }
                 )

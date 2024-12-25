@@ -1,6 +1,5 @@
 package com.daisy.jetclock.data.repository
 
-import android.content.res.AssetFileDescriptor
 import com.daisy.jetclock.data.source.AssetDataSource
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.repository.SoundRepository
@@ -18,10 +17,5 @@ class SoundRepositoryImpl @Inject constructor(
             val soundOptions = files.map { SoundOption(it) }
             emit(soundOptions)
         }
-    }
-
-    override fun getAfd(path: String, soundFile: String): AssetFileDescriptor? {
-        val filePath = "$path/$soundFile"
-        return assetDataSource.getAfd(filePath)
     }
 }

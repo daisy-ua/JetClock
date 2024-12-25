@@ -38,6 +38,7 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockFuncTopAppB
 import com.daisy.jetclock.presentation.ui.component.scaffold.TextFloatingActionButton
 import com.daisy.jetclock.presentation.ui.component.timepicker.TimePicker
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
+import com.daisy.jetclock.presentation.utils.formatter.SoundOptionFormatter
 import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
 
 enum class DialogType {
@@ -227,7 +228,7 @@ fun AlarmDetailsScreenContent(
                 item {
                     SettingRow(
                         stringResource(id = R.string.sound),
-                        alarm.soundOption.getDisplayName(context),
+                        SoundOptionFormatter.getDisplayName(context, alarm.soundOption)
                     ) {
                         onSelectSoundClicked(alarm.soundOption.soundFile)
                     }
