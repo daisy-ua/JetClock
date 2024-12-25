@@ -24,8 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.utils.formatter.AlarmFormatter
+import com.daisy.jetclock.presentation.utils.formatter.RepeatDaysFormatter
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
+import com.daisy.jetclock.utils.formatter.AlarmFormatter
 
 
 @Composable
@@ -36,9 +37,9 @@ fun AlarmCard(
     val context = LocalContext.current
 
     val repeatDaysString by rememberUpdatedState(
-        AlarmFormatter.getRepeatDaysString(
+        RepeatDaysFormatter.formatRepeatDaysString(
             context,
-            item.repeatDays.days
+            item.repeatDays
         )
     )
 
