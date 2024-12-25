@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -185,6 +186,8 @@ fun AlarmDetailsScreenContent(
     onShowDialogTypeChanged: (DialogType) -> Unit,
     darkThemeEnabled: Boolean,
 ) {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             JetClockFuncTopAppBar(
@@ -224,7 +227,7 @@ fun AlarmDetailsScreenContent(
                 item {
                     SettingRow(
                         stringResource(id = R.string.sound),
-                        alarm.soundOption.displayName,
+                        alarm.soundOption.getDisplayName(context),
                     ) {
                         onSelectSoundClicked(alarm.soundOption.soundFile)
                     }

@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,7 @@ fun SoundSelectionScreenContent(
     onUpClick: () -> Unit,
 ) {
     val noSoundOption = remember { SoundOption.none }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -80,7 +82,7 @@ fun SoundSelectionScreenContent(
         ) {
             item {
                 TextRadioButtonRowItem(
-                    name = SoundOption.NONE,
+                    name = stringResource(id = R.string.sound_none_display),
                     isSelected = isSoundSelected(noSoundOption),
                     onItemClick = { onSoundClicked(noSoundOption) }
                 )
@@ -90,7 +92,7 @@ fun SoundSelectionScreenContent(
 
             items(sounds) { sound ->
                 TextRadioButtonRowItem(
-                    name = sound.displayName,
+                    name = sound.getDisplayName(context),
                     isSelected = isSoundSelected(sound),
                     onItemClick = { onSoundClicked(sound) }
                 )

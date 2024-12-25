@@ -5,7 +5,9 @@ import android.content.res.AssetFileDescriptor
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AssetDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {

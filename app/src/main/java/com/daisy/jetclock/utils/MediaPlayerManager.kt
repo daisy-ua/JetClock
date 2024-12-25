@@ -8,7 +8,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
+import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.repository.SoundRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import javax.inject.Inject
@@ -17,13 +19,17 @@ import javax.inject.Inject
 class MediaPlayerManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : MediaPlayer.OnPreparedListener {
+
+    @Inject
+    lateinit var soundRepository: SoundRepository
+
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
 
-    fun prepare(sound: String?, vibration: Boolean) {
-        sound?.let {
+    fun prepare(sound: SoundOption, vibration: Boolean) {
+        sound.let {
             try {
-                context.assets.openFd(SoundOption.getAssetFn(sound)).use { soundAfd ->
+                soundRepository.getAfd(ConfigConstants.SOUND_ASSETS_DIR, sound.soundFile)?.use { soundAfd ->
                     mediaPlayer = MediaPlayer().apply {
                         setAudioAttributes(
                             AudioAttributes.Builder()
@@ -40,7 +46,7 @@ class MediaPlayerManager @Inject constructor(
                     }
                 }
             } catch (e: IOException) {
-                Log.e("daisy-ua", e.message.toString())
+                Log.e("MediaPlayerManager", e.message.toString())
             }
         }
 

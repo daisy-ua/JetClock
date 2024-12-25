@@ -9,6 +9,7 @@ import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.NotificationConfig
 import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.utils.AlarmNotificationManager
 import com.daisy.jetclock.utils.MediaPlayerManager
@@ -63,7 +64,7 @@ class AlarmService : Service() {
     private fun startAlarm(alarm: Alarm, timestamp: String) {
         activeAlarmId = alarm.id
         notificationManager.removeAlarmSnoozedNotification()
-        startMediaPlayback(alarm.soundOption.soundFile)
+        startMediaPlayback(alarm.soundOption)
 
         val displayTimestamp = timestamp.ifEmpty { alarm.timestamp }
 
@@ -129,7 +130,7 @@ class AlarmService : Service() {
         }
     }
 
-    private fun startMediaPlayback(sound: String?) {
+    private fun startMediaPlayback(sound: SoundOption) {
         mediaPlayerManager.prepare(sound, true)
         mediaPlayerManager.start()
     }
