@@ -20,7 +20,9 @@ object RepeatDaysFormatter {
                     R.string.monday_to_friday
                 )
 
-                else -> sort().days.joinToString { day -> day.abbr }
+                else -> sort().days.joinToString { day ->
+                    day.getLocalizedString(context)
+                }
             }
         }
     }
