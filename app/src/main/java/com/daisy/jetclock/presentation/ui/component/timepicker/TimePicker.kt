@@ -30,7 +30,7 @@ import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
-import com.daisy.jetclock.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.utils.helper.TimeDisplayHelper
 
 private val meridiemOptions = listOf("", "", MeridiemOption.AM.name, MeridiemOption.PM.name, "", "")
 
@@ -47,8 +47,8 @@ fun TimePicker(
     soundEnabled: Boolean = false,
     fontColor: Color = MaterialTheme.colors.onBackground,
 ) {
-    val timeFormatter by remember {
-        mutableStateOf(TimeFormatter(timeFormat))
+    val timeDisplayHelper by remember {
+        mutableStateOf(TimeDisplayHelper(timeFormat))
     }
 
     var hourValue by remember { mutableIntStateOf(0) }
@@ -60,7 +60,7 @@ fun TimePicker(
     var initialMeridiemIndex by remember { mutableIntStateOf(0) }
 
     fun handleHourChange(hourIndex: Int) {
-        hourValue = timeFormatter.hoursRange[hourIndex]
+        hourValue = timeDisplayHelper.getHourValue(hourIndex)
         onValueChange(TimeOfDay(hourValue, minuteValue, meridiemValue))
     }
 
@@ -80,8 +80,8 @@ fun TimePicker(
         minuteValue = initialTimeValue.minute
         meridiemValue = initialTimeValue.meridiem
 
-        initialHourIndex = timeFormatter.hoursRange.indexOf(initialTimeValue.hour)
-        initialMinuteIndex = timeFormatter.minutesRange.indexOf(initialTimeValue.minute)
+        initialHourIndex = timeDisplayHelper.getHourIndex(initialTimeValue.hour)
+        initialMinuteIndex = timeDisplayHelper.getMinuteIndex(initialTimeValue.minute)
         initialMeridiemIndex = initialTimeValue.meridiem?.let {
             meridiemOptions.indexOf(it.name) - 2
         } ?: 0
@@ -103,7 +103,7 @@ fun TimePicker(
                 .background(fontColor)
         )
         WheelPicker(
-            items = timeFormatter.hours,
+            items = timeDisplayHelper.hours,
             itemHeight = 35.dp,
             itemWidth = 55.dp,
             initialIndex = initialHourIndex,
@@ -121,7 +121,7 @@ fun TimePicker(
             fontSize = 28.sp,
         )
         WheelPicker(
-            items = timeFormatter.minutes,
+            items = timeDisplayHelper.minutes,
             itemHeight = 35.dp,
             itemWidth = 55.dp,
             initialIndex = initialMinuteIndex,

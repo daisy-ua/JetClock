@@ -24,9 +24,6 @@ data class Alarm(
     val snoozeCount: Int,
 
     val soundOption: SoundOption,
-) {
-    val timestamp: String
-        get() = time.timestamp
-}
+)
 
 

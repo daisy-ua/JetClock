@@ -8,6 +8,7 @@ import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.utils.AlarmDateCalculator
 import java.util.Calendar
 import javax.inject.Inject
@@ -35,7 +36,10 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
 
         return alarm.copy(triggerTime = calendar.timeInMillis).also {
             val intent = getDefaultIntent(it.id).apply {
-                putExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA, it.timestamp)
+                putExtra(
+                    IntentExtra.SNOOZED_TIMESTAMP_EXTRA,
+                    TimeFormatter.formatTimeWithMeridiem(context, it.time)
+                )
             }
             schedule(calendar.timeInMillis, it, intent)
         }

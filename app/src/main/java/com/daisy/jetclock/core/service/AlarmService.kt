@@ -11,6 +11,7 @@ import com.daisy.jetclock.core.manager.AlarmController
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.repository.AlarmRepository
+import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.utils.AlarmNotificationManager
 import com.daisy.jetclock.utils.MediaPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,7 +67,8 @@ class AlarmService : Service() {
         notificationManager.removeAlarmSnoozedNotification()
         startMediaPlayback(alarm.soundOption)
 
-        val displayTimestamp = timestamp.ifEmpty { alarm.timestamp }
+        val displayTimestamp =
+            timestamp.ifEmpty { TimeFormatter.formatTimeWithMeridiem(this, alarm.time) }
 
         startForeground(
             NotificationConfig.ALARM_UPCOMING_NOTIFICATION_ID,
@@ -79,7 +81,10 @@ class AlarmService : Service() {
     private suspend fun snoozeAlarm(alarm: Alarm) {
         val updatedAlarm = alarmController.snooze(alarm)
         stopMediaPlayback()
-        notificationManager.showAlarmSnoozedNotification(updatedAlarm.label, updatedAlarm.timestamp)
+        notificationManager.showAlarmSnoozedNotification(
+            updatedAlarm.label,
+            TimeFormatter.formatTimeWithMeridiem(this, updatedAlarm.time)
+        )
 
         if (alarm.snoozeCount > 0) {
             alarmController.resetAlarmSnoozeCount(alarm)
@@ -117,7 +122,10 @@ class AlarmService : Service() {
             alarmController.autoSnooze(alarm)
         } else {
             performDismissAction(alarm)
-            notificationManager.showAlarmMissedNotification(alarm.label, alarm.timestamp)
+            notificationManager.showAlarmMissedNotification(
+                alarm.label,
+                TimeFormatter.formatTimeWithMeridiem(this, alarm.time)
+            )
         }
     }
 

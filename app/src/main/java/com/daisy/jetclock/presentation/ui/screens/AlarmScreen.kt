@@ -34,7 +34,7 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockFloatingAct
 import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
-import com.daisy.jetclock.utils.formatter.AlarmFormatter
+import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 
 @Composable
@@ -95,10 +95,9 @@ fun AlarmScreenContent(
                 NextAlarmCard(
                     alarm = nextAlarm,
                     alarmTime = nextAlarm?.let {
-                        AlarmFormatter.getTimeString(
+                        TimeFormatter.formatTime(
                             context,
-                            it.time.hour,
-                            it.time.minute
+                            it.time
                         )
                     }
                         ?: "",
