@@ -1,4 +1,4 @@
-package com.daisy.jetclock.utils
+package com.daisy.jetclock.core.utils
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver

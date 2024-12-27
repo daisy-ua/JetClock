@@ -6,13 +6,13 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import com.daisy.jetclock.core.IntentExtra
-import com.daisy.jetclock.core.NotificationConfig
 import com.daisy.jetclock.core.manager.AlarmController
+import com.daisy.jetclock.core.notification.AlarmNotificationManager
+import com.daisy.jetclock.core.notification.AlarmNotificationType
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
-import com.daisy.jetclock.utils.AlarmNotificationManager
 import com.daisy.jetclock.utils.MediaPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +40,8 @@ class AlarmService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
+    private var foregroundNotification: AlarmNotificationType.Ongoing? = null
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val id = intent?.getLongExtra(IntentExtra.ID_EXTRA, -1) ?: -1
         val snoozedTimestamp = intent?.getStringExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA) ?: ""
@@ -64,26 +66,36 @@ class AlarmService : Service() {
 
     private fun startAlarm(alarm: Alarm, timestamp: String) {
         activeAlarmId = alarm.id
-        notificationManager.removeAlarmSnoozedNotification()
+        notificationManager.hideNotification(
+            AlarmNotificationType.Snoozed(alarm.id)
+        )
         startMediaPlayback(alarm.soundOption)
 
         val displayTimestamp =
             timestamp.ifEmpty { TimeFormatter.formatTimeWithMeridiem(this, alarm.time) }
 
-        startForeground(
-            NotificationConfig.ALARM_UPCOMING_NOTIFICATION_ID,
-            notificationManager.getAlarmNotification(alarm.id, alarm.label, displayTimestamp)
-        )
+        foregroundNotification =
+            AlarmNotificationType.Ongoing(alarm.id, alarm.label, displayTimestamp)
 
-        scheduleAutoSnooze(alarm)
+        foregroundNotification?.let { type ->
+            startForeground(
+                type.notificationId,
+                notificationManager.createNotification(type)
+            )
+            scheduleAutoSnooze(alarm)
+        }
     }
 
     private suspend fun snoozeAlarm(alarm: Alarm) {
         val updatedAlarm = alarmController.snooze(alarm)
         stopMediaPlayback()
-        notificationManager.showAlarmSnoozedNotification(
-            updatedAlarm.label,
-            TimeFormatter.formatTimeWithMeridiem(this, updatedAlarm.time)
+
+        notificationManager.showNotification(
+            AlarmNotificationType.Snoozed(
+                updatedAlarm.id,
+                updatedAlarm.label,
+                TimeFormatter.formatTimeWithMeridiem(this, updatedAlarm.time)
+            )
         )
 
         if (alarm.snoozeCount > 0) {
@@ -122,9 +134,12 @@ class AlarmService : Service() {
             alarmController.autoSnooze(alarm)
         } else {
             performDismissAction(alarm)
-            notificationManager.showAlarmMissedNotification(
-                alarm.label,
-                TimeFormatter.formatTimeWithMeridiem(this, alarm.time)
+            notificationManager.showNotification(
+                AlarmNotificationType.Missed(
+                    alarm.id,
+                    alarm.label,
+                    TimeFormatter.formatTimeWithMeridiem(this, alarm.time)
+                )
             )
         }
     }
@@ -156,7 +171,9 @@ class AlarmService : Service() {
 
     override fun onDestroy() {
         serviceScope.cancel()
-        notificationManager.removeAlarmUpcomingNotification()
+        foregroundNotification?.let { type ->
+            notificationManager.hideNotification(type)
+        }
         stopMediaPlayback()
         activeAlarmId = null
     }
