@@ -36,4 +36,23 @@
 
     <string name="meridiem_am">AM</string>
     <string name="meridiem_pm">PM</string>
+
+
+    <!-- Notification Titles -->
+    <string name="alarm_upcoming_channel_name">Upcoming alarms</string>
+    <string name="alarm_upcoming_channel_description">Shows alarm notification at scheduled time</string>
+    <string name="alarm_missed_channel_name">Missed alarms</string>
+    <string name="alarm_missed_channel_description">Shows notification for missed alarms</string>
+    <string name="alarm_snooze_channel_name">Snoozed alarms</string>
+    <string name="alarm_snooze_channel_description">Shows notification for snoozed alarms</string>
+
+    <!-- Notification Actions -->
+    <string name="dismiss_action_text">Dismiss</string>
+    <string name="snooze_action_text">Snooze</string>
+
+    <!-- Notification Titles for Missed and Snoozed Alarms -->
+    <string name="missed_alarm_title">%1$s (Missed)</string>
+    <string name="snoozed_alarm_title">%1$s (Snoozed)</string>
+    <string name="missed_alarm_content">Missed at %1$s</string>
+    <string name="snoozed_alarm_content">Snoozing until %1$s</string>
 </resources>

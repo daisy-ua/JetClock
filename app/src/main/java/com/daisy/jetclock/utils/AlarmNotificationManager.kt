@@ -8,8 +8,8 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.daisy.jetclock.app.MainActivity
 import com.daisy.jetclock.R
+import com.daisy.jetclock.app.MainActivity
 import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.core.IntentExtra
 import com.daisy.jetclock.core.NotificationConfig
@@ -40,8 +40,16 @@ class AlarmNotificationManager @Inject constructor(
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(getFullScreenIntent(), true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(R.drawable.baseline_close_24, "Dismiss", getDismissIntentAction(alarmId))
-            .addAction(R.drawable.baseline_snooze_24, "Snooze", getSnoozeIntentAction(alarmId))
+            .addAction(
+                R.drawable.baseline_close_24,
+                context.getString(R.string.dismiss_action_text),
+                getDismissIntentAction(alarmId)
+            )
+            .addAction(
+                R.drawable.baseline_snooze_24,
+                context.getString(R.string.snooze_action_text),
+                getSnoozeIntentAction(alarmId)
+            )
             .setOngoing(true)
             .build()
 
@@ -50,8 +58,8 @@ class AlarmNotificationManager @Inject constructor(
         val alarmMissedNotification =
             NotificationCompat.Builder(context, NotificationConfig.ALARM_MISSED_CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_alarm_24)
-                .setContentTitle("$label (Missed)")
-                .setContentText("Missed at $time")
+                .setContentTitle(context.getString(R.string.missed_alarm_title, label))
+                .setContentText(context.getString(R.string.missed_alarm_content, time))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -69,8 +77,8 @@ class AlarmNotificationManager @Inject constructor(
         val alarmSnoozedNotification =
             NotificationCompat.Builder(context, NotificationConfig.ALARM_SNOOZE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_alarm_24)
-                .setContentTitle("$label (Snoozed)")
-                .setContentText("Snoozing until $time")
+                .setContentTitle(context.getString(R.string.snoozed_alarm_title, label))
+                .setContentText(context.getString(R.string.snoozed_alarm_content, time))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -110,8 +118,8 @@ class AlarmNotificationManager @Inject constructor(
             NotificationConfig.ALARM_UPCOMING_CHANNEL_ID,
             NotificationManagerCompat.IMPORTANCE_MAX
         )
-            .setName("Upcoming alarms")
-            .setDescription("Shows alarm notification at scheduled time")
+            .setName(context.getString(R.string.alarm_upcoming_channel_name))
+            .setDescription(context.getString(R.string.alarm_upcoming_channel_description))
             .setSound(null, null)
             .build()
 
@@ -121,8 +129,8 @@ class AlarmNotificationManager @Inject constructor(
             NotificationConfig.ALARM_MISSED_CHANNEL_ID,
             NotificationManagerCompat.IMPORTANCE_HIGH
         )
-            .setName("Missed alarms")
-            .setDescription("Shows notification for missed alarms")
+            .setName(context.getString(R.string.alarm_missed_channel_name))
+            .setDescription(context.getString(R.string.alarm_missed_channel_description))
             .setSound(soundUri, null)
             .build()
 
@@ -130,8 +138,8 @@ class AlarmNotificationManager @Inject constructor(
             NotificationConfig.ALARM_SNOOZE_CHANNEL_ID,
             NotificationManagerCompat.IMPORTANCE_LOW
         )
-            .setName("Snoozed alarms")
-            .setDescription("Shows notification for snoozed alarms")
+            .setName(context.getString(R.string.alarm_snooze_channel_name))
+            .setDescription(context.getString(R.string.alarm_snooze_channel_description))
             .setSound(null, null)
             .build()
 
