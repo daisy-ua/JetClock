@@ -4,6 +4,8 @@ import com.daisy.jetclock.data.local.dao.AlarmDao
 import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
 import com.daisy.jetclock.data.source.AssetDataSource
+import com.daisy.jetclock.utils.scope.CoroutineScopeProvider
+import com.daisy.jetclock.utils.scope.MainCoroutineScopeProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,6 +30,12 @@ object RepositoryImplModule {
     fun provideSoundRepository(
         assetDataSource: AssetDataSource,
     ): SoundRepositoryImpl = SoundRepositoryImpl(assetDataSource)
+
+    @Provides
+    @Singleton
+    fun provideCoroutineScopeProvider(): CoroutineScopeProvider {
+        return MainCoroutineScopeProvider()
+    }
 
     @Provides
     fun provideIODispatcher(): CoroutineDispatcher = Dispatchers.IO

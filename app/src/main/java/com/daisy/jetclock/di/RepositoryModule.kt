@@ -1,5 +1,7 @@
 package com.daisy.jetclock.di
 
+import com.daisy.jetclock.core.alarm.AlarmAction
+import com.daisy.jetclock.core.alarm.AlarmCoordinator
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
@@ -25,4 +27,10 @@ interface RepositoryModule {
     fun bindSoundRepository(
         impl: SoundRepositoryImpl,
     ): SoundRepository
+
+    @Binds
+    @Singleton
+    fun bindAlarmAction(
+        impl: AlarmCoordinator,
+    ): AlarmAction
 }

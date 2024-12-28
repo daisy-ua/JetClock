@@ -2,18 +2,14 @@ package com.daisy.jetclock.core.service
 
 import android.app.Service
 import android.content.Intent
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
+import android.util.Log
 import com.daisy.jetclock.core.IntentExtra
-import com.daisy.jetclock.core.manager.AlarmController
+import com.daisy.jetclock.core.alarm.AlarmCoordinator
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.repository.AlarmRepository
-import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
-import com.daisy.jetclock.utils.MediaPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,27 +23,29 @@ import javax.inject.Inject
 class AlarmService : Service() {
 
     @Inject
-    lateinit var mediaPlayerManager: MediaPlayerManager
-
-    @Inject
     lateinit var notificationManager: AlarmNotificationManager
 
     @Inject
     lateinit var alarmRepository: AlarmRepository
 
-    @Inject
-    lateinit var alarmController: AlarmController
-
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private var foregroundNotification: AlarmNotificationType.Ongoing? = null
+
+    @Inject
+    lateinit var coordinator: AlarmCoordinator
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val id = intent?.getLongExtra(IntentExtra.ID_EXTRA, -1) ?: -1
         val snoozedTimestamp = intent?.getStringExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA) ?: ""
 
         serviceScope.launch {
-            handleIntentAction(intent, id, snoozedTimestamp)
+            try {
+                handleIntentAction(intent, id, snoozedTimestamp)
+            } catch (e: Exception) {
+                Log.e("AlarmService", "Error handling intent action", e)
+                stopSelf()
+            }
         }
 
         return START_NOT_STICKY
@@ -57,125 +55,56 @@ class AlarmService : Service() {
         val alarm = alarmRepository.getAlarmById(id).firstOrNull() ?: return stopSelf()
 
         when (intent?.action) {
-            ACTION_START -> startAlarm(alarm, snoozedTimestamp)
-            ACTION_SNOOZE -> snoozeAlarm(alarm)
-            ACTION_DISMISS -> dismissAlarm(alarm)
-            ACTION_DISABLE -> disableAlarm(alarm)
+            ACTION_START -> start(alarm, snoozedTimestamp)
+            ACTION_SNOOZE -> snooze(alarm)
+            ACTION_DISMISS -> dismiss(alarm)
+            ACTION_DISABLE -> cancel(alarm)
         }
     }
 
-    private fun startAlarm(alarm: Alarm, timestamp: String) {
-        activeAlarmId = alarm.id
-        notificationManager.hideNotification(
-            AlarmNotificationType.Snoozed(alarm.id)
-        )
-        startMediaPlayback(alarm.soundOption)
-
-        val displayTimestamp =
-            timestamp.ifEmpty { TimeFormatter.formatTimeWithMeridiem(this, alarm.time) }
-
-        foregroundNotification =
-            AlarmNotificationType.Ongoing(alarm.id, alarm.label, displayTimestamp)
+    private suspend fun start(alarm: Alarm, timestamp: String) {
+        foregroundNotification = coordinator.start(alarm, timestamp) { autoSnoozeCompleted ->
+            if (autoSnoozeCompleted) {
+                stopSelf()
+            }
+        }
 
         foregroundNotification?.let { type ->
             startForeground(
                 type.notificationId,
                 notificationManager.createNotification(type)
             )
-            scheduleAutoSnooze(alarm)
         }
     }
 
-    private suspend fun snoozeAlarm(alarm: Alarm) {
-        val updatedAlarm = alarmController.snooze(alarm)
-        stopMediaPlayback()
-
-        notificationManager.showNotification(
-            AlarmNotificationType.Snoozed(
-                updatedAlarm.id,
-                updatedAlarm.label,
-                TimeFormatter.formatTimeWithMeridiem(this, updatedAlarm.time)
-            )
-        )
-
-        if (alarm.snoozeCount > 0) {
-            alarmController.resetAlarmSnoozeCount(alarm)
-        }
-
-        activeAlarmId = null
-        stopSelf()
-    }
-
-    private suspend fun dismissAlarm(alarm: Alarm) {
-        performDismissAction(alarm)
-        activeAlarmId = null
-        stopSelf()
-    }
-
-    private fun disableAlarm(alarm: Alarm) {
-        if (activeAlarmId == alarm.id) {
-            stopMediaPlayback()
-            activeAlarmId = null
-            stopSelf()
-        }
-    }
-
-    private fun scheduleAutoSnooze(alarm: Alarm) {
-        Handler(Looper.getMainLooper()).postDelayed({
-            serviceScope.launch {
-                autoSnoozeAlarm(alarm)
-                stopSelf()
-            }
-        }, alarm.ringDurationOption.value * 60 * 1000L)
-    }
-
-    private suspend fun autoSnoozeAlarm(alarm: Alarm) {
-        if (alarm.snoozeCount < alarm.snoozeOption.number) {
-            alarmController.autoSnooze(alarm)
-        } else {
-            performDismissAction(alarm)
-            notificationManager.showNotification(
-                AlarmNotificationType.Missed(
-                    alarm.id,
-                    alarm.label,
-                    TimeFormatter.formatTimeWithMeridiem(this, alarm.time)
-                )
-            )
-        }
-    }
-
-    private suspend fun performDismissAction(alarm: Alarm) {
-        stopMediaPlayback()
-        if (shouldRepeatAlarm(alarm)) {
-            alarmController.reschedule(alarm)
-        } else {
-            alarmController.cancel(alarm)
-        }
-    }
-
-    private fun startMediaPlayback(sound: SoundOption) {
-        mediaPlayerManager.prepare(sound, true)
-        mediaPlayerManager.start()
-    }
-
-    private fun stopMediaPlayback() {
-        mediaPlayerManager.release()
+    private suspend fun snooze(alarm: Alarm) {
         stopForeground(STOP_FOREGROUND_REMOVE)
+        coordinator.snooze(alarm)
+        foregroundNotification = null
+        stopSelf()
     }
 
-    private fun shouldRepeatAlarm(alarm: Alarm) = alarm.repeatDays.days.isNotEmpty()
+    private suspend fun dismiss(alarm: Alarm) {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        coordinator.dismiss(alarm)
+        foregroundNotification = null
+        stopSelf()
+    }
+
+    private suspend fun cancel(alarm: Alarm) {
+        if (foregroundNotification?.notificationId == AlarmNotificationType.Ongoing(alarm.id).notificationId) {
+            coordinator.dismiss(alarm)
+        }
+        stopSelf()
+    }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 
     override fun onDestroy() {
+        coordinator.cleanup()
         serviceScope.cancel()
-        foregroundNotification?.let { type ->
-            notificationManager.hideNotification(type)
-        }
-        stopMediaPlayback()
-        activeAlarmId = null
     }
 
     companion object {
@@ -183,7 +112,5 @@ class AlarmService : Service() {
         const val ACTION_SNOOZE = "ACTION_SNOOZE_ALARM"
         const val ACTION_DISMISS = "ACTION_DISMISS_ALARM"
         const val ACTION_DISABLE = "ACTION_DISABLE_ALARM"
-
-        private var activeAlarmId: Long? = null
     }
 }
