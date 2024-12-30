@@ -1,13 +1,13 @@
 package com.daisy.jetclock.core.alarm
 
 import android.content.Context
-import com.daisy.jetclock.core.manager.AlarmController
+import com.daisy.jetclock.core.scheduler.AlarmSchedulerManager
+import com.daisy.jetclock.core.utils.AlarmStateUpdater
+import com.daisy.jetclock.core.media.PlaybackService
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
-import com.daisy.jetclock.utils.MediaPlayerManager
 import com.daisy.jetclock.utils.scope.CoroutineScopeProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.cancel
@@ -18,9 +18,10 @@ import javax.inject.Inject
 class AlarmCoordinator @Inject constructor(
     @ApplicationContext private val context: Context,
     coroutineScopeProvider: CoroutineScopeProvider,
-    private val mediaPlayerManager: MediaPlayerManager,
+    private val mediaPlaybackService: PlaybackService,
     private val notificationManager: AlarmNotificationManager,
-    private val alarmController: AlarmController,
+    private val alarmSchedulerManager: AlarmSchedulerManager,
+    private val alarmStateUpdater: AlarmStateUpdater,
 ) : AlarmAction {
 
     private val scope = coroutineScopeProvider.getCoroutineScope()
@@ -34,7 +35,7 @@ class AlarmCoordinator @Inject constructor(
             AlarmNotificationType.Snoozed(alarm.id)
         )
 
-        startMediaPlayback(alarm.soundOption)
+        mediaPlaybackService.startPlayback(alarm.soundOption)
 
         val displayTimestamp =
             timestamp.ifEmpty { TimeFormatter.formatTimeWithMeridiem(context, alarm.time) }
@@ -47,33 +48,34 @@ class AlarmCoordinator @Inject constructor(
     }
 
     override suspend fun snooze(alarm: Alarm) {
-        stopMediaPlayback()
+        mediaPlaybackService.stopPlayback()
 
-        val updatedAlarm = alarmController.snooze(alarm)
+        val timeInMillis = alarmSchedulerManager.snooze(alarm)
+        alarmStateUpdater.snoozeAlarm(alarm, timeInMillis)
 
         notificationManager.showNotification(
             AlarmNotificationType.Snoozed(
-                updatedAlarm.id,
-                updatedAlarm.label,
-                TimeFormatter.formatTimeWithMeridiem(context, updatedAlarm.time)
+                alarm.id,
+                alarm.label,
+                TimeFormatter.formatTimeWithMeridiem(context, alarm.time)
             )
         )
-
-        resetSnoozeCountIfNeeded(alarm)
     }
 
     override suspend fun dismiss(alarm: Alarm) {
-        stopMediaPlayback()
+        mediaPlaybackService.stopPlayback()
+
         if (alarm.repeatDays.days.isNotEmpty()) {
-            alarmController.reschedule(alarm)
+            val timeInMillis = alarmSchedulerManager.schedule(alarm)
+            alarmStateUpdater.rescheduleAlarm(alarm, timeInMillis)
         } else {
-            alarmController.cancel(alarm)
+            alarmStateUpdater.cancelAlarm(alarm)
         }
     }
 
     fun cleanup() {
         scope.cancel()
-        stopMediaPlayback()
+        mediaPlaybackService.stopPlayback()
     }
 
     private fun scheduleAutoSnooze(alarm: Alarm, onComplete: () -> Unit) {
@@ -86,7 +88,8 @@ class AlarmCoordinator @Inject constructor(
 
     private suspend fun autoSnoozeAlarm(alarm: Alarm) {
         val notification = if (alarm.snoozeCount < alarm.snoozeOption.number) {
-            alarmController.autoSnooze(alarm)
+            val timeInMillis = alarmSchedulerManager.snooze(alarm)
+            alarmStateUpdater.autoSnoozeAlarm(alarm, timeInMillis)
 
             AlarmNotificationType.Snoozed(
                 alarm.id,
@@ -104,21 +107,5 @@ class AlarmCoordinator @Inject constructor(
         }
 
         notificationManager.showNotification(notification)
-    }
-
-    private suspend fun resetSnoozeCountIfNeeded(alarm: Alarm) {
-        if (alarm.snoozeCount > 0) {
-            alarmController.resetAlarmSnoozeCount(alarm)
-        }
-    }
-
-    //    TODO: move to ServicePlayback
-    private fun startMediaPlayback(sound: SoundOption) {
-        mediaPlayerManager.prepare(sound, true)
-        mediaPlayerManager.start()
-    }
-
-    private fun stopMediaPlayback() {
-        mediaPlayerManager.release()
     }
 }

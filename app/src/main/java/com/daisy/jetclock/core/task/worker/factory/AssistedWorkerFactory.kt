@@ -1,4 +1,4 @@
-package com.daisy.jetclock.core.worker.factory
+package com.daisy.jetclock.core.task.worker.factory
 
 import android.content.Context
 import androidx.work.ListenableWorker

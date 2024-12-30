@@ -10,7 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.daisy.jetclock.R
 import com.daisy.jetclock.app.MainActivity
 import com.daisy.jetclock.constants.ConfigConstants
-import com.daisy.jetclock.core.IntentExtra
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.base.BaseNotificationManager
 import com.daisy.jetclock.core.base.NotificationChannelData
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver

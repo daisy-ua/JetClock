@@ -4,12 +4,12 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.daisy.jetclock.core.IntentExtra
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.alarm.AlarmCoordinator
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.domain.repository.AlarmRepository
+import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ class AlarmService : Service() {
     lateinit var notificationManager: AlarmNotificationManager
 
     @Inject
-    lateinit var alarmRepository: AlarmRepository
+    lateinit var getAlarmDetailsUseCase: GetAlarmDetailsUseCase
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -52,13 +52,13 @@ class AlarmService : Service() {
     }
 
     private suspend fun handleIntentAction(intent: Intent?, id: Long, snoozedTimestamp: String) {
-        val alarm = alarmRepository.getAlarmById(id).firstOrNull() ?: return stopSelf()
+        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return stopSelf()
 
         when (intent?.action) {
             ACTION_START -> start(alarm, snoozedTimestamp)
             ACTION_SNOOZE -> snooze(alarm)
             ACTION_DISMISS -> dismiss(alarm)
-            ACTION_DISABLE -> cancel(alarm)
+            ACTION_STOP -> cancel(alarm)
         }
     }
 
@@ -91,9 +91,9 @@ class AlarmService : Service() {
         stopSelf()
     }
 
-    private suspend fun cancel(alarm: Alarm) {
+    private fun cancel(alarm: Alarm) {
         if (foregroundNotification?.notificationId == AlarmNotificationType.Ongoing(alarm.id).notificationId) {
-            coordinator.dismiss(alarm)
+            coordinator.cleanup()
         }
         stopSelf()
     }
@@ -111,6 +111,6 @@ class AlarmService : Service() {
         const val ACTION_START = "ACTION_START_ALARM"
         const val ACTION_SNOOZE = "ACTION_SNOOZE_ALARM"
         const val ACTION_DISMISS = "ACTION_DISMISS_ALARM"
-        const val ACTION_DISABLE = "ACTION_DISABLE_ALARM"
+        const val ACTION_STOP = "ACTION_STOP_ALARM"
     }
 }

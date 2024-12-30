@@ -2,10 +2,10 @@ package com.daisy.jetclock.di
 
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
-import com.daisy.jetclock.core.worker.RescheduleAlarmWorker
-import com.daisy.jetclock.core.worker.factory.AssistedWorkerFactory
-import com.daisy.jetclock.core.worker.factory.RescheduleAlarmWorkerFactory
-import com.daisy.jetclock.core.worker.factory.WrapperWorkerFactory
+import com.daisy.jetclock.core.task.worker.RescheduleAlarmWorker
+import com.daisy.jetclock.core.task.worker.factory.AssistedWorkerFactory
+import com.daisy.jetclock.core.task.worker.factory.RescheduleAlarmWorkerFactory
+import com.daisy.jetclock.core.task.worker.factory.WrapperWorkerFactory
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module

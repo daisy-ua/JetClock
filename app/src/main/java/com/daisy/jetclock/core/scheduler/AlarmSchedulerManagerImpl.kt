@@ -1,11 +1,11 @@
-package com.daisy.jetclock.core.manager
+package com.daisy.jetclock.core.scheduler
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.daisy.jetclock.constants.ConfigConstants
-import com.daisy.jetclock.core.IntentExtra
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
@@ -23,26 +23,25 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
             val nextDayOffset = AlarmDateCalculator.getNextAvailableDay(this, alarm.repeatDays.days)
             add(Calendar.DAY_OF_MONTH, nextDayOffset)
         }
-        schedule(calendar.timeInMillis, alarm, getDefaultIntent(alarm.id))
+        schedule(calendar.timeInMillis, alarm.id.toInt(), getDefaultIntent(alarm.id))
 
         return calendar.timeInMillis
     }
 
-    override fun snooze(alarm: Alarm): Alarm {
+    override fun snooze(alarm: Alarm): Long {
         val calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
             add(Calendar.MINUTE, alarm.snoozeOption.duration)
         }
-
-        return alarm.copy(triggerTime = calendar.timeInMillis).also {
-            val intent = getDefaultIntent(it.id).apply {
-                putExtra(
-                    IntentExtra.SNOOZED_TIMESTAMP_EXTRA,
-                    TimeFormatter.formatTimeWithMeridiem(context, it.time)
-                )
-            }
-            schedule(calendar.timeInMillis, it, intent)
+        val intent = getDefaultIntent(alarm.id).apply {
+            putExtra(
+                IntentExtra.SNOOZED_TIMESTAMP_EXTRA,
+                TimeFormatter.formatTimeWithMeridiem(context, alarm.time)
+            )
         }
+        schedule(calendar.timeInMillis, alarm.id.toInt(), intent)
+
+        return calendar.timeInMillis
     }
 
     override fun cancel(alarm: Alarm) {
@@ -56,10 +55,10 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
         )
     }
 
-    private fun schedule(timeInMillis: Long, alarm: Alarm, intent: Intent) {
+    private fun schedule(timeInMillis: Long, id: Int, intent: Intent) {
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            alarm.id.toInt(),
+            id,
             intent,
             ConfigConstants.PENDING_INTENT_FLAGS
         )

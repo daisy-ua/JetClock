@@ -1,4 +1,4 @@
-package com.daisy.jetclock.core
+package com.daisy.jetclock.core.utils
 
 object IntentExtra {
     const val ID_EXTRA = "ID_EXTRA"

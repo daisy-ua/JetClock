@@ -2,6 +2,10 @@ package com.daisy.jetclock.di
 
 import com.daisy.jetclock.core.alarm.AlarmAction
 import com.daisy.jetclock.core.alarm.AlarmCoordinator
+import com.daisy.jetclock.core.media.MediaPlaybackServiceImpl
+import com.daisy.jetclock.core.media.PlaybackService
+import com.daisy.jetclock.core.receiver.MediaPlaybackHandler
+import com.daisy.jetclock.core.receiver.ServiceHandler
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
@@ -33,4 +37,16 @@ interface RepositoryModule {
     fun bindAlarmAction(
         impl: AlarmCoordinator,
     ): AlarmAction
+
+    @Binds
+    @Singleton
+    fun bindServiceHandler(
+        impl: MediaPlaybackHandler,
+    ): ServiceHandler<Long>
+
+    @Binds
+    @Singleton
+    fun bindPlaybackService(
+        impl: MediaPlaybackServiceImpl,
+    ): PlaybackService
 }

@@ -2,7 +2,7 @@ package com.daisy.jetclock.app
 
 import android.app.Application
 import androidx.work.Configuration
-import com.daisy.jetclock.core.worker.factory.WrapperWorkerFactory
+import com.daisy.jetclock.core.task.worker.factory.WrapperWorkerFactory
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 

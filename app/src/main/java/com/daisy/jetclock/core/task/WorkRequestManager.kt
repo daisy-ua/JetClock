@@ -1,4 +1,4 @@
-package com.daisy.jetclock.core.manager
+package com.daisy.jetclock.core.task
 
 import android.content.Context
 import androidx.work.Data

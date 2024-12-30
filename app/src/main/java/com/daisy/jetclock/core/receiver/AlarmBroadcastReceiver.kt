@@ -3,11 +3,11 @@ package com.daisy.jetclock.core.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.daisy.jetclock.core.IntentExtra
-import com.daisy.jetclock.core.manager.WorkRequestManager
+import com.daisy.jetclock.core.utils.IntentExtra
+import com.daisy.jetclock.core.task.WorkRequestManager
 import com.daisy.jetclock.core.service.AlarmService
-import com.daisy.jetclock.core.worker.RESCHEDULE_ALARM_TAG
-import com.daisy.jetclock.core.worker.RescheduleAlarmWorker
+import com.daisy.jetclock.core.task.worker.RESCHEDULE_ALARM_TAG
+import com.daisy.jetclock.core.task.worker.RescheduleAlarmWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +53,7 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                             }
 
                             ACTION_CANCEL -> {
-                                serviceIntent.action = AlarmService.ACTION_DISABLE
+                                serviceIntent.action = AlarmService.ACTION_STOP
                             }
 
                             else -> {

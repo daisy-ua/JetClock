@@ -5,14 +5,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.DefaultAlarmConfig
-import com.daisy.jetclock.core.manager.AlarmActionManager
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
-import com.daisy.jetclock.domain.repository.AlarmRepository
+import com.daisy.jetclock.domain.usecase.DeleteAlarmUseCase
+import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
+import com.daisy.jetclock.domain.usecase.ScheduleAlarmUseCase
 import com.daisy.jetclock.presentation.navigation.MainDestinations
 import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
@@ -30,8 +31,9 @@ import javax.inject.Inject
 class AlarmDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     alarmConfig: DefaultAlarmConfig,
-    private val repository: AlarmRepository,
-    private val alarmActionManager: AlarmActionManager,
+    private val getAlarmDetailsUseCase: GetAlarmDetailsUseCase,
+    private val scheduleAlarmUseCase: ScheduleAlarmUseCase,
+    private val deleteAlarmUseCase: DeleteAlarmUseCase,
     val toastStateHandler: ToastStateHandler,
 ) : ViewModel() {
     private val _alarm: MutableStateFlow<Alarm> = MutableStateFlow(alarmConfig.defaultAlarm)
@@ -50,7 +52,7 @@ class AlarmDetailsViewModel @Inject constructor(
 
         alarmId?.let { id ->
             viewModelScope.launch {
-                repository.getAlarmById(id).collect {
+                getAlarmDetailsUseCase(id).collect {
                     it?.let {
                         _alarm.value = it
                     }
@@ -98,10 +100,9 @@ class AlarmDetailsViewModel @Inject constructor(
     private var isSaving: AtomicBoolean = AtomicBoolean(false)
 
     fun saveAlarm(callback: () -> Unit) = viewModelScope.launch {
-        val alarmToSave = _alarm.value
         if (isSaving.compareAndSet(false, true)) {
             try {
-                val timeInMillis = alarmActionManager.reschedule(alarmToSave, _alarm.value)
+                val timeInMillis = scheduleAlarmUseCase(_alarm.value)
                 toastStateHandler.clearToastMessage()
                 toastStateHandler.setToastMessage(getTimeLeftUntilAlarm(timeInMillis))
                 delay(100L)
@@ -115,7 +116,7 @@ class AlarmDetailsViewModel @Inject constructor(
     }
 
     fun deleteAlarm(callback: () -> Unit) = viewModelScope.launch {
-        alarmActionManager.delete(_alarm.value)
+        deleteAlarmUseCase(_alarm.value)
         delay(100L)
         callback.invoke()
     }
