@@ -55,4 +55,7 @@
     <string name="snoozed_alarm_title">%1$s (Snoozed)</string>
     <string name="missed_alarm_content">Missed at %1$s</string>
     <string name="snoozed_alarm_content">Snoozing until %1$s</string>
+
+    <!-- Notification content description-->
+    <string name="dismiss_alarm_description">Dismiss alarm</string>
 </resources>

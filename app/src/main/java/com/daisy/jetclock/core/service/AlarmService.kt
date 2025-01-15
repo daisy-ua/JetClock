@@ -4,10 +4,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.alarm.AlarmCoordinator
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -94,6 +94,8 @@ class AlarmService : Service() {
     private fun cancel(alarm: Alarm) {
         if (foregroundNotification?.notificationId == AlarmNotificationType.Ongoing(alarm.id).notificationId) {
             coordinator.cleanup()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            foregroundNotification = null
         }
         stopSelf()
     }

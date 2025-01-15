@@ -92,6 +92,12 @@ private fun AlarmDetails(
 ) {
     val context = LocalContext.current
 
+    val formattedTime = remember {
+        alarm.triggerTime?.let { timeInMillis ->
+            val time = TimeFormatter.convertTimeInMillis(timeInMillis)
+            TimeFormatter.formatTime(context, time)
+        } ?: "-/-"
+    }
     val formattedDate = remember {
         alarm.triggerTime?.let { time ->
             DateFormatter.formatTriggerDate(time)
@@ -105,7 +111,7 @@ private fun AlarmDetails(
     ) {
         Text(
             modifier = Modifier.wrapContentHeight(),
-            text = TimeFormatter.formatTime(context, alarm.time),
+            text = formattedTime,
             style = MaterialTheme.typography.h1,
             color = MaterialTheme.colors.onBackground,
         )

@@ -24,25 +24,20 @@ class OngoingAlarmViewModel @Inject constructor(
     private val _alarm: MutableStateFlow<Alarm?> = MutableStateFlow(null)
     val alarm: StateFlow<Alarm?> get() = _alarm
 
-    private val _exitEvent = MutableStateFlow(false)
-    val exitEvent: StateFlow<Boolean> get() = _exitEvent
-
     init {
         initAlarm(savedStateHandle)
     }
 
-    fun snoozeAlarm() = viewModelScope.launch {
+    fun snoozeAlarm() {
         alarm.value?.let { alarm ->
             snoozeAlarmUseCase(alarm)
         }
-        _exitEvent.value = true
     }
 
-    fun dismissAlarm() = viewModelScope.launch {
+    fun dismissAlarm() {
         alarm.value?.let { alarm ->
             dismissAlarmUseCase(alarm)
         }
-        _exitEvent.value = true
     }
 
     private fun initAlarm(savedStateHandle: SavedStateHandle) {

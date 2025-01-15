@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="snooze_time_text">
+        <item quantity="one">Snooze %1$d min</item>
+        <item quantity="other">Snooze %1$d mins</item>
+    </plurals>
+</resources>

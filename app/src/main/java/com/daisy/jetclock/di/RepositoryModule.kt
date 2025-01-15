@@ -4,14 +4,17 @@ import com.daisy.jetclock.core.alarm.AlarmAction
 import com.daisy.jetclock.core.alarm.AlarmCoordinator
 import com.daisy.jetclock.core.media.MediaPlaybackServiceImpl
 import com.daisy.jetclock.core.media.PlaybackService
-import com.daisy.jetclock.core.receiver.MediaPlaybackHandler
+import com.daisy.jetclock.core.notification.fullscreen.FullscreenNotificationStopper
+import com.daisy.jetclock.core.notification.fullscreen.OngoingAlarmFullscreenNotificationHandler
+import com.daisy.jetclock.core.receiver.AlarmServiceHandler
 import com.daisy.jetclock.core.receiver.ServiceHandler
-import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
+import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.domain.repository.SoundRepository
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -41,7 +44,7 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindServiceHandler(
-        impl: MediaPlaybackHandler,
+        impl: AlarmServiceHandler,
     ): ServiceHandler<Long>
 
     @Binds
@@ -49,4 +52,10 @@ interface RepositoryModule {
     fun bindPlaybackService(
         impl: MediaPlaybackServiceImpl,
     ): PlaybackService
+
+    @Binds
+    @Singleton
+    fun provideFullscreenNotificationStopper(
+        impl: OngoingAlarmFullscreenNotificationHandler,
+    ): FullscreenNotificationStopper
 }

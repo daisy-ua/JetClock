@@ -8,13 +8,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MediaPlaybackHandler @Inject constructor(
+class AlarmServiceHandler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ServiceHandler<Long> {
 
-    override fun stop(key: Long) {
+    override fun start(key: Long, serviceAction: String) {
         val intent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
-            action = AlarmBroadcastReceiver.ACTION_CANCEL
+            action = serviceAction
             putExtra(IntentExtra.ID_EXTRA, key)
         }
 

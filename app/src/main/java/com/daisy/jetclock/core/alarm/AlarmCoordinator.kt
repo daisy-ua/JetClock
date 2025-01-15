@@ -1,11 +1,12 @@
 package com.daisy.jetclock.core.alarm
 
 import android.content.Context
-import com.daisy.jetclock.core.scheduler.AlarmSchedulerManager
-import com.daisy.jetclock.core.utils.AlarmStateUpdater
 import com.daisy.jetclock.core.media.PlaybackService
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
+import com.daisy.jetclock.core.notification.fullscreen.FullscreenNotificationStopper
+import com.daisy.jetclock.core.scheduler.AlarmSchedulerManager
+import com.daisy.jetclock.core.utils.AlarmStateUpdater
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.utils.scope.CoroutineScopeProvider
@@ -22,6 +23,7 @@ class AlarmCoordinator @Inject constructor(
     private val notificationManager: AlarmNotificationManager,
     private val alarmSchedulerManager: AlarmSchedulerManager,
     private val alarmStateUpdater: AlarmStateUpdater,
+    private val fullscreenNotificationStopper: FullscreenNotificationStopper,
 ) : AlarmAction {
 
     private val scope = coroutineScopeProvider.getCoroutineScope()
@@ -41,6 +43,7 @@ class AlarmCoordinator @Inject constructor(
             timestamp.ifEmpty { TimeFormatter.formatTimeWithMeridiem(context, alarm.time) }
 
         scheduleAutoSnooze(alarm) {
+            fullscreenNotificationStopper.stopNotification()
             onAutoSnoozeComplete(true)
         }
 
@@ -50,6 +53,8 @@ class AlarmCoordinator @Inject constructor(
     override suspend fun snooze(alarm: Alarm) {
         mediaPlaybackService.stopPlayback()
 
+        fullscreenNotificationStopper.stopNotification()
+
         val timeInMillis = alarmSchedulerManager.snooze(alarm)
         alarmStateUpdater.snoozeAlarm(alarm, timeInMillis)
 
@@ -57,13 +62,15 @@ class AlarmCoordinator @Inject constructor(
             AlarmNotificationType.Snoozed(
                 alarm.id,
                 alarm.label,
-                TimeFormatter.formatTimeWithMeridiem(context, alarm.time)
+                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis)
             )
         )
     }
 
     override suspend fun dismiss(alarm: Alarm) {
         mediaPlaybackService.stopPlayback()
+
+        fullscreenNotificationStopper.stopNotification()
 
         if (alarm.repeatDays.days.isNotEmpty()) {
             val timeInMillis = alarmSchedulerManager.schedule(alarm)
@@ -94,7 +101,7 @@ class AlarmCoordinator @Inject constructor(
             AlarmNotificationType.Snoozed(
                 alarm.id,
                 alarm.label,
-                TimeFormatter.formatTimeWithMeridiem(context, alarm.time)
+                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis)
             )
         } else {
             dismiss(alarm)

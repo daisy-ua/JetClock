@@ -8,12 +8,12 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.daisy.jetclock.R
-import com.daisy.jetclock.app.MainActivity
+import com.daisy.jetclock.app.OngoingAlarmActivity
 import com.daisy.jetclock.constants.ConfigConstants
-import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.base.BaseNotificationManager
 import com.daisy.jetclock.core.base.NotificationChannelData
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.utils.setIntentAction
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -34,7 +34,6 @@ class AlarmNotificationManager @Inject constructor(
                 name = context.getString(R.string.alarm_upcoming_channel_name),
                 description = context.getString(R.string.alarm_upcoming_channel_description),
             ),
-
             NotificationChannelData(
                 channelId = NotificationConfig.ALARM_MISSED_CHANNEL_ID,
                 importance = NotificationManagerCompat.IMPORTANCE_HIGH,
@@ -44,7 +43,7 @@ class AlarmNotificationManager @Inject constructor(
             ),
             NotificationChannelData(
                 channelId = NotificationConfig.ALARM_SNOOZED_CHANNEL_ID,
-                importance = NotificationManagerCompat.IMPORTANCE_LOW,
+                importance = NotificationManagerCompat.IMPORTANCE_HIGH,
                 name = context.getString(R.string.alarm_snooze_channel_name),
                 description = context.getString(R.string.alarm_snooze_channel_description),
             )
@@ -78,8 +77,8 @@ class AlarmNotificationManager @Inject constructor(
             .setContentText(time)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setFullScreenIntent(getFullScreenIntent(), true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setFullScreenIntent(getFullScreenIntent(alarmId), true)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
             .addAction(
                 R.drawable.baseline_close_24,
                 context.getString(R.string.dismiss_action_text),
@@ -102,7 +101,6 @@ class AlarmNotificationManager @Inject constructor(
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(getFullScreenIntent())
             .build()
     }
 
@@ -111,10 +109,9 @@ class AlarmNotificationManager @Inject constructor(
             .setSmallIcon(R.drawable.baseline_alarm_24)
             .setContentTitle(context.getString(R.string.snoozed_alarm_title, label))
             .setContentText(context.getString(R.string.snoozed_alarm_content, time))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(getFullScreenIntent())
             .build()
     }
 
@@ -132,9 +129,10 @@ class AlarmNotificationManager @Inject constructor(
         context = context
     )
 
-    private fun getFullScreenIntent(): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+    private fun getFullScreenIntent(alarmId: Long): PendingIntent {
+        val intent = Intent(context, OngoingAlarmActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(IntentExtra.ID_EXTRA, alarmId)
         }
         return PendingIntent.getActivity(context, 0, intent, ConfigConstants.PENDING_INTENT_FLAGS)
     }
