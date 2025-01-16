@@ -5,8 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.daisy.jetclock.constants.ConfigConstants
-import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
+import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.utils.AlarmDateCalculator
@@ -63,15 +63,15 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
             ConfigConstants.PENDING_INTENT_FLAGS
         )
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            timeInMillis,
+        alarmManager.setAlarmClock(
+            AlarmManager.AlarmClockInfo(timeInMillis, pendingIntent),
             pendingIntent
         )
     }
 
     private fun getDefaultIntent(alarmId: Long) =
         Intent(context, AlarmBroadcastReceiver::class.java).apply {
+            action = "ACTION_START"
             putExtra(IntentExtra.ID_EXTRA, alarmId)
         }
 }

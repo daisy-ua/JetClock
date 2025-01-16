@@ -3,7 +3,7 @@ package com.daisy.jetclock.core.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.daisy.jetclock.core.service.AlarmService
+import com.daisy.jetclock.core.alarm.AlarmAction
 import com.daisy.jetclock.core.task.WorkRequestManager
 import com.daisy.jetclock.core.task.worker.RESCHEDULE_ALARM_TAG
 import com.daisy.jetclock.core.task.worker.RescheduleAlarmWorker
@@ -23,19 +23,17 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
     @Inject
     lateinit var workRequestManager: WorkRequestManager
 
+    @Inject
+    lateinit var actionHandler: AlarmAction
+
     override fun onReceive(context: Context?, intent: Intent?) {
         val pendingResult: PendingResult = goAsync()
         broadcastReceiverScope.launch(Dispatchers.Default) {
             try {
                 context?.let {
                     intent?.let { intent ->
-                        val serviceIntent =
-                            Intent(context, AlarmService::class.java).apply {
-                                putExtra(
-                                    IntentExtra.ID_EXTRA,
-                                    intent.getLongExtra(IntentExtra.ID_EXTRA, -1)
-                                )
-                            }
+
+                        val id = intent.getLongExtra(IntentExtra.ID_EXTRA, -1)
 
                         when (intent.action) {
                             Intent.ACTION_BOOT_COMPLETED -> {
@@ -45,29 +43,21 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                             }
 
                             ACTION_DISMISS -> {
-                                serviceIntent.action = AlarmService.ACTION_DISMISS
+                                actionHandler.dismiss(id)
                             }
 
                             ACTION_SNOOZE -> {
-                                serviceIntent.action = AlarmService.ACTION_SNOOZE
+                                actionHandler.snooze(id)
                             }
 
                             ACTION_CANCEL -> {
-                                serviceIntent.action = AlarmService.ACTION_STOP
+                                actionHandler.cancel(id)
                             }
 
                             else -> {
-                                serviceIntent.apply {
-                                    putExtra(
-                                        IntentExtra.SNOOZED_TIMESTAMP_EXTRA,
-                                        intent.getStringExtra(IntentExtra.SNOOZED_TIMESTAMP_EXTRA)
-                                    )
-                                    action = AlarmService.ACTION_START
-                                }
+                                actionHandler.start(id)
                             }
                         }
-
-                        context.startService(serviceIntent)
                     }
                 }
             } finally {

@@ -1,17 +1,12 @@
 package com.daisy.jetclock.core.alarm
 
-import com.daisy.jetclock.core.notification.AlarmNotificationType
-import com.daisy.jetclock.domain.model.Alarm
-
 interface AlarmAction {
 
-    suspend fun start(
-        alarm: Alarm,
-        timestamp: String,
-        onAutoSnoozeComplete: (Boolean) -> Unit,
-    ): AlarmNotificationType.Ongoing
+    suspend fun start(alarmId: Long)
 
-    suspend fun snooze(alarm: Alarm)
+    suspend fun snooze(id: Long)
 
-    suspend fun dismiss(alarm: Alarm)
+    suspend fun dismiss(id: Long)
+
+    suspend fun cancel(id: Long)
 }
