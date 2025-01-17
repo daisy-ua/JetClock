@@ -7,9 +7,9 @@ import android.content.Intent
 import com.daisy.jetclock.constants.ConfigConstants
 import com.daisy.jetclock.core.receiver.AlarmBroadcastReceiver
 import com.daisy.jetclock.core.utils.IntentExtra
+import com.daisy.jetclock.core.utils.SchedulerUtils
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
-import com.daisy.jetclock.utils.AlarmDateCalculator
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -19,8 +19,8 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     override fun schedule(alarm: Alarm): Long {
-        val calendar: Calendar = AlarmDateCalculator.calculateAlarmTriggerTime(alarm).apply {
-            val nextDayOffset = AlarmDateCalculator.getNextAvailableDay(this, alarm.repeatDays.days)
+        val calendar: Calendar = SchedulerUtils.calculateAlarmTriggerTime(alarm.time).apply {
+            val nextDayOffset = SchedulerUtils.getNextAvailableDay(this, alarm.repeatDays.days)
             add(Calendar.DAY_OF_MONTH, nextDayOffset)
         }
         schedule(calendar.timeInMillis, alarm.id.toInt(), getDefaultIntent(alarm.id))
