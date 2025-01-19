@@ -15,7 +15,6 @@ import com.daisy.jetclock.domain.usecase.DeleteAlarmUseCase
 import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import com.daisy.jetclock.domain.usecase.ScheduleAlarmUseCase
 import com.daisy.jetclock.presentation.navigation.MainDestinations
-import com.daisy.jetclock.presentation.utils.next.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -99,12 +98,12 @@ class AlarmDetailsViewModel @Inject constructor(
 
     private var isSaving: AtomicBoolean = AtomicBoolean(false)
 
-    fun saveAlarm(callback: () -> Unit) = viewModelScope.launch {
+    fun saveAlarm(callback: () -> Unit, formatMessage: (Long?) -> String) = viewModelScope.launch {
         if (isSaving.compareAndSet(false, true)) {
             try {
                 val timeInMillis = scheduleAlarmUseCase(_alarm.value)
                 toastStateHandler.clearToastMessage()
-                toastStateHandler.setToastMessage(getTimeLeftUntilAlarm(timeInMillis))
+                toastStateHandler.setToastMessage(formatMessage(timeInMillis))
                 delay(100L)
             } catch (e: Exception) {
                 Log.e("NewAlarmViewModel", "Error saving alarm", e)

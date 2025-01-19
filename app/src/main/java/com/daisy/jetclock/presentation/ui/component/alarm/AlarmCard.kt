@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.RepeatDaysFormatter
-import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 
 
 @Composable
@@ -49,7 +49,9 @@ fun AlarmCard(
 
     val changeCheckedState: (Alarm) -> Unit = remember {
         { alarm ->
-            viewModel.changeCheckedState(alarm)
+            viewModel.changeCheckedState(alarm) { timeUntilAlarm ->
+                TimeFormatter.formatTimeUntilAlarmGoesOff(context, timeUntilAlarm)
+            }
         }
     }
 

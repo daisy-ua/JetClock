@@ -100,8 +100,7 @@ fun AlarmScreenContent(
                             context,
                             it.time
                         )
-                    }
-                        ?: "",
+                    } ?: "",
                     ringInTime = nextAlarmRingInTime?.let { time ->
                         TimeFormatter.formatTimeUntilAlarmGoesOff(
                             context,

@@ -9,7 +9,6 @@ import com.daisy.jetclock.domain.usecase.GetAlarmsUseCase
 import com.daisy.jetclock.domain.usecase.ScheduleAlarmUseCase
 import com.daisy.jetclock.presentation.utils.next.NextAlarmHandler
 import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
-import com.daisy.jetclock.presentation.utils.next.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -63,22 +62,33 @@ class AlarmViewModel @Inject constructor(
         refreshJob?.cancel()
     }
 
-    fun changeCheckedState(alarm: Alarm) = viewModelScope.launch {
-        scheduleAlarm(alarm)
-        nextAlarmHandler.updateNextAlarm(alarms.value)
-    }
+    fun changeCheckedState(alarm: Alarm, formatMessage: (Long?) -> String) =
+        viewModelScope.launch {
+            val timeInMillis = scheduleAlarm(alarm)
+            handleToastMessage(timeInMillis, formatMessage)
+            nextAlarmHandler.updateNextAlarm(alarms.value)
+        }
 
     fun deleteAlarm(alarm: Alarm) = viewModelScope.launch {
         deleteAlarmUseCase(alarm)
     }
 
-    private suspend fun scheduleAlarm(alarm: Alarm) {
-        if (alarm.isEnabled) {
+    private suspend fun scheduleAlarm(alarm: Alarm): Long? {
+        return if (alarm.isEnabled) {
             cancelAlarmUseCase(alarm)
-            toastStateHandler.clearToastMessage()
+            null
         } else {
-            val timeInMillis = scheduleAlarmUseCase(alarm)
-            toastStateHandler.setToastMessage(getTimeLeftUntilAlarm(timeInMillis))
+            scheduleAlarmUseCase(alarm)
         }
+    }
+
+    private fun handleToastMessage(
+        timeInMillis: Long?,
+        formatMessage: (Long?) -> String,
+    ) {
+        timeInMillis?.let {
+            val msg = formatMessage(timeInMillis)
+            toastStateHandler.setToastMessage(msg)
+        } ?: toastStateHandler.clearToastMessage()
     }
 }

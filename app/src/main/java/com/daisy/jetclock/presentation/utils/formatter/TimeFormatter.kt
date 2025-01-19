@@ -1,9 +1,9 @@
 package com.daisy.jetclock.presentation.utils.formatter
 
 import android.content.Context
-import android.util.Log
 import com.daisy.jetclock.R
 import com.daisy.jetclock.domain.model.TimeOfDay
+import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils.convertToTimeOfDay
 import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 
@@ -42,6 +42,17 @@ object TimeFormatter {
             val formattedTimeParts = timeParts.joinToString(" ")
             context.getString(R.string.time_until_alarm, formattedTimeParts)
         }
+    }
+
+    fun formatTimeUntilAlarmGoesOff(
+        context: Context,
+        timeInMillis: Long?,
+    ): String {
+        val timeUntilNextAlarm =
+            timeInMillis?.let { time -> TimeMillisUtils.convertTimeUntilAlarmGoesOff((time)) }
+                ?: throw Exception("Error occurred while parsing time.")
+
+        return formatTimeUntilAlarmGoesOff(context, timeUntilNextAlarm)
     }
 
     private fun formatTimePart(context: Context, value: Long, pluralResourceId: Int): String {

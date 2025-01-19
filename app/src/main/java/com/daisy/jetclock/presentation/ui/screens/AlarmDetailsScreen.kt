@@ -39,6 +39,7 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.TextFloatingActionB
 import com.daisy.jetclock.presentation.ui.component.timepicker.TimePicker
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.utils.formatter.SoundOptionFormatter
+import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
 
 enum class DialogType {
@@ -56,6 +57,7 @@ fun AlarmDetailsScreen(
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
     val alarm by viewModel.alarm.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     var showDialogType by remember {
         mutableStateOf(DialogType.NONE)
@@ -85,7 +87,11 @@ fun AlarmDetailsScreen(
     }
 
     val onSaveAlarm: () -> Unit = remember {
-        { viewModel.saveAlarm(onUpClick) }
+        {
+            viewModel.saveAlarm(onUpClick) { timeUntilAlarm ->
+                TimeFormatter.formatTimeUntilAlarmGoesOff(context, timeUntilAlarm)
+            }
+        }
     }
 
     val onDeleteAlarm: () -> Unit = remember {
