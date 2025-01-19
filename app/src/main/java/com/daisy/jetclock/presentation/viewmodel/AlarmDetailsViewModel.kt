@@ -15,7 +15,7 @@ import com.daisy.jetclock.domain.usecase.DeleteAlarmUseCase
 import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import com.daisy.jetclock.domain.usecase.ScheduleAlarmUseCase
 import com.daisy.jetclock.presentation.navigation.MainDestinations
-import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
+import com.daisy.jetclock.presentation.utils.next.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay

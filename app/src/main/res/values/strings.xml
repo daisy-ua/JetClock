@@ -58,4 +58,8 @@
 
     <!-- Notification content description-->
     <string name="dismiss_alarm_description">Dismiss alarm</string>
+
+    <!-- Time Until Alarm Goes Off Messages -->
+    <string name="time_until_alarm">Ring in %1$s.</string>
+    <string name="time_until_alarm_less_than_a_minute">Ring in less than a minute.</string>
 </resources>

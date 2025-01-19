@@ -1,8 +1,9 @@
-package com.daisy.jetclock.utils.nextalarm
+package com.daisy.jetclock.presentation.utils.next
 
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.TimeUntilAlarm
 
+//Next Alarm Utils
 fun getTimeLeftUntilAlarm(timeInMillis: Long): String {
     return TimeUntilAlarm(timeInMillis).getTimeUntil() ?: "Error occurred."
 }

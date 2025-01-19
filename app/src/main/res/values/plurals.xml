@@ -4,4 +4,19 @@
         <item quantity="one">Snooze %1$d min</item>
         <item quantity="other">Snooze %1$d mins</item>
     </plurals>
+
+    <plurals name="time_part_day">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <plurals name="time_part_hour">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+
+    <plurals name="time_part_minute">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
 </resources>

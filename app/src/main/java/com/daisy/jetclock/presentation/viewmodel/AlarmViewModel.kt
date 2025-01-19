@@ -7,8 +7,9 @@ import com.daisy.jetclock.domain.usecase.CancelAlarmUseCase
 import com.daisy.jetclock.domain.usecase.DeleteAlarmUseCase
 import com.daisy.jetclock.domain.usecase.GetAlarmsUseCase
 import com.daisy.jetclock.domain.usecase.ScheduleAlarmUseCase
-import com.daisy.jetclock.utils.nextalarm.NextAlarmHandler
-import com.daisy.jetclock.utils.nextalarm.getTimeLeftUntilAlarm
+import com.daisy.jetclock.presentation.utils.next.NextAlarmHandler
+import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
+import com.daisy.jetclock.presentation.utils.next.getTimeLeftUntilAlarm
 import com.daisy.jetclock.utils.toast.ToastStateHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,7 +34,7 @@ class AlarmViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val nextAlarm: StateFlow<Alarm?> get() = nextAlarmHandler.nextAlarm
-    val nextAlarmTime: StateFlow<String?> get() = nextAlarmHandler.nextAlarmTime
+    val nextAlarmTime: StateFlow<TimeUntilNextAlarm?> get() = nextAlarmHandler.nextAlarmTime
 
     private var refreshJob: Job? = null
 

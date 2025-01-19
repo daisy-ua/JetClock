@@ -35,6 +35,7 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 
 @Composable
@@ -69,7 +70,7 @@ fun AlarmScreen(
 @Composable
 fun AlarmScreenContent(
     nextAlarm: Alarm?,
-    nextAlarmRingInTime: String?,
+    nextAlarmRingInTime: TimeUntilNextAlarm?,
     alarmList: List<Alarm>,
     onNewAlarmClick: () -> Unit,
     onExistingAlarmClick: (Long) -> Unit,
@@ -101,8 +102,12 @@ fun AlarmScreenContent(
                         )
                     }
                         ?: "",
-                    ringInTime = nextAlarmRingInTime
-                        ?: stringResource(id = R.string.no_alarm_scheduled_message),
+                    ringInTime = nextAlarmRingInTime?.let { time ->
+                        TimeFormatter.formatTimeUntilAlarmGoesOff(
+                            context,
+                            time
+                        )
+                    } ?: stringResource(id = R.string.no_alarm_scheduled_message),
                     onClick = onExistingAlarmClick,
                     onStartRefreshing = onStartRefreshingNextAlarm,
                     onStopRefreshing = onStopRefreshingNextAlarm
@@ -144,7 +149,7 @@ fun AlarmScreenPreview() {
     JetClockTheme(darkTheme = true) {
         AlarmScreenContent(
             nextAlarm = null,
-            nextAlarmRingInTime = "",
+            nextAlarmRingInTime = TimeUntilNextAlarm(0, 0, 0),
             alarmList = emptyList(),
             onNewAlarmClick = { /*TODO*/ },
             onExistingAlarmClick = {},

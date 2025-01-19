@@ -43,6 +43,7 @@ import com.daisy.jetclock.presentation.ui.component.button.SwipeableButton
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import com.daisy.jetclock.presentation.utils.formatter.DateFormatter
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.viewmodel.OngoingAlarmViewModel
 
 
@@ -94,7 +95,7 @@ private fun AlarmDetails(
 
     val formattedTime = remember {
         alarm.triggerTime?.let { timeInMillis ->
-            val time = TimeFormatter.convertTimeInMillis(timeInMillis)
+            val time = TimeMillisUtils.convertToTimeOfDay(timeInMillis)
             TimeFormatter.formatTime(context, time)
         } ?: "-/-"
     }

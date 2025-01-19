@@ -3,7 +3,13 @@ package com.daisy.jetclock.presentation.utils.helper
 import com.daisy.jetclock.constants.TimeFormat
 import java.util.Locale
 
-
+/**
+ * Helper class for managing and formatting time values for a TimePicker.
+ * It supports both 12-hour and 24-hour time formats, providing the necessary methods to retrieve
+ * hour and minute values, as well as their string representations with leading zeros.
+ *
+ * @param timeFormat The time format to use (default is 12-hour format).
+ */
 class TimeDisplayHelper(
     timeFormat: TimeFormat = TimeFormat.Hour12Format,
 ) {

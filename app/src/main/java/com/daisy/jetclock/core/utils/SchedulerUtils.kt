@@ -1,4 +1,4 @@
-package com.daisy.jetclock.utils
+package com.daisy.jetclock.core.utils
 
 import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.domain.model.DayOfWeek
