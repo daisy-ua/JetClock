@@ -26,8 +26,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
+import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.constants.DefaultAlarmConfig
+import com.daisy.jetclock.constants.DefaultAlarmConfig.Companion.NEW_ALARM_ID
+import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.RepeatDays
+import com.daisy.jetclock.domain.model.RingDurationOption
+import com.daisy.jetclock.domain.model.SnoozeOption
+import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.alarm.AlarmList
 import com.daisy.jetclock.presentation.ui.component.alarm.NextAlarmCard
 import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockFloatingActionButton
@@ -35,6 +43,7 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 
@@ -80,6 +89,10 @@ fun AlarmScreenContent(
 ) {
     val context = LocalContext.current
 
+    val triggerTime = remember(nextAlarm) {
+        nextAlarm?.triggerTime?.let { TimeMillisUtils.convertToTimeOfDay(it) }
+    }
+
     Scaffold(
         topBar = { JetClockTopAppBar() },
         floatingActionButton = {
@@ -95,10 +108,10 @@ fun AlarmScreenContent(
             ) {
                 NextAlarmCard(
                     alarm = nextAlarm,
-                    alarmTime = nextAlarm?.let {
+                    alarmTime = triggerTime?.let { time ->
                         TimeFormatter.formatTime(
                             context,
-                            it.time
+                            time
                         )
                     } ?: "",
                     ringInTime = nextAlarmRingInTime?.let { time ->
@@ -146,10 +159,28 @@ fun EmptyAlarmState(modifier: Modifier = Modifier) {
 @Composable
 fun AlarmScreenPreview() {
     JetClockTheme(darkTheme = true) {
+        val alarms = listOf(
+            Alarm(
+                id = NEW_ALARM_ID,
+                time = TimeOfDay(1, 40, MeridiemOption.AM),
+                repeatDays = RepeatDays(listOf()),
+                isEnabled = true,
+                triggerTime = 178177384687438,
+                label = "Alarm",
+                ringDurationOption = RingDurationOption(AlarmOptionsData.ringDurationOption[1]),
+                snoozeOption = SnoozeOption(
+                    duration = AlarmOptionsData.snoozeDuration[1],
+                    number = AlarmOptionsData.snoozeNumber[1],
+                ),
+                snoozeCount = 0,
+                soundOption = SoundOption.default
+            ),
+
+        )
         AlarmScreenContent(
-            nextAlarm = null,
-            nextAlarmRingInTime = TimeUntilNextAlarm(0, 0, 0),
-            alarmList = emptyList(),
+            nextAlarm = alarms[0],
+            nextAlarmRingInTime = TimeUntilNextAlarm(1, 5, 9),
+            alarmList = alarms,
             onNewAlarmClick = { /*TODO*/ },
             onExistingAlarmClick = {},
             onAlarmDelete = {},

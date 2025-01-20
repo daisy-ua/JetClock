@@ -102,7 +102,7 @@ fun NextAlarmCard(
                     style = MaterialTheme.typography.subtitle1,
                     color = Platinum,
                     modifier = Modifier
-                        .padding(top = 8.dp)
+                        .padding(start = 3.dp, top = 8.dp)
                         .align(CenterHorizontally),
                 )
             }
