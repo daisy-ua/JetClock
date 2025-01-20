@@ -29,6 +29,7 @@ class AlarmActionHandler @Inject constructor(
 ) : AlarmAction {
 
     private val autoSnoozeJobs = mutableMapOf<Long, Job>()
+    private var activeAlarmId: Long? = null
 
     override suspend fun start(
         alarmId: Long,
@@ -38,6 +39,11 @@ class AlarmActionHandler @Inject constructor(
         )
         val alarm = getAlarmDetailsUseCase(alarmId).firstOrNull() ?: return
 
+        if (activeAlarmId != null) {
+            updateAlarmSchedule(alarmId)
+            return
+        }
+
         scheduleAutoSnooze(alarm)
 //        TODO: change to Alarm
         startOngoingAlarmService(alarmId)
@@ -46,9 +52,9 @@ class AlarmActionHandler @Inject constructor(
     override suspend fun snooze(id: Long) {
         cancelAutoSnoozeJob(id)
 
-        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
-
         stopOngoingAlarmServiceIfNeeded(id)
+
+        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
 
         val timeInMillis = alarmSchedulerManager.snooze(alarm)
         alarmStateUpdater.snoozeAlarm(alarm, timeInMillis)
@@ -65,30 +71,19 @@ class AlarmActionHandler @Inject constructor(
     override suspend fun dismiss(id: Long) {
         cancelAutoSnoozeJob(id)
 
-        disableOngoingAlarm(id)
+        stopOngoingAlarmServiceIfNeeded(id)
+
+        updateAlarmSchedule(id)
     }
 
     override suspend fun cancel(id: Long) {
         stopOngoingAlarmServiceIfNeeded(id)
     }
 
-    private suspend fun disableOngoingAlarm(id: Long) {
-        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
-
-        stopOngoingAlarmServiceIfNeeded(id)
-
-        if (alarm.repeatDays.days.isNotEmpty()) {
-            val timeInMillis = alarmSchedulerManager.schedule(alarm)
-            alarmStateUpdater.rescheduleAlarm(alarm, timeInMillis)
-        } else {
-            alarmStateUpdater.cancelAlarm(alarm)
-        }
-    }
-
     private fun scheduleAutoSnooze(alarm: Alarm) {
         cancelAutoSnoozeJob(alarm.id)
 
-        val job = CoroutineScope(Job() + Dispatchers.Main).launch {
+        val job = CoroutineScope(Job() + Dispatchers.Default).launch {
             try {
                 delay(alarm.ringDurationOption.value * 60 * 1000L)
 
@@ -113,7 +108,7 @@ class AlarmActionHandler @Inject constructor(
                 TimeFormatter.formatTimeWithMeridiem(context, timeInMillis)
             )
         } else {
-            disableOngoingAlarm(alarm.id)
+            updateAlarmSchedule(alarm.id)
 
             AlarmNotificationType.Missed(
                 alarm.id,
@@ -123,6 +118,17 @@ class AlarmActionHandler @Inject constructor(
         }
 
         notificationManager.showNotification(notification)
+    }
+
+    private suspend fun updateAlarmSchedule(id: Long) {
+        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
+
+        if (alarm.repeatDays.days.isNotEmpty()) {
+            val timeInMillis = alarmSchedulerManager.schedule(alarm)
+            alarmStateUpdater.rescheduleAlarm(alarm, timeInMillis)
+        } else {
+            alarmStateUpdater.cancelAlarm(alarm)
+        }
     }
 
     private fun cancelAutoSnoozeJob(id: Long) {
@@ -138,6 +144,8 @@ class AlarmActionHandler @Inject constructor(
             }
 
         context.startForegroundService(serviceIntent)
+
+        activeAlarmId = id
     }
 
     private fun stopOngoingAlarmServiceIfNeeded(id: Long) {
@@ -149,5 +157,7 @@ class AlarmActionHandler @Inject constructor(
             }
 
         context.startService(serviceIntent)
+
+        activeAlarmId = null
     }
 }

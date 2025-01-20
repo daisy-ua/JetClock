@@ -6,7 +6,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 
 abstract class BaseNotificationManager<T : NotificationType>(
-    protected val notificationManager: NotificationManagerCompat,
+    private val notificationManager: NotificationManagerCompat,
 ) {
     abstract fun createNotification(type: T): Notification
 
