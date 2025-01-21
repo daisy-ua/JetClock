@@ -39,8 +39,8 @@
 
 
     <!-- Notification Titles -->
-    <string name="alarm_upcoming_channel_name">Upcoming alarms</string>
-    <string name="alarm_upcoming_channel_description">Shows alarm notification at scheduled time</string>
+    <string name="alarm_ongoing_channel_name">Ongoing alarms</string>
+    <string name="alarm_ongoing_channel_description">Shows alarm notification at scheduled time</string>
     <string name="alarm_missed_channel_name">Missed alarms</string>
     <string name="alarm_missed_channel_description">Shows notification for missed alarms</string>
     <string name="alarm_snooze_channel_name">Snoozed alarms</string>

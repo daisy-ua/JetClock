@@ -31,8 +31,8 @@ class AlarmNotificationManager @Inject constructor(
             NotificationChannelData(
                 channelId = NotificationConfig.ALARM_ONGOING_CHANNEL_ID,
                 importance = NotificationManagerCompat.IMPORTANCE_MAX,
-                name = context.getString(R.string.alarm_upcoming_channel_name),
-                description = context.getString(R.string.alarm_upcoming_channel_description),
+                name = context.getString(R.string.alarm_ongoing_channel_name),
+                description = context.getString(R.string.alarm_ongoing_channel_description),
             ),
             NotificationChannelData(
                 channelId = NotificationConfig.ALARM_MISSED_CHANNEL_ID,

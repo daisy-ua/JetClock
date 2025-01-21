@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">JetClock</string>
+
+    <string name="time_format">%1$d:%2$02d %3$s</string>
+
+    <string name="ring_once">Тільки раз</string>
+    <string name="everyday">Щодня</string>
+    <string name="monday_to_friday">Понеділок-п\'ятниця</string>
+
+    <string name="no_alarms_message">Будильники ще не створені.\nНатисніть кнопку +, щоб додати новий будильник.</string>
+    <string name="no_alarm_scheduled_message">Немає запланованих будильників.</string>
+
+    <string name="set_alarm">Створити будильник</string>
+    <string name="edit_alarm">Редагувати будильник</string>
+    <string name="sound">Мелодія</string>
+    <string name="label">Мітка</string>
+    <string name="repeat">Повторювати</string>
+    <string name="ring_duration">Тривалість звучання</string>
+    <string name="snooze_duration">Тривалість відкладування</string>
+
+    <string name="default_label">Будильник</string>
+
+    <string name="select_sound">Вибір мелодії</string>
+    <string name="ringtones_category_classic">КЛАСИЧНІ МЕЛОДІЇ</string>
+
+    <string name="sound_none_display">Немає</string>
+    <string name="sound_default_display">За замовчуванням</string>
+
+    <string name="day_sun">Нд</string>
+    <string name="day_mon">Пн</string>
+    <string name="day_tue">Вт</string>
+    <string name="day_wed">Ср</string>
+    <string name="day_thu">Чт</string>
+    <string name="day_fri">Пт</string>
+    <string name="day_sat">Сб</string>
+
+    <string name="meridiem_am">дп</string>
+    <string name="meridiem_pm">пп</string>
+
+
+    <!-- Notification Titles -->
+    <string name="alarm_ongoing_channel_name">Активні будильники</string>
+    <string name="alarm_ongoing_channel_description">Показує сповіщення про активні будильники у запланований час</string>
+    <string name="alarm_missed_channel_name">Пропущені будильники</string>
+    <string name="alarm_missed_channel_description">Показує сповіщення про пропущенні будильники</string>
+    <string name="alarm_snooze_channel_name">Відкладені будильники</string>
+    <string name="alarm_snooze_channel_description">Показує сповіщення про відкладені будильники</string>
+
+    <!-- Notification Actions -->
+    <string name="dismiss_action_text">Відхилити</string>
+    <string name="snooze_action_text">Відкласти</string>
+
+    <!-- Notification Titles for Missed and Snoozed Alarms -->
+    <string name="missed_alarm_title">%1$s (Пропущено)</string>
+    <string name="snoozed_alarm_title">%1$s (Відкладено)</string>
+    <string name="missed_alarm_content">Пропущено о %1$s</string>
+    <string name="snoozed_alarm_content">Відхилено до %1$s</string>
+
+    <!-- Notification content description-->
+    <string name="dismiss_alarm_description">Вимкнути будильник</string>
+
+    <!-- Time Until Alarm Goes Off Messages -->
+    <string name="time_until_alarm">Пролунає через %1$s.</string>
+    <string name="time_until_alarm_less_than_a_minute">Пролунає меншe ніж за хвилину.</string>
+</resources>
