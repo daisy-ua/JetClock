@@ -71,7 +71,7 @@ internal class AlarmSchedulerManagerImpl @Inject constructor(
 
     private fun getDefaultIntent(alarmId: Long) =
         Intent(context, AlarmBroadcastReceiver::class.java).apply {
-            action = "ACTION_START"
+            action = AlarmBroadcastReceiver.ACTION_START
             putExtra(IntentExtra.ID_EXTRA, alarmId)
         }
 }

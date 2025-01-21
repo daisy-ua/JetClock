@@ -101,6 +101,7 @@ dependencies {
 
 //    Rebugger
     implementation 'io.github.theapache64:rebugger:1.0.0-rc03'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:3.0-alpha-1'
 }
 
 kapt {

@@ -4,8 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.daisy.jetclock.core.alarm.AlarmAction
-import com.daisy.jetclock.core.utils.IntentExtra
+import com.daisy.jetclock.core.task.WorkRequestManager
+import com.daisy.jetclock.core.task.worker.RESCHEDULE_ALARM_TAG
+import com.daisy.jetclock.core.task.worker.RescheduleAlarmWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +16,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AlarmBroadcastReceiver : BroadcastReceiver() {
+class SystemReceiver : BroadcastReceiver() {
     private val broadcastReceiverScope = CoroutineScope(SupervisorJob())
 
     @Inject
-    lateinit var actionHandler: AlarmAction
+    lateinit var workRequestManager: WorkRequestManager
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val pendingResult: PendingResult = goAsync()
@@ -27,22 +28,18 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
             try {
                 context?.let {
                     intent?.let { intent ->
-                        val id = intent.getLongExtra(IntentExtra.ID_EXTRA, -1)
-
                         when (intent.action) {
+                            Intent.ACTION_BOOT_COMPLETED -> handleReschedule()
 
-                            ACTION_DISMISS -> actionHandler.dismiss(id)
+                            Intent.ACTION_LOCALE_CHANGED -> handleLocaleChanged()
 
-                            ACTION_SNOOZE -> actionHandler.snooze(id)
+                            Intent.ACTION_TIME_CHANGED,
+                            Intent.ACTION_TIMEZONE_CHANGED -> handleReschedule()
 
-                            ACTION_CANCEL -> actionHandler.cancel(id)
-
-                            ACTION_START -> actionHandler.start(id)
-
-                            else -> Log.e(
-                                "AlarmBroadcastReceiver",
-                                "Unknown action ${intent.action}"
-                            )
+                            else -> {
+                                Log.d("SystemReceiver", "time is set")
+                                handleReschedule()
+                            }
                         }
                     }
                 }
@@ -53,10 +50,13 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    companion object {
-        const val ACTION_START = "ACTION_START"
-        const val ACTION_DISMISS = "ACTION_DISMISS"
-        const val ACTION_SNOOZE = "ACTION_SNOOZE"
-        const val ACTION_CANCEL = "ACTION_CANCEL"
+    private fun handleReschedule() {
+        workRequestManager.enqueueWorker<RescheduleAlarmWorker>(
+            RESCHEDULE_ALARM_TAG
+        )
+    }
+
+    private fun handleLocaleChanged() {
+        Log.d("SystemReceiver", "onReceive: locale changed")
     }
 }

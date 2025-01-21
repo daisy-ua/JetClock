@@ -39,6 +39,8 @@ class AlarmActionHandler @Inject constructor(
         )
         val alarm = getAlarmDetailsUseCase(alarmId).firstOrNull() ?: return
 
+        if (isAlarmTimeInThePast(alarm.triggerTime!!)) return
+
         if (activeAlarmId != null) {
             updateAlarmSchedule(alarmId)
             return
@@ -78,6 +80,10 @@ class AlarmActionHandler @Inject constructor(
 
     override suspend fun cancel(id: Long) {
         stopOngoingAlarmServiceIfNeeded(id)
+    }
+
+    private fun isAlarmTimeInThePast(triggerTime: Long, bufferTimeMillis: Long = 5000L): Boolean {
+        return triggerTime + bufferTimeMillis < System.currentTimeMillis()
     }
 
     private fun scheduleAutoSnooze(alarm: Alarm) {
