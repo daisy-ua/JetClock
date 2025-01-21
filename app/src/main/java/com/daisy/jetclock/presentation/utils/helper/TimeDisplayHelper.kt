@@ -1,5 +1,6 @@
 package com.daisy.jetclock.presentation.utils.helper
 
+import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
 import java.util.Locale
 
@@ -17,6 +18,8 @@ class TimeDisplayHelper(
 
     private val minutesRange: List<Int> = (0 until 60).toList()
 
+    val meridiemOptions = listOf("", "", MeridiemOption.AM, MeridiemOption.PM, "", "")
+
     var hours: List<String> = convertTwoCharTime(hoursRange)
         private set
 
@@ -33,6 +36,14 @@ class TimeDisplayHelper(
 
     fun getMinuteIndex(value: Int): Int {
         return minutesRange.indexOf(value)
+    }
+
+    fun getMeridiemOptions(index: Int): MeridiemOption {
+        return meridiemOptions[index] as MeridiemOption
+    }
+
+    fun getIndexOfMeridiem(value: MeridiemOption): Int {
+        return meridiemOptions.indexOf(value) - 2
     }
 
     private fun getHoursRangeForFormat(timeFormat: TimeFormat): List<Int> {

@@ -26,6 +26,11 @@
     <string name="sound_none_display">None</string>
     <string name="sound_default_display">Default</string>
 
+    <string name="delete_action">Delete</string>
+
+    <string name="repetition_display">%1$dx</string>
+    <string name="snooze_option_display">%1$s, %2$s</string>
+
     <string name="day_sun">Sun</string>
     <string name="day_mon">Mon</string>
     <string name="day_tue">Tue</string>
@@ -33,6 +38,15 @@
     <string name="day_thu">Thu</string>
     <string name="day_fri">Fri</string>
     <string name="day_sat">Sat</string>
+
+    <string name="day_sun_one">S</string>
+    <string name="day_mon_one">M</string>
+    <string name="day_tue_one">T</string>
+    <string name="day_wed_one">W</string>
+    <string name="day_thu_one">T</string>
+    <string name="day_fri_one">F</string>
+    <string name="day_sat_one">S</string>
+
 
     <string name="meridiem_am">AM</string>
     <string name="meridiem_pm">PM</string>

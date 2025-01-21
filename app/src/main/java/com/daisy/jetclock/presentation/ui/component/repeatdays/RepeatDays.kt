@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,7 @@ import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.presentation.ui.component.drawable.CirclePath
 import com.daisy.jetclock.presentation.ui.component.drawable.CirclePathDirection
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
+import com.daisy.jetclock.presentation.utils.formatter.DayOfWeekFormatter
 
 val days = DayOfWeek.values().toList()
 
@@ -46,6 +48,8 @@ fun RepeatDays(
     modifier: Modifier = Modifier,
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
+    val context = LocalContext.current
+
     val selectedDays = remember {
         mutableStateListOf<DayOfWeek>()
     }
@@ -132,7 +136,7 @@ fun RepeatDays(
 
                     ) {
                         Text(
-                            text = day.abbr.first().toString(),
+                            text = DayOfWeekFormatter.getOneLetterAbbreviation(context, day),
                             modifier = Modifier
                                 .size(40.dp)
                                 .wrapContentHeight(),
@@ -143,7 +147,7 @@ fun RepeatDays(
                     }
 
                     Text(
-                        text = day.abbr.first().toString(),
+                        text = DayOfWeekFormatter.getOneLetterAbbreviation(context, day),
                         modifier = Modifier
                             .size(40.dp)
                             .wrapContentHeight(),
@@ -157,10 +161,14 @@ fun RepeatDays(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "uk")
 @Composable
 fun RepeatDaysPreview() {
     JetClockTheme(darkTheme = false) {
-//        RepeatDays(modifier = Modifier.padding(16.dp))
+        RepeatDays(
+            value = RepeatDays(listOf()),
+            onItemClicked = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

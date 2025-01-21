@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import com.daisy.jetclock.presentation.ui.theme.AfricanViolet
 import com.daisy.jetclock.presentation.ui.theme.Platinum
 import com.daisy.jetclock.presentation.ui.theme.PortGore
 import com.daisy.jetclock.presentation.ui.theme.UltraViolet
+import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString
 
 
 @Composable
@@ -43,6 +45,7 @@ fun NextAlarmCard(
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -89,13 +92,15 @@ fun NextAlarmCard(
                         fontWeight = FontWeight.Bold,
                         color = Platinum
                     )
-                    Text(
-                        text = alarm?.time?.meridiem?.name ?: "",
-                        style = MaterialTheme.typography.h5,
-                        fontWeight = FontWeight.Bold,
-                        color = Platinum,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
+                    alarm?.time?.meridiem?.let { amPm ->
+                        Text(
+                            text = amPm.getLocalizedString(context),
+                            style = MaterialTheme.typography.h5,
+                            fontWeight = FontWeight.Bold,
+                            color = Platinum,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                 }
                 Text(
                     text = ringInTime,

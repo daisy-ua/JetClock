@@ -26,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.presentation.utils.formatter.RepeatDaysFormatter
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
+import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 
 
@@ -69,9 +70,9 @@ fun AlarmCard(
                     style = MaterialTheme.typography.h5,
                     fontWeight = FontWeight.Medium
                 )
-                item.time.meridiem?.let { meridiem ->
+                item.time.meridiem?.let { amPm ->
                     Text(
-                        text = meridiem.name,
+                        text = amPm.getLocalizedString(context),
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(start = 4.dp)
                     )

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,9 +31,8 @@ import com.daisy.jetclock.constants.MeridiemOption
 import com.daisy.jetclock.constants.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
+import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString
 import com.daisy.jetclock.presentation.utils.helper.TimeDisplayHelper
-
-private val meridiemOptions = listOf("", "", MeridiemOption.AM.name, MeridiemOption.PM.name, "", "")
 
 /**
  * Note: if a value is quickly selected and the save action is triggered immediately,
@@ -47,6 +47,8 @@ fun TimePicker(
     soundEnabled: Boolean = false,
     fontColor: Color = MaterialTheme.colors.onBackground,
 ) {
+    val context = LocalContext.current
+
     val timeDisplayHelper by remember {
         mutableStateOf(TimeDisplayHelper(timeFormat))
     }
@@ -70,7 +72,7 @@ fun TimePicker(
     }
 
     fun handleMeridiemChange(meridiem: Int) {
-        val newValue = MeridiemOption.valueOf(meridiemOptions[meridiem])
+        val newValue = timeDisplayHelper.getMeridiemOptions(meridiem)
         meridiemValue = newValue
         onValueChange(TimeOfDay(hourValue, minuteValue, meridiemValue))
     }
@@ -83,7 +85,7 @@ fun TimePicker(
         initialHourIndex = timeDisplayHelper.getHourIndex(initialTimeValue.hour)
         initialMinuteIndex = timeDisplayHelper.getMinuteIndex(initialTimeValue.minute)
         initialMeridiemIndex = initialTimeValue.meridiem?.let {
-            meridiemOptions.indexOf(it.name) - 2
+            timeDisplayHelper.getIndexOfMeridiem(it)
         } ?: 0
     }
 
@@ -132,7 +134,10 @@ fun TimePicker(
         )
         if (timeFormat == TimeFormat.Hour12Format) {
             WheelPicker(
-                items = meridiemOptions,
+                items = timeDisplayHelper.meridiemOptions.map {
+                    if (it is MeridiemOption) it.getLocalizedString(context)
+                    else it as String
+                },
                 itemHeight = 35.dp,
                 itemWidth = 55.dp,
                 initialIndex = initialMeridiemIndex,

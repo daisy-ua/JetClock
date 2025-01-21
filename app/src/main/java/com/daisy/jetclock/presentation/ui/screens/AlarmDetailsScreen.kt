@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -210,8 +211,9 @@ fun AlarmDetailsScreenContent(
         floatingActionButton = {
             if (!isNewAlarm(alarm.id)) {
                 TextFloatingActionButton(
+                    actionText = stringResource(id = R.string.delete_action),
                     onItemClick = onDeleteAlarm,
-                    Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
         },
@@ -249,16 +251,28 @@ fun AlarmDetailsScreenContent(
                 item {
                     SettingRow(
                         stringResource(id = R.string.ring_duration),
-                        alarm.ringDurationOption.displayString
+                        pluralStringResource(
+                            id = R.plurals.time_part_minute,
+                            count = alarm.ringDurationOption.value,
+                            alarm.ringDurationOption.value
+                        )
                     ) {
                         onShowDialogTypeChanged(DialogType.RING_DURATION)
                     }
                 }
 
                 item {
+                    val minutes = pluralStringResource(
+                        id = R.plurals.time_part_minute,
+                        count = alarm.snoozeOption.duration,
+                        alarm.snoozeOption.duration
+                    )
+                    val times =
+                        stringResource(id = R.string.repetition_display, alarm.snoozeOption.number)
+
                     SettingRow(
                         stringResource(id = R.string.snooze_duration),
-                        alarm.snoozeOption.displayString
+                        stringResource(id = R.string.snooze_option_display, minutes, times)
                     ) {
                         onShowDialogTypeChanged(DialogType.SNOOZE_DURATION)
                     }

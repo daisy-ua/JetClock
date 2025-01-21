@@ -21,7 +21,7 @@ object RepeatDaysFormatter {
                 )
 
                 else -> sort().days.joinToString { day ->
-                    day.getLocalizedString(context)
+                    DayOfWeekFormatter.getThreeLetterAbbreviation(context, day)
                 }
             }
         }

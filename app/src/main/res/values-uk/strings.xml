@@ -27,6 +27,11 @@
     <string name="sound_none_display">Немає</string>
     <string name="sound_default_display">За замовчуванням</string>
 
+    <string name="delete_action">Видалити</string>
+
+    <string name="repetition_display">%1$dx</string>
+    <string name="snooze_option_display">%1$s, %2$s</string>
+
     <string name="day_sun">Нд</string>
     <string name="day_mon">Пн</string>
     <string name="day_tue">Вт</string>
@@ -34,6 +39,15 @@
     <string name="day_thu">Чт</string>
     <string name="day_fri">Пт</string>
     <string name="day_sat">Сб</string>
+
+    <string name="day_sun_one">Н</string>
+    <string name="day_mon_one">П</string>
+    <string name="day_tue_one">В</string>
+    <string name="day_wed_one">С</string>
+    <string name="day_thu_one">Ч</string>
+    <string name="day_fri_one">П</string>
+    <string name="day_sat_one">С</string>
+
 
     <string name="meridiem_am">дп</string>
     <string name="meridiem_pm">пп</string>
