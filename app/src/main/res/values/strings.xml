@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">JetClock</string>
 
-    <string name="time_format">%1$d:%2$02d %3$s</string>
+    <string name="time_format_12">%1$d:%2$02d %3$s</string>
+    <string name="time_format_24">%1$02d:%2$02d</string>
 
     <string name="ring_once">Ring only once</string>
     <string name="everyday">Everyday</string>

@@ -1,6 +1,6 @@
 package com.daisy.jetclock.data.mapper
 
-import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.data.local.entity.AlarmEntity
 import com.daisy.jetclock.domain.model.Alarm
 import java.time.LocalTime

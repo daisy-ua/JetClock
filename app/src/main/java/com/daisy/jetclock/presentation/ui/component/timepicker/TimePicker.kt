@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.daisy.jetclock.constants.MeridiemOption
-import com.daisy.jetclock.constants.TimeFormat
+import com.daisy.jetclock.domain.model.MeridiemOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString

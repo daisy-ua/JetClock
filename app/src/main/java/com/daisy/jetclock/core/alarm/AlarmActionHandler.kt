@@ -9,6 +9,7 @@ import com.daisy.jetclock.core.service.AlarmMediaService
 import com.daisy.jetclock.core.utils.AlarmStateUpdater
 import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -61,11 +62,12 @@ class AlarmActionHandler @Inject constructor(
         val timeInMillis = alarmSchedulerManager.snooze(alarm)
         alarmStateUpdater.snoozeAlarm(alarm, timeInMillis)
 
+//        TODO: remove hardcoded
         notificationManager.showNotification(
             AlarmNotificationType.Snoozed(
                 alarm.id,
                 alarm.label,
-                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis)
+                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis, TimeFormat.Hour24Format)
             )
         )
     }
@@ -108,10 +110,11 @@ class AlarmActionHandler @Inject constructor(
             val timeInMillis = alarmSchedulerManager.snooze(alarm)
             alarmStateUpdater.autoSnoozeAlarm(alarm, timeInMillis)
 
+//            TODO: remove hardcoded
             AlarmNotificationType.Snoozed(
                 alarm.id,
                 alarm.label,
-                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis)
+                TimeFormatter.formatTimeWithMeridiem(context, timeInMillis, TimeFormat.Hour24Format)
             )
         } else {
             updateAlarmSchedule(alarm.id)

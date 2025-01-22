@@ -29,12 +29,13 @@ import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.constants.DefaultAlarmConfig.Companion.NEW_ALARM_ID
-import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.alarm.AlarmList
 import com.daisy.jetclock.presentation.ui.component.alarm.NextAlarmCard
@@ -89,8 +90,9 @@ fun AlarmScreenContent(
 ) {
     val context = LocalContext.current
 
+//    TODO: remove hardcoded
     val triggerTime = remember(nextAlarm) {
-        nextAlarm?.triggerTime?.let { TimeMillisUtils.convertToTimeOfDay(it) }
+        nextAlarm?.triggerTime?.let { TimeMillisUtils.convertToTimeOfDay(it, TimeFormat.Hour24Format) }
     }
 
     Scaffold(

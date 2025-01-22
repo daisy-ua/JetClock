@@ -29,6 +29,7 @@ import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.components.ListRowComponent
 import com.daisy.jetclock.presentation.ui.component.dialog.SetAlarmLabelDialog
@@ -223,8 +224,10 @@ fun AlarmDetailsScreenContent(
             modifier = Modifier
                 .fillMaxSize()
         ) {
+//            TODO: remove hardcoded
             TimePicker(
                 initialTimeValue = alarm.time,
+                timeFormat = TimeFormat.Hour24Format,
                 onValueChange = onUpdateSelectedTime,
                 modifier = Modifier.padding(top = 4.dp, bottom = 26.dp, start = 16.dp, end = 16.dp),
                 soundEnabled = true,

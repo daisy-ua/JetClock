@@ -1,6 +1,7 @@
 package com.daisy.jetclock.presentation.utils.helper
 
-import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.domain.model.MeridiemOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 import java.util.Calendar
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit
  */
 object TimeMillisUtils {
 
-    fun convertToTimeOfDay(timeInMillis: Long): TimeOfDay {
+    fun convertToTimeOfDay(timeInMillis: Long, timeFormat: TimeFormat): TimeOfDay {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = timeInMillis
 
@@ -20,7 +21,7 @@ object TimeMillisUtils {
         val meridiem =
             if (calendar.get(Calendar.AM_PM) == Calendar.AM) MeridiemOption.AM else MeridiemOption.PM
 
-        return TimeOfDay(hour, minute, meridiem)
+        return TimeOfDay(hour, minute, meridiem).format(timeFormat)
     }
 
     fun convertTimeUntilAlarmGoesOff(timeInMillis: Long): TimeUntilNextAlarm? {

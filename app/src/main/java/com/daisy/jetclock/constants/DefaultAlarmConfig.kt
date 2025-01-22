@@ -3,10 +3,12 @@ package com.daisy.jetclock.constants
 import android.content.Context
 import com.daisy.jetclock.R
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Calendar
@@ -18,10 +20,11 @@ import javax.inject.Singleton
 class DefaultAlarmConfig @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
+//    TODO: remove hardcoded
     val defaultAlarm: Alarm
         get() = Alarm(
             id = NEW_ALARM_ID,
-            time = with(getLocalTime()) { TimeOfDay(hour, minute, meridiem) },
+            time = with(getLocalTime()) { TimeOfDay(hour, minute, meridiem).format(TimeFormat.Hour24Format) },
             repeatDays = RepeatDays(listOf()),
             isEnabled = true,
             triggerTime = null,

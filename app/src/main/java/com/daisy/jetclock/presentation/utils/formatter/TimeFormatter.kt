@@ -2,6 +2,7 @@ package com.daisy.jetclock.presentation.utils.formatter
 
 import android.content.Context
 import com.daisy.jetclock.R
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils.convertToTimeOfDay
@@ -10,16 +11,43 @@ import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 object TimeFormatter {
 
     fun formatTime(context: Context, time: TimeOfDay): String {
-        return context.getString(R.string.time_format, time.hour, time.minute, "")
+        return when (time.timeFormat) {
+            TimeFormat.Hour12Format -> context.getString(
+                R.string.time_format_12,
+                time.hour,
+                time.minute,
+                ""
+            )
+
+            TimeFormat.Hour24Format -> context.getString(
+                R.string.time_format_24,
+                time.hour,
+                time.minute
+            )
+        }
     }
 
     fun formatTimeWithMeridiem(context: Context, time: TimeOfDay): String {
-        val amPm = time.meridiem?.getLocalizedString(context) ?: ""
-        return context.getString(R.string.time_format, time.hour, time.minute, amPm)
+        return when (time.timeFormat) {
+            TimeFormat.Hour12Format -> {
+                val amPm = time.meridiem?.getLocalizedString(context) ?: ""
+                context.getString(R.string.time_format_12, time.hour, time.minute, amPm)
+            }
+
+            TimeFormat.Hour24Format -> context.getString(
+                R.string.time_format_24,
+                time.hour,
+                time.minute
+            )
+        }
     }
 
-    fun formatTimeWithMeridiem(context: Context, timeInMillis: Long): String {
-        val timeOfDay = convertToTimeOfDay(timeInMillis)
+    fun formatTimeWithMeridiem(
+        context: Context,
+        timeInMillis: Long,
+        timeFormat: TimeFormat,
+    ): String {
+        val timeOfDay = convertToTimeOfDay(timeInMillis, timeFormat)
 
         return formatTimeWithMeridiem(context, timeOfDay)
     }

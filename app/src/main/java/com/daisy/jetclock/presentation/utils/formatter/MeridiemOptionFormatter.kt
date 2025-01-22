@@ -2,7 +2,7 @@ package com.daisy.jetclock.presentation.utils.formatter
 
 import android.content.Context
 import com.daisy.jetclock.R
-import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.domain.model.MeridiemOption
 
 
 fun MeridiemOption.getLocalizedString(context: Context): String {

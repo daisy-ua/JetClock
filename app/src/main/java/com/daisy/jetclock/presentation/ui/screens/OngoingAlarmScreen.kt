@@ -31,12 +31,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.constants.DefaultAlarmConfig.Companion.NEW_ALARM_ID
-import com.daisy.jetclock.constants.MeridiemOption
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
 import com.daisy.jetclock.presentation.ui.component.button.DismissButton
 import com.daisy.jetclock.presentation.ui.component.button.SwipeableButton
@@ -93,9 +94,10 @@ private fun AlarmDetails(
 ) {
     val context = LocalContext.current
 
+//    TODO: remove hardcoded
     val formattedTime = remember {
         alarm.triggerTime?.let { timeInMillis ->
-            val time = TimeMillisUtils.convertToTimeOfDay(timeInMillis)
+            val time = TimeMillisUtils.convertToTimeOfDay(timeInMillis, TimeFormat.Hour24Format)
             TimeFormatter.formatTime(context, time)
         } ?: "-/-"
     }

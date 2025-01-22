@@ -1,4 +1,4 @@
-package com.daisy.jetclock.constants
+package com.daisy.jetclock.domain.model
 
 
 enum class TimeFormat {

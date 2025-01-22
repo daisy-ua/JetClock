@@ -1,7 +1,7 @@
 package com.daisy.jetclock.presentation.utils.helper
 
-import com.daisy.jetclock.constants.MeridiemOption
-import com.daisy.jetclock.constants.TimeFormat
+import com.daisy.jetclock.domain.model.MeridiemOption
+import com.daisy.jetclock.domain.model.TimeFormat
 import java.util.Locale
 
 /**
