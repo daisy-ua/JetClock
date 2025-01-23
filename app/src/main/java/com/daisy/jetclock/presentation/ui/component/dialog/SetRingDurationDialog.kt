@@ -9,7 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -20,27 +20,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.presentation.ui.component.components.CancelOKButtonsRow
 import com.daisy.jetclock.presentation.ui.component.components.TextRadioButtonRowItem
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 
 val ringDurationOptions by lazy {
-    AlarmOptionsData.ringDurationOption.map { duration ->
-        RingDurationOption(duration)
-    }
+    AlarmOptionsData.ringDurationOption
 }
 
 @Composable
 fun SetRingDurationDialog(
-    currentDurationOption: RingDurationOption,
+    currentDuration: Int,
     onDismissRequest: () -> Unit,
-    onSubmitRequest: (RingDurationOption) -> Unit,
+    onSubmitRequest: (Int) -> Unit,
 ) {
-    var durationOptionSelected by rememberSaveable(stateSaver = RingDurationOption.Saver()) {
-        mutableStateOf(
-            currentDurationOption
-        )
+    var durationSelected by rememberSaveable {
+        mutableIntStateOf(currentDuration)
     }
 
     BottomFixedDialog(onDismissRequest = onDismissRequest) {
@@ -62,12 +57,12 @@ fun SetRingDurationDialog(
                 itemsIndexed(ringDurationOptions) { _, option ->
                     TextRadioButtonRowItem(
                         name = pluralStringResource(
-                            id = R.plurals.time_part_minute,
-                            count = option.value,
-                            option.value
+                            id = R.plurals.time_part_minute_duration,
+                            count = option,
+                            option
                         ),
-                        isSelected = durationOptionSelected == option,
-                        onItemClick = { durationOptionSelected = option })
+                        isSelected = durationSelected == option,
+                        onItemClick = { durationSelected = option })
                 }
             }
 
@@ -76,7 +71,7 @@ fun SetRingDurationDialog(
                     .fillMaxWidth()
                     .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 4.dp),
                 onDismissRequest = onDismissRequest,
-                onSubmitRequest = { onSubmitRequest(durationOptionSelected) },
+                onSubmitRequest = { onSubmitRequest(durationSelected) },
             )
         }
     }

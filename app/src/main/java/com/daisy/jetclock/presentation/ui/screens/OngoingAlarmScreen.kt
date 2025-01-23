@@ -31,10 +31,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.constants.DefaultAlarmConfig.Companion.NEW_ALARM_ID
-import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeFormat
@@ -188,7 +187,7 @@ fun OngoingAlarmScreenPreview() {
                 isEnabled = true,
                 triggerTime = null,
                 label = "Alarm",
-                ringDurationOption = RingDurationOption(AlarmOptionsData.ringDurationOption[1]),
+                ringDuration = AlarmOptionsData.ringDurationOption[1],
                 snoozeOption = SnoozeOption(
                     duration = AlarmOptionsData.snoozeDuration[1],
                     number = AlarmOptionsData.snoozeNumber[1],

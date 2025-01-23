@@ -4,8 +4,8 @@ import android.content.Context
 import com.daisy.jetclock.core.scheduler.AlarmSchedulerManager
 import com.daisy.jetclock.core.scheduler.AlarmSchedulerManagerImpl
 import com.daisy.jetclock.core.task.WorkRequestManager
-import com.daisy.jetclock.utils.SoundPoolManager
 import com.daisy.jetclock.presentation.utils.next.NextAlarmHandler
+import com.daisy.jetclock.utils.SoundPoolManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

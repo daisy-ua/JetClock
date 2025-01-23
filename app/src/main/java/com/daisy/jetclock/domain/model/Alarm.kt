@@ -19,7 +19,7 @@ data class Alarm(
 
     val label: String,
 
-    val ringDurationOption: RingDurationOption,
+    val ringDuration: Int,
 
     val snoozeOption: SnoozeOption,
 

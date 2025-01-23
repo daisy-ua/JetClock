@@ -29,10 +29,9 @@ import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.constants.DefaultAlarmConfig.Companion.NEW_ALARM_ID
-import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeFormat
@@ -92,7 +91,12 @@ fun AlarmScreenContent(
 
 //    TODO: remove hardcoded
     val triggerTime = remember(nextAlarm) {
-        nextAlarm?.triggerTime?.let { TimeMillisUtils.convertToTimeOfDay(it, TimeFormat.Hour24Format) }
+        nextAlarm?.triggerTime?.let {
+            TimeMillisUtils.convertToTimeOfDay(
+                it,
+                TimeFormat.Hour24Format
+            )
+        }
     }
 
     Scaffold(
@@ -169,15 +173,14 @@ fun AlarmScreenPreview() {
                 isEnabled = true,
                 triggerTime = 178177384687438,
                 label = "Alarm",
-                ringDurationOption = RingDurationOption(AlarmOptionsData.ringDurationOption[1]),
+                ringDuration = AlarmOptionsData.ringDurationOption[1],
                 snoozeOption = SnoozeOption(
                     duration = AlarmOptionsData.snoozeDuration[1],
                     number = AlarmOptionsData.snoozeNumber[1],
                 ),
                 snoozeCount = 0,
                 soundOption = SoundOption.default
-            ),
-
+            )
         )
         AlarmScreenContent(
             nextAlarm = alarms[0],

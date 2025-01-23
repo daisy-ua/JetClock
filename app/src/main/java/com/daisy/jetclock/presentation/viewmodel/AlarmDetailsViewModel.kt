@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeOfDay
@@ -72,8 +71,8 @@ class AlarmDetailsViewModel @Inject constructor(
         updateAlarm { copy(label = newLabel) }
     }
 
-    fun updateRingDuration(newRingDurationOption: RingDurationOption) {
-        updateAlarm { copy(ringDurationOption = newRingDurationOption) }
+    fun updateRingDuration(newRingDuration: Int) {
+        updateAlarm { copy(ringDuration = newRingDuration) }
     }
 
     fun updateSnoozeDuration(newSnoozeDurationOption: SnoozeOption) {

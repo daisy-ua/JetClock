@@ -7,7 +7,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.daisy.jetclock.presentation.ui.component.components.ListRowComponent
 
 @Composable
 fun TextRadioButtonRowItem(

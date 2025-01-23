@@ -1,8 +1,8 @@
 package com.daisy.jetclock.data.mapper
 
-import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.data.local.entity.AlarmEntity
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.MeridiemOption
 import java.time.LocalTime
 
 fun Alarm.convertToEntity(): AlarmEntity {
@@ -21,7 +21,7 @@ fun Alarm.convertToEntity(): AlarmEntity {
         isEnabled = isEnabled,
         triggerTime = triggerTime,
         label = label,
-        ringDuration = ringDurationOption.value,
+        ringDuration = ringDuration,
         snoozeDuration = snoozeOption.duration,
         snoozeNumber = snoozeOption.number,
         snoozeCount = snoozeCount,

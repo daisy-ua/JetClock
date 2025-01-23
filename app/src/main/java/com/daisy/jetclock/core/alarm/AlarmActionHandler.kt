@@ -92,7 +92,7 @@ class AlarmActionHandler @Inject constructor(
 
         val job = CoroutineScope(Job() + Dispatchers.Default).launch {
             try {
-                delay(alarm.ringDurationOption.value * 60 * 1000L)
+                delay(alarm.ringDuration * 60 * 1000L)
 
                 stopOngoingAlarmServiceIfNeeded(alarm.id)
 

@@ -1,7 +1,7 @@
 package com.daisy.jetclock.core.utils
 
-import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.DayOfWeek
+import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.TimeOfDay
 import java.util.Calendar
 import javax.inject.Singleton

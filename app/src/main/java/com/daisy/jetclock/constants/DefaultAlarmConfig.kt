@@ -5,7 +5,6 @@ import com.daisy.jetclock.R
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeFormat
@@ -20,16 +19,22 @@ import javax.inject.Singleton
 class DefaultAlarmConfig @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-//    TODO: remove hardcoded
+    //    TODO: remove hardcoded
     val defaultAlarm: Alarm
         get() = Alarm(
             id = NEW_ALARM_ID,
-            time = with(getLocalTime()) { TimeOfDay(hour, minute, meridiem).format(TimeFormat.Hour24Format) },
+            time = with(getLocalTime()) {
+                TimeOfDay(
+                    hour,
+                    minute,
+                    meridiem
+                ).format(TimeFormat.Hour24Format)
+            },
             repeatDays = RepeatDays(listOf()),
             isEnabled = true,
             triggerTime = null,
             label = context.getString(R.string.default_label),
-            ringDurationOption = RingDurationOption(AlarmOptionsData.ringDurationOption[1]),
+            ringDuration = AlarmOptionsData.ringDurationOption[1],
             snoozeOption = SnoozeOption(
                 duration = AlarmOptionsData.snoozeDuration[1],
                 number = AlarmOptionsData.snoozeNumber[1],

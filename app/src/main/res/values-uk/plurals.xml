@@ -23,4 +23,10 @@
         <item quantity="few">%d хвилини</item>
         <item quantity="many">%d хвилин</item>
     </plurals>
+
+    <plurals name="time_part_minute_duration">
+        <item quantity="one">%d хвилинa</item>
+        <item quantity="few">%d хвилини</item>
+        <item quantity="many">%d хвилин</item>
+    </plurals>
 </resources>

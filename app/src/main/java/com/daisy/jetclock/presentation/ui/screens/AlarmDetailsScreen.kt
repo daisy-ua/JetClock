@@ -27,7 +27,6 @@ import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.model.TimeOfDay
@@ -67,7 +66,7 @@ fun AlarmDetailsScreen(
 
     HandleDialogs(
         label = alarm.label,
-        ringDuration = alarm.ringDurationOption,
+        ringDuration = alarm.ringDuration,
         snoozeDuration = alarm.snoozeOption,
         showDialogType = showDialogType,
         onDialogDismiss = { showDialogType = DialogType.NONE },
@@ -125,7 +124,7 @@ fun AlarmDetailsScreen(
 @Composable
 fun HandleDialogs(
     label: String,
-    ringDuration: RingDurationOption,
+    ringDuration: Int,
     snoozeDuration: SnoozeOption,
     showDialogType: DialogType,
     onDialogDismiss: () -> Unit,
@@ -142,7 +141,7 @@ fun HandleDialogs(
 
         DialogType.RING_DURATION -> {
             SetRingDurationDialog(
-                currentDurationOption = ringDuration,
+                currentDuration = ringDuration,
                 onDismissRequest = onDialogDismiss,
                 onSubmitRequest = { ringDurationOption ->
                     onSubmit(
@@ -177,7 +176,7 @@ fun handleDialogSubmit(
 ) {
     when (dialogType) {
         DialogType.ALARM_LABEL -> viewModel.updateLabel(updatedValue as String)
-        DialogType.RING_DURATION -> viewModel.updateRingDuration(updatedValue as RingDurationOption)
+        DialogType.RING_DURATION -> viewModel.updateRingDuration(updatedValue as Int)
         DialogType.SNOOZE_DURATION -> viewModel.updateSnoozeDuration(updatedValue as SnoozeOption)
         DialogType.NONE -> {}
     }
@@ -256,8 +255,8 @@ fun AlarmDetailsScreenContent(
                         stringResource(id = R.string.ring_duration),
                         pluralStringResource(
                             id = R.plurals.time_part_minute,
-                            count = alarm.ringDurationOption.value,
-                            alarm.ringDurationOption.value
+                            count = alarm.ringDuration,
+                            alarm.ringDuration
                         )
                     ) {
                         onShowDialogTypeChanged(DialogType.RING_DURATION)

@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.presentation.ui.component.alarm.AlarmCard
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)

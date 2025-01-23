@@ -4,7 +4,6 @@ import com.daisy.jetclock.data.local.entity.AlarmEntity
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.model.MeridiemOption
 import com.daisy.jetclock.domain.model.RepeatDays
-import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.domain.model.SoundOption
 import com.daisy.jetclock.domain.model.TimeFormat
@@ -28,7 +27,7 @@ fun AlarmEntity.convertToDomain(timeFormat: TimeFormat = TimeFormat.Hour12Format
         isEnabled = isEnabled,
         triggerTime = triggerTime,
         label = label,
-        ringDurationOption = RingDurationOption(ringDuration),
+        ringDuration = ringDuration,
         snoozeOption = SnoozeOption(snoozeDuration, snoozeNumber),
         snoozeCount = snoozeCount,
         soundOption = SoundOption(sound)
