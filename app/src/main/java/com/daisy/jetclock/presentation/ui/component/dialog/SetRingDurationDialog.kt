@@ -14,8 +14,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.domain.model.RingDurationOption
 import com.daisy.jetclock.presentation.ui.component.components.CancelOKButtonsRow
@@ -48,7 +51,7 @@ fun SetRingDurationDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Set ring duration",
+                text = stringResource(id = R.string.set_ring_duration_action),
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -58,7 +61,11 @@ fun SetRingDurationDialog(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(ringDurationOptions) { _, option ->
                     TextRadioButtonRowItem(
-                        name = option.displayString,
+                        name = pluralStringResource(
+                            id = R.plurals.time_part_minute,
+                            count = option.value,
+                            option.value
+                        ),
                         isSelected = durationOptionSelected == option,
                         onItemClick = { durationOptionSelected = option })
                 }

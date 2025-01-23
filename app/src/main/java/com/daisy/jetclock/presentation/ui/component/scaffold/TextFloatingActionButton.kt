@@ -1,15 +1,13 @@
 package com.daisy.jetclock.presentation.ui.component.scaffold
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +24,7 @@ fun TextFloatingActionButton(
     backgroundColor: Color = MaterialTheme.colors.error,
     shadowColor: Color = MaterialTheme.colors.error,
 ) {
-    Box(
+    Button(
         modifier = Modifier
             .then(modifier)
             .drawColoredShadow(
@@ -34,18 +32,20 @@ fun TextFloatingActionButton(
                 alpha = 0.2f,
                 borderRadius = 10.dp,
                 offsetY = 8.dp,
-            )
-            .clip(MaterialTheme.shapes.medium)
-            .background(backgroundColor)
-            .clickable { onItemClick() }
-            .padding(horizontal = 30.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
+            ),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = backgroundColor
+        ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = null,
+        onClick = onItemClick
     ) {
         Text(
             text = actionText.uppercase(),
             color = Color.White,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
         )
     }
 }

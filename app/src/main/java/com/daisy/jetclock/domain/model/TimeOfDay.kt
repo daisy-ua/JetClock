@@ -1,10 +1,14 @@
 package com.daisy.jetclock.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class TimeOfDay(
     val hour: Int,
     val minute: Int,
     val meridiem: MeridiemOption?,
-) {
+): Parcelable {
     val timeFormat: TimeFormat
         get() = meridiem?.run { TimeFormat.Hour12Format } ?: TimeFormat.Hour24Format
 

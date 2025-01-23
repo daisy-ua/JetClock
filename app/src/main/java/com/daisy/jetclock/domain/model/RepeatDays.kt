@@ -1,8 +1,12 @@
 package com.daisy.jetclock.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class RepeatDays(
     val days: List<DayOfWeek>,
-) {
+) : Parcelable {
     fun sort(firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY): RepeatDays {
         val startIndex = firstDayOfWeek.ordinal
         return days

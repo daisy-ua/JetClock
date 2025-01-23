@@ -1,10 +1,13 @@
 package com.daisy.jetclock.domain.model
 
+import android.os.Parcelable
 import com.daisy.jetclock.constants.DefaultAlarmConfig
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class SoundOption(
     val soundFile: String,
-) {
+) : Parcelable {
     val isSoundNone: Boolean
         get() = soundFile == NONE_FILENAME
 

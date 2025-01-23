@@ -2,26 +2,18 @@ package com.daisy.jetclock.core.service
 
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import com.daisy.jetclock.core.media.PlaybackService
 import com.daisy.jetclock.core.notification.foreground.ForegroundServiceNotification
 import com.daisy.jetclock.core.notification.fullscreen.FullscreenNotificationStopper
 import com.daisy.jetclock.core.utils.IntentExtra
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.domain.usecase.GetAlarmDetailsUseCase
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class AlarmMediaService : Service() {
-
-    @Inject
-    lateinit var getAlarmDetailsUseCase: GetAlarmDetailsUseCase
 
     @Inject
     lateinit var mediaPlaybackService: PlaybackService
@@ -32,27 +24,27 @@ class AlarmMediaService : Service() {
     @Inject
     lateinit var serviceNotification: ForegroundServiceNotification<Alarm>
 
-    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
     private var ongoingAlarmId: Long? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val id = intent?.getLongExtra(IntentExtra.ID_EXTRA, -1) ?: -1
 
-        serviceScope.launch {
-            when (intent?.action) {
-                ACTION_START -> start(id)
+        val alarm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent?.getParcelableExtra(IntentExtra.DATA_EXTRA, Alarm::class.java)
+        } else {
+            intent?.getParcelableExtra(IntentExtra.DATA_EXTRA)
+        }
 
-                ACTION_STOP -> stopIfNeeded(id)
-            }
+        when (intent?.action) {
+            ACTION_START -> alarm?.let { start(it) }
+
+            ACTION_STOP -> stopIfNeeded(id)
         }
 
         return START_STICKY
     }
 
-    private suspend fun start(id: Long) {
-        val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
-
+    private fun start(alarm: Alarm) {
         mediaPlaybackService.startPlayback(alarm.soundOption)
 
         startForeground(
@@ -60,7 +52,7 @@ class AlarmMediaService : Service() {
             serviceNotification.getNotification(alarm),
         )
 
-        ongoingAlarmId = id
+        ongoingAlarmId = alarm.id
     }
 
     private fun stopIfNeeded(id: Long) {

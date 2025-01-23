@@ -13,9 +13,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.R
 import com.daisy.jetclock.constants.AlarmOptionsData
 import com.daisy.jetclock.domain.model.SnoozeOption
 import com.daisy.jetclock.presentation.ui.component.components.CancelOKButtonsRow
@@ -46,7 +48,7 @@ fun SetSnoozeDurationDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Snooze duration",
+                text = stringResource(id = R.string.snooze_duration),
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -56,7 +58,7 @@ fun SetSnoozeDurationDialog(
             val subMenuColor = MaterialTheme.colors.onBackground.copy(.6f)
 
             Text(
-                text = "Snooze duration (min)",
+                text = stringResource(id = R.string.snooze_duration_option),
                 style = MaterialTheme.typography.body1,
                 color = subMenuColor,
                 fontWeight = FontWeight.Medium,
@@ -76,7 +78,7 @@ fun SetSnoozeDurationDialog(
             )
 
             Text(
-                text = "Number of snoozes",
+                text = stringResource(id = R.string.snooze_number_option),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Medium,
                 color = subMenuColor,

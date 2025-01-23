@@ -29,6 +29,15 @@
     <string name="sound_default_display">За замовчуванням</string>
 
     <string name="delete_action">Видалити</string>
+    <string name="ok_action">Ок</string>
+    <string name="cancel_action">Скасувати</string>
+
+    <string name="set_ring_duration_action">Встановити тривалість звучання</string>
+    <string name="set_snooze_duration_action">Вставновити тривалість відкладування</string>
+    <string name="set_alarm_label_action">Встановити мітку будильника</string>
+
+    <string name="snooze_duration_option">Тривалість відкладування (хв)</string>
+    <string name="snooze_number_option">Кількість повторів сигналу перед автовимкненням</string>
 
     <string name="repetition_display">%1$dx</string>
     <string name="snooze_option_display">%1$s, %2$s</string>

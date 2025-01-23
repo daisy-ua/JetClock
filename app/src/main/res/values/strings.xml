@@ -28,6 +28,15 @@
     <string name="sound_default_display">Default</string>
 
     <string name="delete_action">Delete</string>
+    <string name="ok_action">Ok</string>
+    <string name="cancel_action">Cancel</string>
+
+    <string name="set_ring_duration_action">Set ring duration</string>
+    <string name="set_snooze_duration_action">Set snooze duration</string>
+    <string name="set_alarm_label_action">Set alarm label</string>
+
+    <string name="snooze_duration_option">Snooze duration (min)</string>
+    <string name="snooze_number_option">Number of snoozes</string>
 
     <string name="repetition_display">%1$dx</string>
     <string name="snooze_option_display">%1$s, %2$s</string>

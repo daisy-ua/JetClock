@@ -23,10 +23,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.jetclock.R
 import com.daisy.jetclock.presentation.ui.component.components.CancelOKButtonsRow
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import kotlinx.coroutines.android.awaitFrame
@@ -67,7 +69,7 @@ fun SetAlarmLabelDialog(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Set alarm label",
+                text = stringResource(id = R.string.set_alarm_label_action),
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.padding(bottom = 16.dp)
             )

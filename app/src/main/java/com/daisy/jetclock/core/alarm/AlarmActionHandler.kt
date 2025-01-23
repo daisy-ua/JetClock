@@ -48,8 +48,7 @@ class AlarmActionHandler @Inject constructor(
         }
 
         scheduleAutoSnooze(alarm)
-//        TODO: change to Alarm
-        startOngoingAlarmService(alarmId)
+        startOngoingAlarmService(alarm)
     }
 
     override suspend fun snooze(id: Long) {
@@ -144,17 +143,17 @@ class AlarmActionHandler @Inject constructor(
         autoSnoozeJobs[id]?.cancel()
     }
 
-    private fun startOngoingAlarmService(id: Long) {
+    private fun startOngoingAlarmService(alarm: Alarm) {
         val serviceIntent =
             Intent(context, AlarmMediaService::class.java).apply {
-                putExtra(IntentExtra.ID_EXTRA, id)
+                putExtra(IntentExtra.DATA_EXTRA, alarm)
 
                 action = AlarmMediaService.ACTION_START
             }
 
         context.startForegroundService(serviceIntent)
 
-        activeAlarmId = id
+        activeAlarmId = alarm.id
     }
 
     private fun stopOngoingAlarmServiceIfNeeded(id: Long) {
