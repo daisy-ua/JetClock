@@ -15,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -27,17 +28,20 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.daisy.jetclock.constants.DefaultAlarmConfig
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.presentation.ui.theme.AfricanViolet
 import com.daisy.jetclock.presentation.ui.theme.Platinum
 import com.daisy.jetclock.presentation.ui.theme.PortGore
 import com.daisy.jetclock.presentation.ui.theme.UltraViolet
+import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString
+import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 
 
 @Composable
 fun NextAlarmCard(
     alarm: Alarm?,
-    alarmTime: String,
+    timeFormat: TimeFormat,
     ringInTime: String,
     onClick: (Long) -> Unit,
     onStartRefreshing: () -> Unit,
@@ -46,6 +50,24 @@ fun NextAlarmCard(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+
+    val triggerTime = remember(alarm, timeFormat) {
+        alarm?.triggerTime?.let {
+            TimeMillisUtils.convertToTimeOfDay(
+                it,
+                timeFormat
+            )
+        }
+    }
+
+    val alarmTime = remember(triggerTime) {
+        triggerTime?.let { time ->
+            TimeFormatter.formatTime(
+                context,
+                time
+            )
+        } ?: ""
+    }
 
     LaunchedEffect(Unit) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -92,7 +114,7 @@ fun NextAlarmCard(
                         fontWeight = FontWeight.Bold,
                         color = Platinum
                     )
-                    alarm?.time?.meridiem?.let { amPm ->
+                    triggerTime?.meridiem?.let { amPm ->
                         Text(
                             text = amPm.getLocalizedString(context),
                             style = MaterialTheme.typography.h5,

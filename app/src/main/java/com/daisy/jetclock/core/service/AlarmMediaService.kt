@@ -2,14 +2,18 @@ package com.daisy.jetclock.core.service
 
 import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import com.daisy.jetclock.core.media.PlaybackService
 import com.daisy.jetclock.core.notification.foreground.ForegroundServiceNotification
 import com.daisy.jetclock.core.notification.fullscreen.FullscreenNotificationStopper
 import com.daisy.jetclock.core.utils.IntentExtra
+import com.daisy.jetclock.core.utils.getParcelableExtra
 import com.daisy.jetclock.domain.model.Alarm
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -26,14 +30,11 @@ class AlarmMediaService : Service() {
 
     private var ongoingAlarmId: Long? = null
 
+    private var job: Job? = null
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val id = intent?.getLongExtra(IntentExtra.ID_EXTRA, -1) ?: -1
-
-        val alarm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent?.getParcelableExtra(IntentExtra.DATA_EXTRA, Alarm::class.java)
-        } else {
-            intent?.getParcelableExtra(IntentExtra.DATA_EXTRA)
-        }
+        val alarm = getParcelableExtra(intent, IntentExtra.DATA_EXTRA, Alarm::class.java)
 
         when (intent?.action) {
             ACTION_START -> alarm?.let { start(it) }
@@ -47,10 +48,12 @@ class AlarmMediaService : Service() {
     private fun start(alarm: Alarm) {
         mediaPlaybackService.startPlayback(alarm.soundOption)
 
-        startForeground(
-            alarm.id.toInt(),
-            serviceNotification.getNotification(alarm),
-        )
+        job = CoroutineScope(Dispatchers.Main).launch {
+            startForeground(
+                alarm.id.toInt(),
+                serviceNotification.getNotification(alarm),
+            )
+        }
 
         ongoingAlarmId = alarm.id
     }
@@ -66,6 +69,7 @@ class AlarmMediaService : Service() {
         super.onDestroy()
         fullscreenNotificationStopper.stopNotification()
         mediaPlaybackService.stopPlayback()
+        job?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 

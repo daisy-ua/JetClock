@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.daisy.jetclock.constants.ConfigConstants
 
 
@@ -32,4 +33,12 @@ fun Class<out BroadcastReceiver>?.setIntentAction(
         broadcastIntent,
         ConfigConstants.PENDING_INTENT_FLAGS,
     )
+}
+
+fun <T> getParcelableExtra(intent: Intent?, key: String, classType: Class<out T>): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        intent?.getParcelableExtra(key, classType)
+    } else {
+        intent?.getParcelableExtra(key)
+    }
 }

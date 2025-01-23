@@ -15,12 +15,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeFormat
+import com.daisy.jetclock.presentation.ui.component.alarm.AlarmCard
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlarmColumnContent(
     item: Alarm,
+    timeFormat: TimeFormat,
     state: DismissState,
     onAlarmClick: (Long) -> Unit,
 ) {
@@ -56,6 +59,6 @@ fun AlarmColumnContent(
         ),
         elevation = elevation,
     ) {
-        AlarmCard(item)
+        AlarmCard(item, timeFormat)
     }
 }

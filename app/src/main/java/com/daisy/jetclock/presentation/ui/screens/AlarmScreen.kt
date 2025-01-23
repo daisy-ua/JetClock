@@ -43,15 +43,17 @@ import com.daisy.jetclock.presentation.ui.component.scaffold.JetClockTopAppBar
 import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.ui.theme.JetClockTheme
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
-import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.utils.next.TimeUntilNextAlarm
 import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
+import com.daisy.jetclock.presentation.viewmodel.UIConfigurationViewModel
 
 @Composable
 fun AlarmScreen(
     onAlarmClick: (Long) -> Unit,
     viewModel: AlarmViewModel = hiltViewModel<AlarmViewModel>(),
+    configViewModel: UIConfigurationViewModel = hiltViewModel(),
 ) {
+    val timeFormat by configViewModel.timeFormat.collectAsStateWithLifecycle()
     val nextAlarm by viewModel.nextAlarm.collectAsStateWithLifecycle()
     val nextAlarmRingInTime by viewModel.nextAlarmTime.collectAsStateWithLifecycle()
     val alarmList by viewModel.alarms.collectAsStateWithLifecycle()
@@ -66,6 +68,7 @@ fun AlarmScreen(
         nextAlarm = nextAlarm,
         nextAlarmRingInTime = nextAlarmRingInTime,
         alarmList = alarmList,
+        timeFormat = timeFormat,
         onNewAlarmClick = { onAlarmClick(DefaultAlarmConfig.NEW_ALARM_ID) },
         onExistingAlarmClick = onAlarmClick,
         onStartRefreshingNextAlarm = viewModel::startRefreshingNextAlarmTime,
@@ -81,6 +84,7 @@ fun AlarmScreenContent(
     nextAlarm: Alarm?,
     nextAlarmRingInTime: TimeUntilNextAlarm?,
     alarmList: List<Alarm>,
+    timeFormat: TimeFormat,
     onNewAlarmClick: () -> Unit,
     onExistingAlarmClick: (Long) -> Unit,
     onAlarmDelete: (Alarm) -> Unit,
@@ -88,16 +92,6 @@ fun AlarmScreenContent(
     onStopRefreshingNextAlarm: () -> Unit,
 ) {
     val context = LocalContext.current
-
-//    TODO: remove hardcoded
-    val triggerTime = remember(nextAlarm) {
-        nextAlarm?.triggerTime?.let {
-            TimeMillisUtils.convertToTimeOfDay(
-                it,
-                TimeFormat.Hour24Format
-            )
-        }
-    }
 
     Scaffold(
         topBar = { JetClockTopAppBar() },
@@ -114,12 +108,7 @@ fun AlarmScreenContent(
             ) {
                 NextAlarmCard(
                     alarm = nextAlarm,
-                    alarmTime = triggerTime?.let { time ->
-                        TimeFormatter.formatTime(
-                            context,
-                            time
-                        )
-                    } ?: "",
+                    timeFormat = timeFormat,
                     ringInTime = nextAlarmRingInTime?.let { time ->
                         TimeFormatter.formatTimeUntilAlarmGoesOff(
                             context,
@@ -142,7 +131,7 @@ fun AlarmScreenContent(
                 )
             }
 
-            AlarmList(alarmList, onExistingAlarmClick, onAlarmDelete)
+            AlarmList(alarmList, timeFormat, onExistingAlarmClick, onAlarmDelete)
         }
     }
 }
@@ -186,6 +175,7 @@ fun AlarmScreenPreview() {
             nextAlarm = alarms[0],
             nextAlarmRingInTime = TimeUntilNextAlarm(1, 5, 9),
             alarmList = alarms,
+            timeFormat = TimeFormat.Hour12Format,
             onNewAlarmClick = { /*TODO*/ },
             onExistingAlarmClick = {},
             onAlarmDelete = {},

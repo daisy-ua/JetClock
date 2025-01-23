@@ -45,17 +45,21 @@ import com.daisy.jetclock.presentation.utils.formatter.DateFormatter
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.utils.helper.TimeMillisUtils
 import com.daisy.jetclock.presentation.viewmodel.OngoingAlarmViewModel
+import com.daisy.jetclock.presentation.viewmodel.UIConfigurationViewModel
 
 
 @Composable
 fun OngoingAlarmScreen(
     viewModel: OngoingAlarmViewModel = hiltViewModel(),
+    configViewModel: UIConfigurationViewModel = hiltViewModel(),
 ) {
     val alarm by viewModel.alarm.collectAsStateWithLifecycle()
+    val timeFormat by configViewModel.timeFormat.collectAsStateWithLifecycle()
 
     alarm?.let {
         OngoingAlarmScreenContent(
             alarm = alarm!!,
+            timeFormat = timeFormat,
             onSnoozeClicked = viewModel::snoozeAlarm,
             onDismissClicked = viewModel::dismissAlarm
         )
@@ -65,6 +69,7 @@ fun OngoingAlarmScreen(
 @Composable
 fun OngoingAlarmScreenContent(
     alarm: Alarm,
+    timeFormat: TimeFormat,
     onSnoozeClicked: () -> Unit,
     onDismissClicked: () -> Unit,
 ) {
@@ -76,7 +81,7 @@ fun OngoingAlarmScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        AlarmDetails(alarm)
+        AlarmDetails(alarm, timeFormat)
 
         AlarmActions(
             alarm = alarm,
@@ -89,14 +94,14 @@ fun OngoingAlarmScreenContent(
 @Composable
 private fun AlarmDetails(
     alarm: Alarm,
+    timeFormat: TimeFormat,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
-//    TODO: remove hardcoded
     val formattedTime = remember {
         alarm.triggerTime?.let { timeInMillis ->
-            val time = TimeMillisUtils.convertToTimeOfDay(timeInMillis, TimeFormat.Hour24Format)
+            val time = TimeMillisUtils.convertToTimeOfDay(timeInMillis, timeFormat)
             TimeFormatter.formatTime(context, time)
         } ?: "-/-"
     }
@@ -195,6 +200,7 @@ fun OngoingAlarmScreenPreview() {
                 snoozeCount = 0,
                 soundOption = SoundOption.default
             ),
+            timeFormat = TimeFormat.Hour12Format,
             {}, {}
         )
     }

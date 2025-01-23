@@ -4,5 +4,5 @@ import android.app.Notification
 
 interface ForegroundServiceNotification<T> {
 
-    fun getNotification(data: T): Notification
+    suspend fun getNotification(data: T): Notification
 }

@@ -12,9 +12,11 @@ import com.daisy.jetclock.core.receiver.AlarmServiceHandler
 import com.daisy.jetclock.core.receiver.ServiceHandler
 import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
+import com.daisy.jetclock.data.repository.UISettingsRepositoryImpl
 import com.daisy.jetclock.domain.model.Alarm
 import com.daisy.jetclock.domain.repository.AlarmRepository
 import com.daisy.jetclock.domain.repository.SoundRepository
+import com.daisy.jetclock.domain.repository.UISettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -36,6 +38,12 @@ interface RepositoryModule {
     fun bindSoundRepository(
         impl: SoundRepositoryImpl,
     ): SoundRepository
+
+    @Binds
+    @Singleton
+    fun bindUISettingsRepository(
+        impl: UISettingsRepositoryImpl,
+    ): UISettingsRepository
 
     @Binds
     @Singleton

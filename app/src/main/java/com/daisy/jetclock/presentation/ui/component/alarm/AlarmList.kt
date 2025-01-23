@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.presentation.ui.component.animation.listitemplacement.animatedItemsIndexed
 import com.daisy.jetclock.presentation.ui.component.animation.listitemplacement.updateAnimatedItemsState
 import com.daisy.jetclock.presentation.ui.component.animation.swipetoaction.SwipeActions
@@ -27,6 +28,7 @@ import com.daisy.jetclock.presentation.ui.component.animation.swipetoaction.Swip
 @Composable
 fun AlarmList(
     alarmList: List<Alarm>,
+    timeFormat: TimeFormat,
     onAlarmClick: (Long) -> Unit,
     onAlarmDelete: (Alarm) -> Unit,
     modifier: Modifier = Modifier,
@@ -57,6 +59,7 @@ fun AlarmList(
             ) { state ->
                 AlarmColumnContent(
                     item = item,
+                    timeFormat,
                     state = state,
                     onAlarmClick = onAlarmClick
                 )

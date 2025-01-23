@@ -42,6 +42,7 @@ import com.daisy.jetclock.presentation.ui.component.utils.ToastHandler
 import com.daisy.jetclock.presentation.utils.formatter.SoundOptionFormatter
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
+import com.daisy.jetclock.presentation.viewmodel.UIConfigurationViewModel
 
 enum class DialogType {
     NONE,
@@ -55,8 +56,10 @@ fun AlarmDetailsScreen(
     onUpClick: () -> Unit,
     onSelectSoundClicked: (String) -> Unit,
     viewModel: AlarmDetailsViewModel = hiltViewModel<AlarmDetailsViewModel>(),
+    configViewModel: UIConfigurationViewModel = hiltViewModel(),
     darkThemeEnabled: Boolean = isSystemInDarkTheme(),
 ) {
+    val timeFormat by configViewModel.timeFormat.collectAsStateWithLifecycle()
     val alarm by viewModel.alarm.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -108,6 +111,7 @@ fun AlarmDetailsScreen(
 
     AlarmDetailsScreenContent(
         alarm = alarm,
+        timeFormat = timeFormat,
         onSaveAlarm = onSaveAlarm,
         onDeleteAlarm = onDeleteAlarm,
         onUpdateSelectedTime = onUpdateSelectedTime,
@@ -185,6 +189,7 @@ fun handleDialogSubmit(
 @Composable
 fun AlarmDetailsScreenContent(
     alarm: Alarm,
+    timeFormat: TimeFormat,
     onSaveAlarm: () -> Unit,
     onDeleteAlarm: () -> Unit,
     onUpdateSelectedTime: (TimeOfDay) -> Unit,
@@ -195,6 +200,10 @@ fun AlarmDetailsScreenContent(
     darkThemeEnabled: Boolean,
 ) {
     val context = LocalContext.current
+
+    val time = remember(alarm, timeFormat) {
+        alarm.time.format(timeFormat)
+    }
 
     Scaffold(
         topBar = {
@@ -223,10 +232,9 @@ fun AlarmDetailsScreenContent(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-//            TODO: remove hardcoded
             TimePicker(
-                initialTimeValue = alarm.time,
-                timeFormat = TimeFormat.Hour24Format,
+                initialTimeValue = time,
+                timeFormat = timeFormat,
                 onValueChange = onUpdateSelectedTime,
                 modifier = Modifier.padding(top = 4.dp, bottom = 26.dp, start = 16.dp, end = 16.dp),
                 soundEnabled = true,
@@ -254,7 +262,7 @@ fun AlarmDetailsScreenContent(
                     SettingRow(
                         stringResource(id = R.string.ring_duration),
                         pluralStringResource(
-                            id = R.plurals.time_part_minute,
+                            id = R.plurals.time_part_minute_duration,
                             count = alarm.ringDuration,
                             alarm.ringDuration
                         )

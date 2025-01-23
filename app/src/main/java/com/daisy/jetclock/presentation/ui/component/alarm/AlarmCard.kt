@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.daisy.jetclock.domain.model.Alarm
+import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.presentation.utils.formatter.RepeatDaysFormatter
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import com.daisy.jetclock.presentation.utils.formatter.getLocalizedString
@@ -33,6 +34,7 @@ import com.daisy.jetclock.presentation.viewmodel.AlarmViewModel
 @Composable
 fun AlarmCard(
     item: Alarm,
+    timeFormat: TimeFormat,
     viewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -44,8 +46,12 @@ fun AlarmCard(
         )
     )
 
-    val timeString by remember(item.time.hour, item.time.minute) {
-        mutableStateOf(TimeFormatter.formatTime(context, item.time))
+    val time by remember(item.time.hour, item.time.minute, timeFormat) {
+        mutableStateOf(item.time.format(timeFormat))
+    }
+
+    val timeString by remember(time) {
+        mutableStateOf(TimeFormatter.formatTime(context, time))
     }
 
     val changeCheckedState: (Alarm) -> Unit = remember {
@@ -70,7 +76,7 @@ fun AlarmCard(
                     style = MaterialTheme.typography.h5,
                     fontWeight = FontWeight.Medium
                 )
-                item.time.meridiem?.let { amPm ->
+                time.meridiem?.let { amPm ->
                     Text(
                         text = amPm.getLocalizedString(context),
                         fontWeight = FontWeight.Medium,

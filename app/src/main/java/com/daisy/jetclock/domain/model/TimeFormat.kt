@@ -1,7 +1,10 @@
 package com.daisy.jetclock.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-enum class TimeFormat {
+@Parcelize
+enum class TimeFormat : Parcelable {
     Hour12Format,
 
     Hour24Format,

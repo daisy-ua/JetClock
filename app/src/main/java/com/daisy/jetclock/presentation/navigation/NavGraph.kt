@@ -21,6 +21,7 @@ import com.daisy.jetclock.presentation.ui.screens.AlarmDetailsScreen
 import com.daisy.jetclock.presentation.ui.screens.AlarmScreen
 import com.daisy.jetclock.presentation.ui.screens.SoundSelectionScreen
 import com.daisy.jetclock.presentation.viewmodel.AlarmDetailsViewModel
+import com.daisy.jetclock.presentation.viewmodel.UIConfigurationViewModel
 
 
 @Composable
@@ -66,6 +67,12 @@ fun NavGraph(
                 }
 
                 val viewModel = hiltViewModel<AlarmDetailsViewModel>(parentBackStackEntry)
+
+                val rootEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(ALARMS_ROUTE.name)
+                }
+                val configViewModel = hiltViewModel<UIConfigurationViewModel>(rootEntry)
+
                 val selectedSound = navController.currentBackStackEntry
                     ?.savedStateHandle
                     ?.get<String?>(SOUND_ID_KEY.name)
@@ -82,6 +89,7 @@ fun NavGraph(
                         )
                     },
                     viewModel = viewModel,
+                    configViewModel = configViewModel,
                     onUpClick = { actions.navigateUp(backStackEntry) },
                 )
             }
