@@ -1,6 +1,5 @@
 package com.daisy.jetclock.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daisy.jetclock.constants.ConfigConstants
@@ -14,12 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UIConfigurationViewModel @Inject constructor(
-    private val getTimeFormatUseCase: GetTimeFormatUseCase,
+    getTimeFormatUseCase: GetTimeFormatUseCase,
 ) : ViewModel() {
-
-    init {
-        Log.d("daisy-ua", "init: ")
-    }
 
     val timeFormat: StateFlow<TimeFormat> = getTimeFormatUseCase()
         .stateIn(viewModelScope, SharingStarted.Lazily, ConfigConstants.DEFAULT_TIME_FORMAT)

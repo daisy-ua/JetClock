@@ -2,16 +2,13 @@ package com.daisy.jetclock.core.notification.foreground
 
 import android.app.Notification
 import android.content.Context
-import android.util.Log
 import com.daisy.jetclock.core.notification.AlarmNotificationManager
 import com.daisy.jetclock.core.notification.AlarmNotificationType
 import com.daisy.jetclock.domain.model.Alarm
-import com.daisy.jetclock.domain.model.TimeFormat
 import com.daisy.jetclock.domain.usecase.GetTimeFormatUseCase
 import com.daisy.jetclock.presentation.utils.formatter.TimeFormatter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 

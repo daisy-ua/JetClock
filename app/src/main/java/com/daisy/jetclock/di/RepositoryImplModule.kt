@@ -7,6 +7,7 @@ import com.daisy.jetclock.data.repository.AlarmRepositoryImpl
 import com.daisy.jetclock.data.repository.SoundRepositoryImpl
 import com.daisy.jetclock.data.repository.UISettingsRepositoryImpl
 import com.daisy.jetclock.data.source.AssetDataSource
+import com.daisy.jetclock.domain.provider.SystemTimeProvider
 import com.daisy.jetclock.domain.usecase.GetTimeFormatUseCase
 import com.daisy.jetclock.utils.scope.CoroutineScopeProvider
 import com.daisy.jetclock.utils.scope.MainCoroutineScopeProvider
@@ -40,7 +41,8 @@ object RepositoryImplModule {
     @Singleton
     fun provideUISettingsRepository(
         dataStore: DataStore<Preferences>,
-    ): UISettingsRepositoryImpl = UISettingsRepositoryImpl(dataStore)
+        systemTimeProvider: SystemTimeProvider,
+    ): UISettingsRepositoryImpl = UISettingsRepositoryImpl(dataStore, systemTimeProvider)
 
     @Provides
     @Singleton
