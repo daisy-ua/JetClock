@@ -42,7 +42,10 @@ class AlarmActionHandler @Inject constructor(
         )
         val alarm = getAlarmDetailsUseCase(alarmId).firstOrNull() ?: return
 
-        if (isAlarmTimeInThePast(alarm.triggerTime!!)) return
+        if (isAlarmTimeInThePast(alarm.triggerTime!!)) {
+            rescheduleAlarm(alarm)
+            return
+        }
 
         if (activeAlarmId != null) {
             updateAlarmSchedule(alarmId)
@@ -136,11 +139,15 @@ class AlarmActionHandler @Inject constructor(
         val alarm = getAlarmDetailsUseCase(id).firstOrNull() ?: return
 
         if (alarm.repeatDays.days.isNotEmpty()) {
-            val timeInMillis = alarmSchedulerManager.schedule(alarm)
-            alarmStateUpdater.rescheduleAlarm(alarm, timeInMillis)
+            rescheduleAlarm(alarm)
         } else {
             alarmStateUpdater.cancelAlarm(alarm)
         }
+    }
+
+    private suspend fun rescheduleAlarm(alarm: Alarm) {
+        val timeInMillis = alarmSchedulerManager.schedule(alarm)
+        alarmStateUpdater.rescheduleAlarm(alarm, timeInMillis)
     }
 
     private fun cancelAutoSnoozeJob(id: Long) {
